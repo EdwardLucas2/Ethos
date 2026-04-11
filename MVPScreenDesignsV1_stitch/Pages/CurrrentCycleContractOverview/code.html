@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETHOS - Contract Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;700;900&amp;family=Epilogue:wght@700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {},
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue", "Public Sans", "sans-serif"],
+                        "body": ["Public Sans", "sans-serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .neo-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .neo-shadow-sm {
+            box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+        }
+        .striped-bg {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-body text-black pb-24">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-black text-black dark:text-white border-b-4 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-2xl" data-icon="gavel">gavel</span>
+<h1 class="text-3xl font-black italic tracking-tighter uppercase">ETHOS</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-yellow-400 dark:hover:bg-yellow-500 transition-colors p-1 active:translate-x-1 active:translate-y-1 active:shadow-none">
+<span class="material-symbols-outlined text-3xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+</button>
+</div>
+</header>
+<main class="max-w-2xl mx-auto p-6 space-y-8">
+<!-- Period Switcher -->
+<div class="flex bg-white border-4 border-black p-1 neo-shadow">
+<button class="flex-1 py-3 text-center font-black text-sm uppercase tracking-widest bg-yellow-400 border-r-4 border-black">
+                THIS WEEK
+            </button>
+<button class="flex-1 py-3 text-center font-black text-sm uppercase tracking-widest hover:bg-gray-100 transition-colors">
+                LAST WEEK
+            </button>
+</div>
+<!-- Stake & Timeline -->
+<div class="bg-white border-4 border-black p-6 neo-shadow space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-xs font-black uppercase tracking-widest text-gray-500 mb-1">CONTRACT BOUNTY</p>
+<h2 class="text-4xl font-black italic uppercase leading-none">ON THE LINE: A PINT</h2>
+</div>
+<div class="text-right">
+<span class="material-symbols-outlined text-4xl text-blue-600" data-icon="sports_bar" style="font-variation-settings: 'FILL' 1;">sports_bar</span>
+</div>
+</div>
+<div class="pt-4 border-t-2 border-black">
+<div class="flex justify-between text-[10px] font-black uppercase tracking-tighter mb-2">
+<span>START</span>
+<span>AUG 14</span>
+</div>
+<div class="h-6 bg-gray-200 border-2 border-black relative">
+<div class="absolute inset-y-0 left-0 bg-black w-[65%]"></div>
+</div>
+</div>
+</div>
+<!-- Progress Arena -->
+<section class="space-y-4">
+<h3 class="font-black text-xl uppercase tracking-tighter italic">PROGRESS ARENA</h3>
+<div class="space-y-6">
+<!-- Alex -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-black uppercase tracking-widest text-sm">ALEX: GYM 3X/WEEK (2/3)</span>
+<span class="material-symbols-outlined text-green-600" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="h-10 bg-white border-4 border-black neo-shadow-sm flex overflow-hidden">
+<div class="h-full bg-yellow-400 border-r-2 border-black w-[70%]" style="width: 66.6%;"></div>
+</div>
+</div>
+<!-- Sarah -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-black uppercase tracking-widest text-sm">SARAH: NO SUGAR 5X/WEEK (4/5)</span>
+<span class="font-bold text-[10px] bg-black text-white px-2 py-0.5">PENDING VERIFICATION</span>
+</div>
+<div class="h-10 bg-white border-4 border-black neo-shadow-sm flex overflow-hidden">
+<div class="h-full bg-yellow-400 border-r-2 border-black w-[30%]" style="width: 80%;"></div>
+</div>
+</div>
+<!-- Mike -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-black uppercase tracking-widest text-sm">MIKE: RUN 10KM/WEEK (0/1)</span>
+<span class="material-symbols-outlined text-green-600" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="h-10 bg-white border-4 border-black neo-shadow-sm flex overflow-hidden">
+<div class="h-full bg-yellow-400 border-r-2 border-black w-[90%]" style="width: 0%; border-right: none;"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Evidence Feed -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="font-black text-xl uppercase tracking-tighter italic">PROOF FEED</h3>
+<span class="text-[10px] font-bold bg-black text-white px-2 py-1">24 NEW ENTRIES</span>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="aspect-square bg-white border-4 border-black neo-shadow-sm overflow-hidden group relative">
+<img alt="gym workout proof" class="w-full h-full object-cover" data-alt="close-up of heavy dumbbells on a gym floor with dramatic top lighting and gritty texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAobeYSnhlI8Z9dJ3WN867qGP2uCPH1KkKO6GeqTG-V6U1xu5ywoMXtT7yTwpb4DnkCz6yg_eSjvQhurJhSbAEkl8hIiwKhTJeDJJbH0JfsKduH5uU7aL6Kj3M-9sO9gwgp5PYC6zn810WI71BxinTLuoInqL4Pg9If17CfIS80NC_aYltDLzbKeMyrfZvi7QxGLS0errL3eqbAXHkxg1ioR-vOpmq1cb1QMF_SsgmqKMmM8GQd_fFnBss_t-KOj0u_EcHYCBNiVS7F"/>
+<div class="absolute bottom-0 left-0 bg-yellow-400 border-t-2 border-r-2 border-black px-1 text-[8px] font-black uppercase">MIKE</div>
+</div>
+<div class="aspect-square bg-white border-4 border-black neo-shadow-sm overflow-hidden group relative">
+<img alt="running app screenshot proof" class="w-full h-full object-cover" data-alt="digital interface of a fitness tracker showing a completed 5km run with bold typography and high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK8wttMtb55QxzjB4ZhC6svAPzzoltje605akbWU1M2DQlGFtc3PV2f5vcz0usUuCLjvcRoYMSSu3O2R6Cye9GhNE4HisvTr9bWVBqFIuRtzVmbMKrdTgrqeNsYCpbeIH_UaoQJ9IwIvaTM0QL89MGoX7ne_zYBQ4hktGLwqKevN289kXPNMZ11H7CWOeSt23CWYUA-EZx1zP77m1PshMUUxVc6GXRjxsT_RUe6xZXyfTF64SHWYpUoyoDAof5XcVnRK2qhIIyJDuM"/>
+<div class="absolute bottom-0 left-0 bg-yellow-400 border-t-2 border-r-2 border-black px-1 text-[8px] font-black uppercase">ALEX</div>
+</div>
+<div class="aspect-square bg-white border-4 border-black neo-shadow-sm overflow-hidden group relative">
+<img alt="yoga mat proof" class="w-full h-full object-cover" data-alt="rolled out yoga mat on a hardwood floor in a sunlit studio with sharp shadows and minimalist aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9NZyQvV-qSIhP_zJJBt-73PVr-uoCP5bhRDU_ofcs8RZoWWRWyCTkXu9eqYKvNF-rC29K5g1uEB7Qg-Eb3NkP8RZ_OWPS-3HsWco0UHf07SuEZR5RIA4W_NoWarYiabQkpeuCCj1fM83qK8EZ7sLd5-2xAhJF3egNwhcyDlN9CujmLMHY0l9aRo8vQ8u-VoLnnI4orOlY8fWA-hFcM6oGXWftNIBwDx4TqzPdoEaab3ol-Fn_Am6vdTOiv0YvFrJ9HYNO7ieVGkya"/>
+<div class="absolute bottom-0 left-0 bg-yellow-400 border-t-2 border-r-2 border-black px-1 text-[8px] font-black uppercase">SARAH</div>
+</div>
+<div class="aspect-square bg-white border-4 border-black neo-shadow-sm overflow-hidden group relative">
+<img alt="healthy meal proof" class="w-full h-full object-cover" data-alt="top down view of a colorful salad in a ceramic bowl on a dark concrete table with bright lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdHBeCYJDMqAIScKAzSzZbW4FAyAXJkMsCy6Z2miWMnBpv-1zbP6l0G-oGJZ4U3iLlQKvUSno6g9TJ6wxf4mAtmNZ0ZzR9l-dTbaXQaVra3FqKsgKsOftvTz5fkXt26qGYQonorzCFSUJCLyMBwFDnskf77VI3zakXzBDzK3KJf73JLSxBhBUdx_J1JcrGA-PP0o-p09D9qb4odY_Zf-xgQxBO6GZ6zNOW8MeNGs9F4Ujf6eWOFn74QQu0zqjIJBs8tQX0LXldmqkn"/>
+<div class="absolute bottom-0 left-0 bg-yellow-400 border-t-2 border-r-2 border-black px-1 text-[8px] font-black uppercase">MIKE</div>
+</div>
+<div class="aspect-square bg-white border-4 border-black neo-shadow-sm overflow-hidden group relative">
+<img alt="running shoes proof" class="w-full h-full object-cover" data-alt="dirty running shoes on gravel path at dawn with soft orange sunlight and high detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9TuZaLZ6hf_D8WxzM4ElLYwpu9KDsEFt-5lvW7qBzI7POIUFLgrkcXEUsQNrXB76tTeJdz4F7xKKxEELLaWL91EuqP4saO7WA3np7BiCwtC63zQWeqZk6CJxrASx7NYlsGkyTHE_S6FoO43bXpXCmSqFhj1AIGwuODxQAIgFbrUzL7DYJG9cDyhsTDT3LyBEnsh1fLL8tZ9Ew08c7TBS3I0dOQTqeRfBnyIe0XwBspeceJp1Cl8qYIXHcPvf1m1RKsnDOrZsGPdH0"/>
+<div class="absolute bottom-0 left-0 bg-yellow-400 border-t-2 border-r-2 border-black px-1 text-[8px] font-black uppercase">SARAH</div>
+</div>
+<div class="aspect-square bg-white border-4 border-black neo-shadow-sm flex items-center justify-center bg-gray-50 border-dashed">
+<span class="font-black text-[10px] text-center uppercase px-2">VIEW ALL PROOF</span>
+</div>
+</div>
+</section>
+<!-- Primary Action -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-40">
+<button class="w-full bg-blue-600 text-white font-black text-2xl py-6 border-4 border-black neo-shadow uppercase tracking-tighter italic active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-4">
+<span class="material-symbols-outlined text-4xl" data-icon="add_a_photo" style="font-variation-settings: 'FILL' 1;">add_a_photo</span>
+                SNAP PROOF
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-stretch items-stretch bg-white dark:bg-black border-t-4 border-black dark:border-white">
+<!-- CONTRACTS (Active) -->
+<a class="flex-1 flex flex-col items-center justify-center bg-yellow-400 dark:bg-yellow-500 text-black p-3 border-r-2 border-black" href="#">
+<span class="material-symbols-outlined" data-icon="description" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-bold text-xs uppercase tracking-widest mt-1">CONTRACTS</span>
+</a>
+<!-- VOUCH -->
+<a class="flex-1 flex flex-col items-center justify-center text-black dark:text-white p-3 border-r-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors active:bg-black active:text-white" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span class="font-bold text-xs uppercase tracking-widest mt-1">VOUCH</span>
+</a>
+<!-- RANK -->
+<a class="flex-1 flex flex-col items-center justify-center text-black dark:text-white p-3 border-r-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors active:bg-black active:text-white" href="#">
+<span class="material-symbols-outlined" data-icon="military_tech">military_tech</span>
+<span class="font-bold text-xs uppercase tracking-widest mt-1">RANK</span>
+</a>
+<!-- PROFILE -->
+<a class="flex-1 flex flex-col items-center justify-center text-black dark:text-white p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors active:bg-black active:text-white" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-bold text-xs uppercase tracking-widest mt-1">PROFILE</span>
+</a>
+</nav>
+</body></html>

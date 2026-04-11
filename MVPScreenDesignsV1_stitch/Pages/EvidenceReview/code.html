@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ethos Evidence Feed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;0,900;1,900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {},
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Public Sans"],
+                    "body": ["Public Sans"],
+                    "label": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Public Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zinc-100 text-zinc-900 min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-b-4 border-zinc-900 dark:border-zinc-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sticky top-0 z-50 flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="active:translate-x-1 active:translate-y-1 active:shadow-none transition-all hover:bg-yellow-400 dark:hover:bg-yellow-500 hover:text-black p-1">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+<h1 class="text-2xl font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase">ETHOS</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex gap-6">
+<a class="text-zinc-900 dark:text-zinc-50 underline decoration-4 font-black uppercase tracking-tighter" href="#">FEED</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:bg-yellow-400 dark:hover:bg-yellow-500 hover:text-black font-black uppercase tracking-tighter" href="#">DASH</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:bg-yellow-400 dark:hover:bg-yellow-500 hover:text-black font-black uppercase tracking-tighter" href="#">CONTRACTS</a>
+</nav>
+<div class="w-10 h-10 border-2 border-zinc-900 bg-zinc-200 overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+<img alt="User profile avatar" data-alt="close-up portrait of a professional man with a friendly expression in clean studio lighting with a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIJ7hHBgzvO8USm53htPnq6tUue8LqfJcRk195q5XcJ2rXSaX8lFBLS0sRjW8H2BinIL91ihposvuAxjTJWlCYiFNnKclYqk3m_cDGW6IRmsT0ELpyR6j9rnn9RhhhMhBxmGnVZ41gltwjbmmlk3skhK5YVeycvhMEvc5O3ANNUb4w6HTi038yo_ujV-nBnuKwamRGFr7mLl2OHgEPSbE2_bsrFLm-BlhpnqCKZu6sgTx9oMypEXqa1bPlk8V3ZUIkIPXzlP_I7DVE"/>
+</div>
+</div>
+</header>
+<main class="max-w-3xl mx-auto px-4 py-8">
+<!-- Section Header -->
+<div class="mb-8">
+<h2 class="text-5xl font-black italic uppercase tracking-tighter border-l-8 border-zinc-900 pl-4 mb-6">EVIDENCE FEED</h2>
+<!-- Segmented Control -->
+<div class="flex border-4 border-zinc-900 bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+<button class="flex-1 py-4 text-center font-black uppercase tracking-widest bg-yellow-400 text-black border-r-4 border-zinc-900">YOU</button>
+<button class="flex-1 py-4 text-center font-black uppercase tracking-widest hover:bg-zinc-100 transition-colors">ALEX</button>
+</div>
+</div>
+<!-- Evidence Feed -->
+<div class="grid gap-8">
+<!-- Card 1: Pending Review -->
+<div class="group relative bg-white border-4 border-red-600 shadow-[8px_8px_0px_0px_rgba(220,38,38,1)] p-4 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all cursor-pointer">
+<div class="absolute -top-5 -right-3 bg-red-600 text-white font-black px-4 py-1 text-sm tracking-widest rotate-3 border-2 border-zinc-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    REVIEW NEEDED
+                </div>
+<div class="flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-1/3 aspect-square border-[3px] border-zinc-900 overflow-hidden shrink-0">
+<img alt="Workout evidence" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" data-alt="close-up of a person lifting a heavy dumbbell in a gritty urban gym with dramatic shadows and high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpA_39lEsHFeG2NGr1uZTIyVFLtZ7BJ1W8GlGRJeN5Dnfx3cjJaKgJjqtGDznMImW5ApFUyE5SG10QEpSLQiGdep80u0fPJvE4CooW4mrqThY2duFGU5qvjQd04lRQXsTNnxTWpp9ZfMrjBsQk70R8n-G677ClxtlxgYjwGmmNGsVe36YTIBaYY5UeOsAr7k1KiUblWT9UFq68jHnrn0m6_OLWkw41sA0KeG0cjOGlbNyoGQrV3HZPtd2JXfD4F7fLAJY_EL2AX9tH"/>
+</div>
+<div class="flex flex-col justify-between py-2 grow">
+<div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-black text-xl tracking-tighter uppercase italic bg-zinc-900 text-white px-2">WED 7AM</span>
+<span class="material-symbols-outlined text-red-600 font-bold" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+<p class="font-black text-sm uppercase tracking-widest text-zinc-500 mb-1">METADATA</p>
+<p class="font-bold text-lg leading-tight uppercase">LOCATION: IRON PARADISE GYM</p>
+<p class="font-bold text-lg leading-tight uppercase">STATUS: PENDING VALIDATION</p>
+</div>
+<div class="mt-4 pt-4 border-t-2 border-zinc-100">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-zinc-200 border border-zinc-900 overflow-hidden">
+<img alt="Alex avatar" data-alt="headshot of a young man with glasses and a friendly smile outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSEfBOPfGbBLh_VcAXk59cb98czZ43K8iBTeAICP8ESFGy4NYFBRocKQud6V3SiRZmCkGuEMEd__5uqF5_QQsLjNgyLrLk_5kZvBF70GgkAO6g3dr6QumSW6S762wIIlG2zBF8ILaMZ050C0-tZhf9Ty91wsVY7EBna4n0cgeDbcHiphg6viz6_bN_LeRTgxWh7SRGDbo97bLU1B7vaHtW1mDzTL7DqgSJwmBiRxob_riyHunYFE53Td2DZ4w51GJoF-Z2adYa64jy"/>
+</div>
+<p class="font-black text-xs uppercase tracking-widest text-red-600">WAITING FOR ALEX</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Approved -->
+<div class="group bg-white border-4 border-zinc-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+<div class="flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-1/3 aspect-square border-[3px] border-zinc-900 overflow-hidden shrink-0">
+<img alt="Yoga evidence" class="w-full h-full object-cover" data-alt="serene morning yoga practice in a bright sunlit studio with wooden floors and minimalist decor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC43auIr9Rdpjr60xy2txA-_NXqSFC35JCIbBBxdo8kB0hcCPT7ih9KYXwH5houlzYLj9OxmMm_hocFCxBevOVIrkEWdBjLkmSztc2BIOM5pOPN2kddVUjn2U3Xc9lQOwMoVtA3LxAy6QlupNv8LMG1VoWugxmkxz40-SoatHYa-MmIxGkn6JsTrrCO7j4slo2lLJSOuT8AOM5SPyMJs2ZcJEJ4zcM5CgafdvZ96G-BMkdWB8GfP9BlN3iTMdCu5CbKBSPj9Qu5EmcJ"/>
+</div>
+<div class="flex flex-col justify-between py-2 grow">
+<div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-black text-xl tracking-tighter uppercase italic bg-zinc-900 text-white px-2">TUE 6PM</span>
+<span class="material-symbols-outlined text-emerald-500 font-bold" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="font-black text-sm uppercase tracking-widest text-zinc-500 mb-1">METADATA</p>
+<p class="font-bold text-lg leading-tight uppercase">LOCATION: ZEN STUDIO NORTH</p>
+<p class="font-bold text-lg leading-tight uppercase">STATUS: VERIFIED</p>
+</div>
+<div class="mt-4 pt-4 border-t-2 border-zinc-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-500 text-sm">verified_user</span>
+<p class="font-black text-xs uppercase tracking-widest text-emerald-600">APPROVED BY ALEX</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Approved -->
+<div class="group bg-white border-4 border-zinc-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+<div class="flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-1/3 aspect-square border-[3px] border-zinc-900 overflow-hidden shrink-0">
+<img alt="Running evidence" class="w-full h-full object-cover" data-alt="athlete running on a coastal road at sunset with long shadows and warm orange light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBLKPRPS14w8ZhShayOImjV414BFghZWfTmkialLO21RYQaKv3VccZwrpxue6cVSSsMsIWJmZqd4YNXjoMPUwe0xlPa_-BazgD-21XQ-NGqMobXkiUnQdhmfMRmd_xh_FlfBwlv-OWqt9SYK0ZVDnRWjTju4kTEsJKcxcFlFvhy_1UpVBj0ZvJ3kzvbW954hrB9MLAdNGt3YBwx6eNxA-NrB1GfBNXSv2EhCgVY5hI7cSm32wlKMKYQiywOHx248-IrQY8_Fe_0_j2"/>
+</div>
+<div class="flex flex-col justify-between py-2 grow">
+<div>
+<div class="flex justify-between items-start mb-2">
+<span class="font-black text-xl tracking-tighter uppercase italic bg-zinc-900 text-white px-2">MON 6AM</span>
+<span class="material-symbols-outlined text-emerald-500 font-bold" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="font-black text-sm uppercase tracking-widest text-zinc-500 mb-1">METADATA</p>
+<p class="font-bold text-lg leading-tight uppercase">LOCATION: BAYSIDE PROMENADE</p>
+<p class="font-bold text-lg leading-tight uppercase">STATUS: VERIFIED</p>
+</div>
+<div class="mt-4 pt-4 border-t-2 border-zinc-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-500 text-sm">verified_user</span>
+<p class="font-black text-xs uppercase tracking-widest text-emerald-600">APPROVED BY ALEX</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-20 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-t-4 border-zinc-900 dark:border-zinc-50">
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-xs font-black uppercase tracking-widest">DASH</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">gavel</span>
+<span class="text-xs font-black uppercase tracking-widest">CONTRACTS</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-yellow-400 dark:bg-yellow-500 text-black p-3 border-x-2 border-zinc-900 dark:border-zinc-50 flex-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">visibility</span>
+<span class="text-xs font-black uppercase tracking-widest">FEED</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-xs font-black uppercase tracking-widest">PROFILE</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ethos - Evidence Upload</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;0,900;1,900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {},
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+        .neo-shadow { shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zinc-50 text-zinc-900 min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-zinc-900 border-b-4 border-zinc-900 dark:border-zinc-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="active:translate-x-1 active:translate-y-1 active:shadow-none transition-all hover:bg-yellow-400 dark:hover:bg-yellow-500 hover:text-black p-1">
+<span class="material-symbols-outlined text-3xl block" data-icon="menu">menu</span>
+</button>
+<h1 class="text-2xl font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase">ETHOS</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-zinc-200 border-2 border-zinc-900 overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="professional user profile portrait with neutral background and sharp lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5SkBL-oEf9Dmw4XO--mrxWsKBNECGqIuyvO67k8A5nUXq1FZwtEy_QIIL5nHGTUrV0f4tHCkVL76VHtJN0NsbYOeMlAHwKeii7nSbXsj21zy6EjJTRs5WSM22b531ktAkL097VzAuzmg8ACXcKjScARLDPkJuaJlkKMw282yijcINQHBFTf-Glf1HkPdhG5t3LbQu5al7Mj8j--cZNBNvylhGHSHNuiNyEDiF7p7gl_ED7A8VhNLspoDPzub__lMyjxWxIv6-vwk4"/>
+</div>
+</div>
+</header>
+<main class="max-w-xl mx-auto px-6 py-8 space-y-8">
+<!-- Title & Context -->
+<div class="space-y-1">
+<div class="inline-block bg-zinc-900 text-white text-[10px] font-black px-2 py-0.5 tracking-widest uppercase">STAKED CONTRACT #4402</div>
+<h2 class="text-4xl font-black tracking-tighter uppercase leading-none">SUBMIT PROOF</h2>
+</div>
+<!-- Camera Viewfinder Section -->
+<section class="space-y-4">
+<div class="relative aspect-square w-full border-[3px] border-zinc-900 bg-zinc-200 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+<img alt="Evidence Preview" class="w-full h-full object-cover grayscale brightness-90 contrast-125" data-alt="first-person perspective of hands typing on a modern laptop in a bright coworking space with coffee" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBucYHCvAEZUxpAyoYcHdvnj0QPWzP7Wq95AwLLwWWQSqdFMaKGWaj55CGx3Ua-VFNPsn3qvvF-TjFHruVQl0gR8m9WGtQiZDbiZolp7lc1Vp4rm-j3cIpoOdhQGilxh2oJ99SThHmJ9Mf28UhY0Zng-ocpn-PFEePIu0zDEnVVNfzXaJTB5YJwSNL_2NBTzM7JtxkHmv7grf4KgoM8uPxJsAMkr0QG1PBUFmiZmE3mwUGO_QNHcWRoLfRJnYQCIFsdO6otzMTfS59G"/>
+<!-- Viewfinder Overlays -->
+<div class="absolute top-4 left-4 w-8 h-8 border-t-4 border-l-4 border-white"></div>
+<div class="absolute top-4 right-4 w-8 h-8 border-t-4 border-r-4 border-white"></div>
+<div class="absolute bottom-4 left-4 w-8 h-8 border-b-4 border-l-4 border-white"></div>
+<div class="absolute bottom-4 right-4 w-8 h-8 border-b-4 border-r-4 border-white"></div>
+<div class="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
+<div class="w-full h-[1px] bg-white"></div>
+<div class="h-full w-[1px] bg-white absolute"></div>
+</div>
+<div class="absolute top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-3 py-1 font-black text-xs flex items-center gap-2">
+<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    LIVE VIEW
+                </div>
+</div>
+<button class="w-full py-4 border-[3px] border-zinc-900 bg-zinc-300 font-black tracking-widest uppercase text-zinc-600 hover:bg-zinc-400 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                RETAKE PHOTO
+            </button>
+</section>
+<!-- Input Section -->
+<section class="space-y-6">
+<div class="group">
+<label class="block text-xs font-black tracking-widest uppercase mb-2">ADD A NOTE (OPTIONAL)...</label>
+<textarea class="w-full bg-transparent border-b-[6px] border-zinc-900 focus:ring-0 focus:outline-none p-0 text-xl font-bold placeholder:text-zinc-300 resize-none" placeholder="Explain the deliverable..." rows="3"></textarea>
+</div>
+<!-- Meta Data Grid -->
+<div class="grid grid-cols-2 gap-4">
+<div class="p-3 border-2 border-zinc-900 bg-white">
+<div class="text-[10px] font-black uppercase text-zinc-400">Timestamp</div>
+<div class="font-bold tabular-nums">2023-11-24 14:02:11</div>
+</div>
+<div class="p-3 border-2 border-zinc-900 bg-white">
+<div class="text-[10px] font-black uppercase text-zinc-400">Location</div>
+<div class="font-bold">VERIFIED_GPS</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="pt-4">
+<button class="w-full py-6 bg-[#FFD166] border-[3px] border-zinc-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all group">
+<div class="flex items-center justify-center gap-3">
+<span class="text-2xl font-black tracking-tighter uppercase">UPLOAD PROOF</span>
+<span class="material-symbols-outlined text-3xl font-black" data-icon="cloud_upload">cloud_upload</span>
+</div>
+</button>
+<p class="text-[10px] font-black text-center mt-6 text-zinc-400 uppercase tracking-widest">By uploading, you trigger the smart contract verification protocol.</p>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-20 bg-white dark:bg-zinc-900 border-t-4 border-zinc-900 dark:border-zinc-50">
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-transform flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-xs font-black uppercase tracking-widest">DASH</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-yellow-400 dark:bg-yellow-500 text-black p-3 border-x-2 border-zinc-900 dark:border-zinc-50 active:scale-95 transition-transform flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="gavel" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<span class="text-xs font-black uppercase tracking-widest">CONTRACTS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-transform flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<span class="text-xs font-black uppercase tracking-widest">FEED</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-transform flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-xs font-black uppercase tracking-widest">PROFILE</span>
+</a>
+</nav>
+</body></html>

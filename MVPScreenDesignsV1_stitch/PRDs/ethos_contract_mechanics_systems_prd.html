@@ -1,0 +1,52 @@
+# Ethos: Contract Mechanics & Game Systems
+
+This document defines the core logic, scoring, and resolution systems for the Ethos MVP.
+
+---
+
+## 1. Participation & Structure
+*   **Capacity:** 2 to 10 participants per contract.
+*   **The Forfeit:** A single, shared penalty/reward set at creation (e.g., "A Pint", "$20"). It is the same for everyone in the contract.
+*   **Time Periods:** Unified duration for all participants.
+    *   Weekly
+    *   Bi-weekly (14 days)
+    *   Monthly (Calendar month)
+*   **Scheduling:** Customizable start date (Today or a specific future date).
+
+## 2. Commitments & Progress
+*   **Individual Goals:** Each participant can set a unique commitment and frequency within the shared time period (e.g., Alex does "Gym 3x/week" while Sarah does "Read 5x/week").
+*   **Multi-Tone Progress Bars:**
+    *   **Committed (Pending):** A lighter/patterned fill showing evidence has been uploaded but not yet verified.
+    *   **Verified (Locked):** A solid, high-contrast fill showing evidence has been approved by the group.
+    *   **Remaining:** The empty portion of the bar.
+
+## 3. Evidence & Verification
+*   **Majority Rule:** Evidence is approved or rejected based on a majority vote of the *other* participants.
+*   **Self-Exclusion:** A user cannot vote on their own evidence.
+*   **The "Verified Only" Rule:** Only verified evidence contributes to the final "Locked" progress bar and the win/loss determination.
+
+## 4. Resolution Logic (The "End Game")
+At the end of the time period, the system evaluates the state of all progress bars:
+
+| Scenario | Outcome |
+| :--- | :--- |
+| **All Participants Full** | **Success:** No one owes anything. High-five animation. |
+| **Mixed Results (Some Full, Some Not)** | **Penalty:** Those who didn't finish owe the forfeit to those who did. Forfeits are distributed as evenly as possible. |
+| **Total Failure (No One Full)** | **Relative Penalty:** The person with the least progress owes the forfeit to the person with the most progress. |
+| **Draws** | **Neutral:** In the event of a tie (e.g., two people at 50% and no one finished), no one owes anything. |
+
+---
+
+## 5. User Stories for the Mechanic
+
+**The Committer**
+*   "As a participant, I want to see exactly how many more 'Verified' actions I need before the period ends so I don't lose the bet."
+*   "As a participant, I want to see my 'Pending' progress so I feel a sense of accomplishment while waiting for my friends to vote."
+
+**The Voter**
+*   "As a group member, I want to be notified when a friend's progress depends on my vote so I can keep the game moving."
+*   "As a group member, I want to see a clear summary of evidence before I cast a 'Reject' vote, as it has real financial/social consequences."
+
+**The Winner/Loser**
+*   "As a winner, I want the app to clearly state exactly who owes me the forfeit so I don't have to do the math or confront them manually."
+*   "As a loser, I want to see the 'Relative Failure' logic explained if no one won, so I understand why I'm the one paying up."

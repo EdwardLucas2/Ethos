@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {},
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        @font-face {
+            font-family: 'Clash Display';
+            src: url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@900&display=swap');
+        }
+        .neo-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .neo-shadow-lg {
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+        }
+        .stamp-rotation {
+            transform: rotate(-10deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#F4F4F0] font-body text-black min-h-screen flex flex-col pb-24">
+<!-- TopAppBar -->
+<header class="bg-yellow-400 dark:bg-yellow-500 border-b-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center w-full px-4 h-16 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-black active:translate-x-[2px] active:translate-y-[2px]" data-icon="arrow_back">arrow_back</span>
+<h1 class="text-2xl font-black italic tracking-tighter text-black font-mono uppercase">Ethos Resolution</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-black active:translate-x-[2px] active:translate-y-[2px]" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center p-6 space-y-8 max-w-lg mx-auto w-full">
+<!-- Victory Stamp -->
+<div class="relative py-12">
+<div class="stamp-rotation bg-[#39FF14] border-[6px] border-black px-8 py-4 neo-shadow-lg">
+<h2 class="text-5xl md:text-6xl font-[900] tracking-tighter uppercase leading-none text-black">YOU'RE OWED</h2>
+</div>
+</div>
+<!-- Main Content Card: CONTRACT DETAILS -->
+<div class="w-full bg-white border-4 border-black neo-shadow-lg p-6 space-y-6">
+<div class="flex justify-between items-start border-b-4 border-black pb-4">
+<h3 class="text-2xl font-black uppercase tracking-tight">CONTRACT DETAILS</h3>
+<span class="material-symbols-outlined text-3xl" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div class="space-y-1">
+<p class="text-xs font-black uppercase text-gray-500">Habit</p>
+<p class="text-xl font-bold uppercase italic">Gym 3x/week</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 border-4 border-black bg-purple-400 overflow-hidden shrink-0">
+<img alt="Alex" data-alt="Stylized portrait of a young man with glasses and a smirk, flat vector illustration on purple background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4KEJxLdCd434lbQIGVY0Zh2tadMI_o4m5s18TorauVy-OsU9hvzeD2yf0p-EkD5CEOfGMzhWNQ4F5Fmgw9NY1980YS62ye_L_vP-ZJyQ7WYLIeQ3ZGYqb3Z8dckUAqmkd1sOx8dMnVDrQCJ9xgdryuvjqbp5DDNafPBohVbD315BxHUtrgsL3MGsWe0ixHn96mda5ch9OpQVGh5GfwVmkk6UMIE-7rc38HdgI-FEJm_ZlJr4NoRnG5rYOQPrIIF4q195nL10Ztmai"/>
+</div>
+<div class="space-y-1">
+<p class="text-xs font-black uppercase text-gray-500">Opponent</p>
+<p class="text-xl font-bold uppercase">Alex</p>
+</div>
+</div>
+</div>
+<a class="inline-flex items-center gap-2 text-black font-black uppercase underline decoration-4 hover:bg-yellow-100 p-1 transition-colors" href="#">
+                VIEW CYCLE DETAILS
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+<!-- High Contrast Reward Card -->
+<div class="w-full bg-yellow-400 border-4 border-black neo-shadow p-6 flex items-center gap-4">
+<span class="material-symbols-outlined text-5xl" data-icon="sports_bar">sports_bar</span>
+<div>
+<p class="text-sm font-black uppercase leading-tight">ALEX OWES YOU:</p>
+<p class="text-2xl font-[900] uppercase italic leading-none">A PINT AT THE PUB</p>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex flex-col gap-4">
+<button class="w-full bg-blue-500 text-white border-4 border-black py-4 neo-shadow active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined font-bold" data-icon="campaign">campaign</span>
+<span class="text-xl font-black uppercase">PESTER ALEX</span>
+</button>
+<button class="w-full bg-black text-white border-4 border-black py-4 neo-shadow active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3">
+<span class="material-symbols-outlined font-bold" data-icon="check_circle">check_circle</span>
+<span class="text-xl font-black uppercase">MARK AS SETTLED</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 flex justify-around items-stretch bg-white dark:bg-zinc-900 border-t-4 border-black z-50">
+<a class="flex flex-col items-center justify-center bg-yellow-400 text-black border-l-4 border-black h-full px-2 flex-1 active:invert hover:bg-yellow-200" href="#">
+<span class="material-symbols-outlined" data-icon="loop">loop</span>
+<span class="font-mono text-xs font-bold uppercase">Cycles</span>
+</a>
+<a class="flex flex-col items-center justify-center text-black/60 dark:text-white/60 border-l-4 border-black h-full px-2 flex-1 active:invert hover:bg-yellow-200 dark:hover:bg-zinc-800" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-mono text-xs font-bold uppercase">Vault</span>
+</a>
+<a class="flex flex-col items-center justify-center text-black/60 dark:text-white/60 border-l-4 border-black h-full px-2 flex-1 active:invert hover:bg-yellow-200 dark:hover:bg-zinc-800" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-mono text-xs font-bold uppercase">Social</span>
+</a>
+<a class="flex flex-col items-center justify-center text-black/60 dark:text-white/60 border-l-4 border-black h-full px-2 flex-1 active:invert hover:bg-yellow-200 dark:hover:bg-zinc-800" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-mono text-xs font-bold uppercase">Profile</span>
+</a>
+</nav>
+</body></html>

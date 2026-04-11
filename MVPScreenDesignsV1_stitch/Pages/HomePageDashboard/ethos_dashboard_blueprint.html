@@ -1,0 +1,63 @@
+# Ethos: Dashboard & Action Hub (The Nerve Center)
+
+This document defines the architecture, user stories, and feature set for the primary Dashboard. The goal is to surface the most urgent actions (verifications, uploads) while providing a high-level view of all active and pending contracts.
+
+---
+
+## 1. Core Functions & Philosophy
+The Dashboard is where the "game" of Ethos is managed daily. It must:
+*   **Prioritize Urgency:** Actions that hold up the group (Verifying Proof) or have a deadline (Snap Proof) must be front-and-center.
+*   **Dual-Cycle Visibility:** Users need to see how they are doing *this* week while also tracking if they won/lost *last* week.
+*   **Frictionless Entry:** One-tap access to the camera or the verification modal.
+
+---
+
+## 2. User Stories
+
+### The Urgent Actor
+*   "As a user, I want to see a clear notification if a friend has uploaded proof so I can verify it and keep their progress moving."
+*   "As a user, I want to see which of my contracts has the least amount of time left so I know which habit to prioritize today."
+
+### The Multi-Contract Player
+*   "As a user with 5 active contracts, I want to see a summary of my overall 'Daily Completion' so I feel a sense of cumulative win."
+*   "As a user, I want to see if a past contract is still 'Pending Resolution' so I can nudge my friends to vote and settle the bet."
+
+### The Recruiter
+*   "As a user, I want to see any incoming contract invites immediately so I can join the challenge and set my goals."
+
+---
+
+## 3. Dashboard Sections & UI Anatomy
+
+### A. The "Alert Stack" (High Urgency)
+*   **Description:** A stack of high-contrast banners at the very top of the scroll view.
+*   **Types of Alerts:**
+    *   **Verification Needed:** "Alex uploaded proof. [VERIFY]" (Blue background).
+    *   **New Invite:** "Sarah challenged you to 'The Morning Routine'. [VIEW]" (Yellow background).
+    *   **Settle Up:** "Last week's pot is ready! See who won. [SETTLE]" (Red background).
+*   **Style:** Thick 3px borders, hard shadows, right-pointing arrow icons.
+
+### B. The "Active Arena" (Current Cycles)
+*   **Description:** A vertical list of cards for every contract the user is currently participating in.
+*   **Card Details:**
+    *   **Contract Name & Opponent(s).**
+    *   **Progress Bar:** Multi-tone (Solid = Verified, Patterned = Pending, Empty = Remaining).
+    *   **Dynamic CTA:** If a user hasn't hit their frequency today/this week, show a "SNAP PROOF" button directly on the card.
+    *   **Time Remaining Badge:** e.g., "2 DAYS LEFT" in a high-contrast red/yellow pill.
+
+### C. The "Vault" Preview (Pending Resolution)
+*   **Description:** A separate, slightly muted section or a horizontal carousel for cycles that have ended but aren't yet settled.
+*   **Purpose:** Keeps the "old business" visible so it doesn't get forgotten, but separates it from the "new business" of current habits.
+*   **Action:** Tapping takes the user to the "Pending Resolution" screen.
+
+### D. Global Action (The "Big Plus")
+*   **Description:** A massive, floating action button (FAB).
+*   **Action:** Opens the "Create Contract" flow.
+*   **Style:** Neon Red, thick border, hard shadow that flattens on press.
+
+---
+
+## 4. Visual Language Requirements
+*   **Status Indicators:** Use the Ethos accent palette (Red = Urgent/Alert, Blue = Action/Verifying, Yellow = Progress/Success).
+*   **Density:** The dashboard should feel "packed" but organized, like a busy mission control center.
+*   **Borders:** 3px black borders on everything to maintain the Heavyweight Play aesthetic.

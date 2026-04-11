@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ethos Nerve Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;0,900;1,900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {},
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Public Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .pattern-pending {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-[#FDFDFD] dark:bg-zinc-950 font-body text-zinc-900 dark:text-zinc-50 min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 bg-[#FDFDFD] dark:bg-zinc-950">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 border-4 border-zinc-900 dark:border-zinc-50 overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="Close-up portrait of a determined young man with short hair in a bright studio with sharp shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAcuSHc0Lfrdz-2DYyz2z2Zeyit5O6dv0PctR2kb8LsDM2GDRlf0hI8AAuf-OgJG_vLiIHWxlTHTNYJRRkgJgRgR3fv9Mni4aKHP8ijHoELgWh-YMf0egkArdRXqCga-85Hpf7S7LOF32HCOyvT8fxKOl44OEpmGCHno3bCF0AhV_z8MKewQqIiA9J7lrDliGUjMSCEH0vEhjKHBm0jwoxODsyNeUnm7yWVhrpulS_McrwAAPSOBA-jwC-Jfmspb4UAQpY5WBa9N1L"/>
+</div>
+<h1 class="text-3xl font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase">Ethos</h1>
+</div>
+<button class="w-12 h-12 border-4 border-zinc-900 dark:border-zinc-50 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:bg-yellow-400 dark:hover:bg-yellow-500 transition-colors active:translate-x-1 active:translate-y-1 active:shadow-none">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="px-4 space-y-8">
+<!-- Alert Stack -->
+<section class="space-y-3">
+<div class="bg-blue-500 text-white border-4 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined font-bold" data-icon="verified_user">verified_user</span>
+<p class="font-black text-sm uppercase tracking-tight">ALEX UPLOADED PROOF. [VERIFY]</p>
+</div>
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="bg-yellow-400 text-zinc-900 border-4 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined font-bold" data-icon="mail">mail</span>
+<p class="font-black text-sm uppercase tracking-tight">SARAH CHALLENGED YOU. [VIEW]</p>
+</div>
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="bg-red-500 text-white border-4 border-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined font-bold" data-icon="payments">payments</span>
+<p class="font-black text-sm uppercase tracking-tight">LAST WEEK'S POT READY! [SETTLE]</p>
+</div>
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</div>
+</section>
+<!-- Active Arena -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-black text-2xl uppercase italic tracking-tighter">Active Arena</h2>
+<span class="font-bold text-xs bg-zinc-900 text-white px-2 py-1 uppercase">2 Live</span>
+</div>
+<!-- Card 1 -->
+<div class="border-4 border-zinc-900 bg-white dark:bg-zinc-900 p-5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)]">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-black text-xl uppercase leading-none">GYM 3X/WEEK</h3>
+<p class="font-bold text-zinc-500 dark:text-zinc-400 text-sm uppercase mt-1">VS ALEX</p>
+</div>
+<div class="bg-zinc-100 dark:bg-zinc-800 border-2 border-zinc-900 px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+<span class="font-black text-xs uppercase">14H 20M</span>
+</div>
+</div>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-[10px] font-black uppercase">
+<span>Progress</span>
+<span>2/3 Verified</span>
+</div>
+<div class="h-6 border-2 border-zinc-900 bg-zinc-100 dark:bg-zinc-800 flex">
+<div class="h-full w-2/3 bg-green-500 border-r-2 border-zinc-900"></div>
+<div class="h-full w-1/6 bg-green-200 dark:bg-green-900 pattern-pending"></div>
+</div>
+</div>
+<button class="w-full py-4 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 font-black uppercase italic tracking-widest flex items-center justify-center gap-2 border-b-4 border-r-4 border-zinc-500 active:translate-x-1 active:translate-y-1 active:border-none transition-all">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span>
+                    SNAP PROOF
+                </button>
+</div>
+<!-- Card 2 -->
+<div class="border-4 border-zinc-900 bg-white dark:bg-zinc-900 p-5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] opacity-90">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-black text-xl uppercase leading-none">NO SUGAR</h3>
+<p class="font-bold text-zinc-500 dark:text-zinc-400 text-sm uppercase mt-1">SQUAD BATTLE</p>
+</div>
+<div class="bg-red-100 dark:bg-red-900/30 border-2 border-zinc-900 px-2 py-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-red-600" data-icon="priority_high">priority_high</span>
+<span class="font-black text-xs uppercase text-red-600">2H REMAINING</span>
+</div>
+</div>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-[10px] font-black uppercase">
+<span>Progress</span>
+<span>0/1 Verified</span>
+</div>
+<div class="h-6 border-2 border-zinc-900 bg-zinc-100 dark:bg-zinc-800">
+<div class="h-full w-0 bg-green-500"></div>
+</div>
+</div>
+<button class="w-full py-4 bg-red-500 text-white font-black uppercase italic tracking-widest flex items-center justify-center gap-2 border-b-4 border-r-4 border-red-800 active:translate-x-1 active:translate-y-1 active:border-none transition-all">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span>
+                    SNAP PROOF
+                </button>
+</div>
+</section>
+<!-- Vault Preview -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-black text-2xl uppercase italic tracking-tighter">PREVIOUS CYCLES</h2>
+<span class="font-bold text-xs border-b-2 border-zinc-900 uppercase">View All</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+<div class="flex-none w-72 border-4 border-zinc-900 dark:border-zinc-50 bg-white dark:bg-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between"><div><div class="bg-blue-500 text-white border-2 border-zinc-900 px-2 py-1 mb-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] inline-block"><span class="text-[10px] font-black uppercase">WAITING FOR VERIFICATION</span></div><h4 class="font-black text-sm uppercase mb-1">Morning Run</h4><p class="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase mb-3">Cycle #42 • Resolved</p></div><div class="flex justify-between items-center"><div class="flex -space-x-2"><div class="w-6 h-6 border-2 border-zinc-900 bg-blue-500"></div><div class="w-6 h-6 border-2 border-zinc-900 bg-red-500"></div></div><span class="font-black text-xs text-green-600">+$24.00</span></div></div>
+<div class="flex-none w-72 border-4 border-zinc-900 dark:border-zinc-50 bg-white dark:bg-zinc-900 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between"><div><div class="bg-green-500 text-white border-2 border-zinc-900 px-2 py-1 mb-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] inline-block"><span class="text-[10px] font-black uppercase">COMPLETED &amp; SETTLED</span></div><h4 class="font-black text-sm uppercase mb-1">Deep Work</h4><p class="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase mb-3">Cycle #41 • Resolved</p></div><div class="flex justify-between items-center"><div class="flex -space-x-2"><div class="w-6 h-6 border-2 border-zinc-900 bg-yellow-500"></div><div class="w-6 h-6 border-2 border-zinc-900 bg-zinc-900"></div></div><span class="font-black text-xs text-red-600">-$10.00</span></div></div>
+</div>
+</section>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-24 right-6 w-16 h-16 bg-red-500 text-white flex items-center justify-center border-4 border-zinc-900 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none z-50">
+<span class="material-symbols-outlined text-4xl font-bold" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-20 bg-[#FDFDFD] dark:bg-zinc-950 border-t-4 border-zinc-900 dark:border-zinc-50 divide-x-4 divide-zinc-900 dark:divide-zinc-50 shadow-[0_-4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[0_-4px_0px_0px_rgba(255,255,255,1)]">
+<!-- Hub (Active) -->
+<a class="flex flex-col items-center justify-center bg-red-500 dark:bg-red-600 text-white p-2 h-full w-full border-x-2 border-zinc-900 active:invert transition-all duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-black text-xs uppercase mt-1">Hub</span>
+</a>
+<!-- Build -->
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-2 h-full w-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:text-white active:invert transition-all duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="add_box">add_box</span>
+<span class="font-black text-xs uppercase mt-1">Build</span>
+</a>
+<!-- Squad -->
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-2 h-full w-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:text-white active:invert transition-all duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-black text-xs uppercase mt-1">Squad</span>
+</a>
+<!-- Vault -->
+<a class="flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-50 p-2 h-full w-full hover:bg-blue-500 dark:hover:bg-blue-600 hover:text-white active:invert transition-all duration-75" href="#">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span class="font-black text-xs uppercase mt-1">Vault</span>
+</a>
+</nav>
+</body></html>

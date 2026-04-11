@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETHOS - Evidence Approval</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;0,900;1,900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "ethos-red": "#FF3E3E",
+                        "ethos-blue": "#4361EE"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Public Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+        .neo-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .neo-shadow-lg {
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+        }
+        .active-press:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zinc-50 font-body text-zinc-900 antialiased min-h-screen flex flex-col">
+<!-- Top Navigation Bar (JSON Guided) -->
+<header class="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border-b-4 border-zinc-900 dark:border-zinc-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="active:translate-x-1 active:translate-y-1 active:shadow-none transition-all hover:bg-yellow-400 dark:hover:bg-yellow-500 hover:text-black p-1">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="text-2xl font-black italic tracking-tighter text-zinc-900 dark:text-zinc-50 uppercase">ETHOS</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full border-2 border-zinc-900 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="close up of a professional user profile portrait with a minimalist neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkAxRfAY4QULYVUWAbLabICn1oK2kzHjRifNrUrwg0Jc9vr3PHwubw9-FFQygtAUaqCInwUWhuyw_11hZ6Svhgx7K5g4cLvCZRIjcCsOZ0PVK_ChlhqtxfQeTUJ2APndydNm0k2JGIBiDSRemKBUgniZsgKHcLAOS1NfX4ngsmLmXdB8i-WdE1drUupDCaTIJWL9jf1WtDnPrdYRmGuMM6xnxKNfwq1HbrK4Ntq2R6aHQSXgwhnUlslE7TxkQa3u1ZnJSGNPrsvfFl"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col p-6 max-w-2xl mx-auto w-full">
+<!-- Header Section -->
+<section class="mb-8">
+<div class="inline-block bg-zinc-900 text-white px-3 py-1 mb-2 text-xs font-black uppercase tracking-widest">
+                VERIFY PROOF
+            </div>
+<h2 class="text-4xl font-black uppercase tracking-tighter leading-none mb-2">VERIFY ALEX'S PROOF</h2>
+<p class="text-xl font-bold bg-yellow-400 border-2 border-zinc-900 inline-block px-4 py-1 neo-shadow">
+                Commitment: Alex went to the gym.
+            </p>
+</section>
+<!-- Evidence Card -->
+<section class="flex-grow flex flex-col gap-6">
+<div class="relative group">
+<div class="bg-white border-4 border-zinc-900 neo-shadow-lg p-2">
+<img class="w-full aspect-[4/5] object-cover border-2 border-zinc-900 grayscale-[0.2] contrast-125" data-alt="POV of a person standing in a modern brightly lit gym with weight racks and workout benches in the background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa_MOel9ZlgIJqB_s1vusjwdCV17C3VzlBRbRoWstecFJfS6ATn3hy9zipv_1BaXLAyYZO9N11hd7zehXp6pDS0dxxuvC0Nn9zBfwGKdRkfUhEghQp5kExzFfzjKm_T1zHI8pHOrOuT3tS0kB9g-Z-QTlLjyNiWPUnSj0O8wI4jng5R13xtqf8TTh-Hz4v5J9GxwC-8Jt_sl1UjT5S6yQXqkg9oMpW0_pcDOY1UlTMWMx7ocmPABvI4vLKqiZ973V97REh_QNCSPgw"/>
+</div>
+<!-- Metadata Overlay/Tag -->
+<div class="absolute -bottom-4 -right-4 bg-zinc-900 text-white p-4 border-2 border-white neo-shadow max-w-[200px]">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+<span class="text-xs font-black uppercase">Tue 6PM</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+<span class="text-xs font-black uppercase tracking-tight">Gold's Gym</span>
+</div>
+</div>
+</div>
+<!-- Note Section -->
+<div class="bg-zinc-100 border-4 border-zinc-900 p-6 neo-shadow">
+<h3 class="text-xs font-black uppercase text-zinc-500 mb-2">Note from Alex:</h3>
+<p class="text-2xl font-black italic tracking-tight uppercase">"Crushed legs today!"</p>
+</div>
+</section>
+<!-- Action Buttons Spacer -->
+<div class="h-32"></div>
+</main>
+<!-- Fixed Bottom Actions -->
+<div class="fixed bottom-0 left-0 w-full p-6 flex gap-4 bg-white/80 backdrop-blur-md border-t-4 border-zinc-900">
+<button class="flex-1 bg-ethos-red text-white py-6 border-4 border-zinc-900 font-black text-xl tracking-tighter uppercase neo-shadow active-press flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="thumb_down" data-weight="fill" style="font-variation-settings: 'FILL' 1;">thumb_down</span>
+            REJECT
+        </button>
+<button class="flex-1 bg-ethos-blue text-white py-6 border-4 border-zinc-900 font-black text-xl tracking-tighter uppercase neo-shadow active-press flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="verified" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+            APPROVE
+        </button>
+</div>
+</body></html>

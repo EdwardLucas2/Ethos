@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETHOS - Build the Lobby</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.cdnfonts.com/css/clash-display" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-error": "#ffffff", "secondary-fixed-dim": "#ffb4a7", "tertiary-container": "#5b7b6c", "tertiary-fixed-dim": "#accebc", "secondary-container": "#fd7d68", "tertiary-fixed": "#c7ebd7", "on-primary-fixed": "#001c39", "on-secondary-fixed-variant": "#842417", "surface-container-low": "#f4f3f1", tertiary: "#436354", "error-container": "#ffdad6", surface: "#faf9f7", "on-tertiary": "#ffffff", "on-primary": "#ffffff", "surface-bright": "#faf9f7", outline: "#717783", "on-primary-fixed-variant": "#004883", secondary: "#a43b2c", "primary-fixed": "#d4e3ff", "on-secondary-container": "#71160b", error: "#ba1a1a", "on-tertiary-fixed": "#012115", "on-secondary-fixed": "#400200", "secondary-fixed": "#ffdad4", "surface-dim": "#dadad8", "primary-container": "#2976c7", background: "#faf9f7", "surface-variant": "#e3e2e0", "surface-container-lowest": "#ffffff", primary: "#005da7", "outline-variant": "#c1c7d3", "on-surface-variant": "#414751", "inverse-on-surface": "#f1f1ef", "surface-container-highest": "#e3e2e0", "on-secondary": "#ffffff", "on-tertiary-fixed-variant": "#2e4d3f", "on-surface": "#1a1c1b", "inverse-surface": "#2f3130", "surface-container-high": "#e9e8e6", "inverse-primary": "#a4c9ff", "on-tertiary-container": "#f5fff7", "surface-tint": "#0060ac", "primary-fixed-dim": "#a4c9ff", "on-error-container": "#93000a", "on-background": "#1a1c1b", "surface-container": "#efeeec", "on-primary-container": "#fdfcff"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Plus Jakarta Sans"], body: ["Inter"], label: ["Inter"], display: "Plus Jakarta Sans"}}}};</script>
+<style>
+        body { font-family: 'Clash Display', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-white dark:bg-[#121212] text-black dark:text-white pb-32">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 py-4 bg-[#FFDE03] dark:bg-[#222222] border-b-[3px] border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[4px] active:translate-y-[4px]">
+<span class="material-symbols-outlined text-black dark:text-white text-3xl">menu</span>
+</button>
+<h1 class="text-3xl font-black italic tracking-tighter text-black dark:text-white uppercase">ETHOS</h1>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+<img alt="User profile" data-alt="Close-up 3D stylized avatar of a person with short hair and modern glasses on a solid bright background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvHlQ2MX21FrrANLEB2zZDXG1oIpl3nnGKwqABMPZh6Dn2vQxwPttUiEnmc6BKSp7ozuRnrTTlALMRi5yidYQ7Nds8y-BIkxBg_8FKscjtYeaVYhu38o0HdQuO4hLZxa7I68khkH91OKDW6vHs2GSwElpVP9KzPsaPjZoxNutHt_rNucn5Lv1zOzmjYCUjBL8ALOt1qowp6OR0IsT2brFU2J3PwDQ1szYGwbphMa6ff0CO_-Luj2fn9p7hE7ppK57IhqGG43SZn6wU"/>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-4 pt-8 space-y-8">
+<!-- Section Header -->
+<div class="space-y-1">
+<h2 class="text-5xl font-black italic uppercase leading-none tracking-wider">BUILD THE LOBBY</h2>
+<p class="font-bold text-sm tracking-widest opacity-70">PHASE 1: CREATION</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Ground Rules Card (Left Col) -->
+<section class="md:col-span-7 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 space-y-6">
+<div class="flex items-center gap-2 border-b-2 border-black pb-2">
+<span class="material-symbols-outlined font-black" style="font-variation-settings: 'FILL' 1;">gavel</span>
+<h3 class="font-black uppercase tracking-widest">Ground Rules</h3>
+</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<label class="block font-black text-xs uppercase">Contract Name</label>
+<input class="w-full border-[3px] border-black p-3 font-bold focus:ring-0 focus:outline-none focus:bg-yellow-50" placeholder="e.g. THE IRON SQUAD" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="block font-black text-xs uppercase">Forfeit Asset</label>
+<div class="flex border-[3px] border-black h-[50px]">
+<button class="flex-1 bg-black text-white font-black text-xs">$ USD</button>
+<button class="flex-1 bg-white text-black font-black text-xs hover:bg-gray-100 transition-colors">PINT</button>
+</div>
+</div>
+<div class="space-y-1">
+<label class="block font-black text-xs uppercase">Amount</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-black">$</span>
+<input class="w-full border-[3px] border-black p-3 pl-8 font-bold focus:ring-0 focus:outline-none" placeholder="50.00" type="number"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="block font-black text-xs uppercase">Period</label>
+<select class="w-full border-[3px] border-black p-3 font-bold focus:ring-0 focus:outline-none bg-white appearance-none uppercase text-lg">
+<option>WEEKLY</option>
+<option>BI-WEEKLY</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="block font-black text-xs uppercase">Start Date</label>
+<input class="w-full border-[3px] border-black p-3 font-bold focus:ring-0 focus:outline-none" type="date"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Squad Status Card (Right Col) -->
+<section class="md:col-span-5 flex flex-col gap-6">
+<div class="bg-[#00E676] border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-black uppercase tracking-tight">Squad Status</h3>
+<span class="bg-black text-white px-2 py-1 font-black text-sm">3/10 SLOTS</span>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center justify-between border-b-2 border-black pb-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+<img alt="You" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJJXb96EN2mwAjMvQAtnpzvWyykFC4Ll2zqUUfMlooPEZcb6mervbw1AplLxlh80fH5M6HBPT2YF0K63OoaxsYcYFG2Ge0g9BU9zZ_A9XQiFKFCKZSnEj7lU9ptNP2sIcpEcA9vaEabVhwvGnzGcZeD7oU22I8IYmsWLp4Zj8Onyt1LVVpui-4zzLHH8zZOd07JHuL0e3966JYpgepKd3Jl2774t3fCDBqIKHaOGPBa9vurZt1-Af-J5ilylgMmALDXvkOUqFOBo1-"/>
+</div>
+<div>
+<p class="font-black text-sm uppercase">YOU (CREATOR)</p>
+<p class="font-bold text-[10px] uppercase opacity-70">GYM 3X/WEEK</p>
+</div>
+</div>
+<span class="font-black text-[10px] bg-black text-white px-2 py-1">SIGNED</span>
+</li>
+<li class="flex items-center justify-between border-b-2 border-black pb-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+<img alt="Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw-lPMAKQk2jxGkoPrvV6a3ajuqmoK-ZCQoERnkOlc7LbNKaN1ESljaDIqZbmzisvUY2CzhdN7aXitAXuEVGc3g8n2dI5MHvg5iVEiay8rz5tUaq2-dkNiQW4BKfIKKpw6mS7rq8SMYykW5EpjojDf6zMnwW8uUZD_Omfav8Khc1EfML9YkUUMRwMl7CKI9RRS-bBPajzjpeQJp8BanRSGO9jCypjEGUkDK3xMHTkYZ_rGFVIoJGoCG2cRWYwTw-i1PKwCxT77aay3"/>
+</div>
+<div>
+<p class="font-black text-sm uppercase">Sarah</p>
+<p class="font-bold text-[10px] uppercase opacity-70">RUNNING 2X/WEEK</p>
+</div>
+</div>
+<span class="font-black text-[10px] border-2 border-black px-2 py-1">WAITING</span>
+</li>
+<li class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-3 opacity-50">
+<div class="w-10 h-10 border-2 border-black bg-white overflow-hidden">
+<img alt="Marcus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAwAShRqtQiY1--QKGhuEpy0JUy3_Gcmv7r5tuc0eiG3a3WkMgUBbj6Uz3Zxkol-A2khKJkZODWqxAC0DxpKR7ZHJNSqtDnP2yz-Yt81P1YPB567tpqJReWkEwuT9xeXTKg8EK0RBZJbsUuIDJdxCi4qa7i3X6wj-3Xs_48Cg6MZMSZZQRr7OY1RsiWHTRMwiybIrOr_2qDr6oMWaF2UANrEvCnhFGta5Hx4zOzhPRFuLYqt2a2z2XfCcYBG2oCZuNGKHmlthovnjp"/>
+</div>
+<div>
+<p class="font-black text-sm uppercase">Marcus</p>
+<p class="font-bold text-[10px] uppercase italic">DRAFTING...</p>
+</div>
+</div>
+<span class="font-black text-[10px] opacity-50 italic">DRAFTING</span>
+</li>
+</ul>
+</div>
+<!-- Summon the Squad -->
+<div class="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
+<h3 class="font-black uppercase mb-4 tracking-widest">Summon the Squad</h3>
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-black font-black">person_add</span>
+<input class="w-full border-[3px] border-black p-3 pl-10 font-bold focus:ring-0 focus:outline-none focus:bg-gray-50" placeholder="Search friends by handle..." type="text"/>
+</div>
+</div>
+</section>
+<!-- Your Commitment (Full Width) -->
+<section class="md:col-span-12 bg-[#2979FF] text-white border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<h3 class="text-3xl font-black uppercase italic tracking-tighter">Your Commitment</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-4">
+<div class="space-y-1">
+<label class="block font-black text-xs uppercase text-blue-100">What is your habit?</label>
+<input class="w-full bg-white text-black border-[3px] border-black p-4 font-black text-xl placeholder:text-black/30 focus:ring-0 focus:outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" placeholder="GYM 5AM SESSION" type="text" value="GYM 5AM SESSION"/>
+</div>
+</div>
+<div class="space-y-4">
+<label class="block font-black text-xs uppercase text-blue-100">Frequency (Times per Week)</label>
+<div class="flex gap-2 h-16"><button class="flex-1 bg-white border-[3px] border-black flex items-center justify-center text-black font-black text-xl hover:bg-yellow-400 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">1</button>
+<button class="flex-1 bg-white border-[3px] border-black flex items-center justify-center text-black font-black text-xl hover:bg-yellow-400 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">2</button>
+<button class="flex-1 bg-[#FFDE03] border-[4px] border-black flex items-center justify-center text-black font-black text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">3</button>
+<button class="flex-1 bg-white border-[3px] border-black flex items-center justify-center text-black font-black text-xl hover:bg-yellow-400 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">4</button>
+<button class="flex-1 bg-white border-[3px] border-black flex items-center justify-center text-black font-black text-xl hover:bg-yellow-400 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">5</button>
+<button class="flex-[1.5] bg-white border-[3px] border-black flex items-center justify-center text-black font-black text-xs uppercase hover:bg-yellow-400 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1">Other</button></div>
+</div>
+</div>
+</section>
+</div>
+<!-- CTA Section -->
+<div class="pt-4 pb-12 flex flex-col items-center gap-4">
+<div class="bg-red-500 text-white px-4 py-2 border-[2px] border-black font-black text-xs uppercase flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">warning</span>
+                MINIMUM 1 MORE SIGNATURE REQUIRED
+            </div>
+<div class="w-full max-w-xl flex flex-col gap-4 w-full">
+<button class="w-full bg-[#2979FF] text-white border-[4px] border-black py-5 font-black text-2xl uppercase tracking-widest shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all">
+SIGN CONTRACT
+</button>
+<button class="w-full bg-white text-red-600 border-[4px] border-black py-4 font-black text-lg uppercase tracking-widest hover:bg-red-50 transition-all">
+DECLINE
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Shell) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-2 bg-[#FFDE03] dark:bg-[#222222] border-t-[3px] border-black dark:border-white md:hidden">
+<a class="flex flex-col items-center justify-center text-black dark:text-white p-2 hover:bg-white dark:hover:bg-black transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-black uppercase text-[12px]">Hub</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-black dark:bg-white text-white dark:text-black p-2 border-[2px] border-black dark:border-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" href="#">
+<span class="material-symbols-outlined" data-icon="construct" style="font-variation-settings: 'FILL' 1;">construction</span>
+<span class="font-black uppercase text-[12px]">Build</span>
+</a>
+<a class="flex flex-col items-center justify-center text-black dark:text-white p-2 hover:bg-white dark:hover:bg-black transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-black uppercase text-[12px]">Squad</span>
+</a>
+<a class="flex flex-col items-center justify-center text-black dark:text-white p-2 hover:bg-white dark:hover:bg-black transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span class="font-black uppercase text-[12px]">Vault</span>
+</a>
+</nav>
+<!-- Sidebar / Top Nav Cluster for Desktop -->
+<div class="hidden md:flex fixed right-8 top-1/2 -translate-y-1/2 flex-col gap-4">
+<div class="group relative">
+<div class="bg-black text-white px-3 py-1 font-black uppercase text-[10px] absolute right-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-black">Build</div>
+<button class="w-12 h-12 bg-[#FFDE03] border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+<span class="material-symbols-outlined font-black">construction</span>
+</button>
+</div>
+<div class="group relative">
+<div class="bg-black text-white px-3 py-1 font-black uppercase text-[10px] absolute right-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-black">Vault</div>
+<button class="w-12 h-12 bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+<span class="material-symbols-outlined font-black">lock</span>
+</button>
+</div>
+</div>
+</body></html>

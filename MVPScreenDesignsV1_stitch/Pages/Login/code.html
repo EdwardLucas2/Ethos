@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ETHOS | LOGIN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#b6c4ff",
+                        "inverse-primary": "#b6c4ff",
+                        "on-primary-container": "#f7f5ff",
+                        "secondary-fixed": "#ffe24b",
+                        "outline-variant": "#c3c5d8",
+                        "surface-tint": "#004ee8",
+                        "on-secondary-fixed-variant": "#524600",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#737687",
+                        "surface-container-highest": "#e2e2e2",
+                        "inverse-on-surface": "#f0f1f1",
+                        "primary": "#0049db",
+                        "surface-variant": "#e2e2e2",
+                        "secondary": "#6d5e00",
+                        "on-secondary-fixed": "#211b00",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#575959",
+                        "secondary-container": "#fddc00",
+                        "on-primary-fixed": "#001550",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "on-primary-fixed-variant": "#003ab3",
+                        "on-surface-variant": "#434656",
+                        "tertiary-fixed": "#e2e2e2",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#707171",
+                        "surface": "#fdfdfd",
+                        "on-surface": "#1a1c1c",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#1a1c1c",
+                        "background": "#f9f9f9",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-dim": "#dadada",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "primary-container": "#2962ff",
+                        "surface-container-low": "#f3f3f3",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "on-secondary-container": "#706000",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-container": "#f6f6f6",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f9f9f9",
+                        "secondary-fixed-dim": "#e3c600",
+                        "inverse-surface": "#2f3131",
+                        "primary-fixed": "#dce1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .neo-shadow {
+            box-shadow: 4px 4px 0px 0px #1a1c1c;
+        }
+        .neo-shadow-hover:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px 0px #1a1c1c;
+        }
+        .neo-input:focus {
+            background-color: #2962ff;
+            color: #ffffff;
+            outline: none;
+        }
+        .neo-input:focus::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center justify-center p-6">
+<!-- Header / Branding Section -->
+<header class="flex flex-col items-center mb-8 text-center">
+<div class="w-12 h-12 bg-secondary-container border-[3px] border-on-surface flex items-center justify-center neo-shadow mb-6">
+<span class="material-symbols-outlined text-on-surface scale-125" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<h1 class="font-black text-4xl md:text-5xl uppercase tracking-tighter italic text-on-surface mb-2">
+            WELCOME BACK.
+        </h1>
+<p class="font-body text-on-surface-variant font-medium text-lg max-w-xs">
+            Enter your credentials to access the vault.
+        </p>
+</header>
+<!-- Main Login Card -->
+<main class="w-full max-w-[420px]">
+<div class="bg-surface-container-lowest border-[3px] border-on-surface neo-shadow p-8 flex flex-col gap-6">
+<!-- Credentials Form -->
+<form class="flex flex-col gap-6">
+<!-- Email Field -->
+<div class="flex flex-col gap-2">
+<label class="font-black text-xs uppercase tracking-[0.1em] text-on-surface">
+                        Email Address
+                    </label>
+<input class="w-full bg-surface border-[3px] border-on-surface p-4 font-bold text-on-surface neo-input transition-all placeholder:text-on-surface-variant/50" placeholder="ARCHITECT@ETHOS.NETWORK" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="font-black text-xs uppercase tracking-[0.1em] text-on-surface">
+                            Password
+                        </label>
+<a class="text-[10px] font-black uppercase underline tracking-widest text-primary" href="#">Forgot?</a>
+</div>
+<input class="w-full bg-surface border-[3px] border-on-surface p-4 font-bold text-on-surface neo-input transition-all placeholder:text-on-surface-variant/50" placeholder="••••••••••••" type="password"/>
+</div>
+<!-- Primary Action -->
+<button class="w-full bg-primary text-on-primary py-5 border-[3px] border-on-surface neo-shadow neo-shadow-hover font-black text-lg uppercase tracking-widest transition-all" type="submit">
+                    CONTINUE
+                </button>
+</form>
+<!-- Alternative Action -->
+<button class="w-full bg-secondary-container text-on-surface py-4 border-[3px] border-on-surface neo-shadow neo-shadow-hover font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">key</span>
+                SEND EMAIL OTP
+            </button>
+<!-- Divider -->
+<div class="flex items-center gap-4 my-2">
+<div class="h-[3px] flex-grow bg-on-surface"></div>
+<span class="font-black text-[10px] uppercase tracking-widest text-on-surface-variant whitespace-nowrap">OR CONNECT WITH</span>
+<div class="h-[3px] flex-grow bg-on-surface"></div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-surface border-[3px] border-on-surface p-3 neo-shadow neo-shadow-hover flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-lg">ios</span>
+                    Apple
+                </button>
+<button class="bg-surface border-[3px] border-on-surface p-3 neo-shadow neo-shadow-hover flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest">
+<span class="material-symbols-outlined text-lg text-primary">language</span>
+                    Google
+                </button>
+</div>
+</div>
+<!-- Footer Link -->
+<div class="mt-8 text-center">
+<p class="font-bold text-xs uppercase tracking-widest text-on-surface-variant">
+                New to the network? 
+                <a class="text-primary underline font-black ml-1" href="#">REQUEST ACCESS</a>
+</p>
+</div>
+</main>
+<!-- Side Decoration (Neo-Brutalist Architectural Element) -->
+<div class="fixed left-0 top-0 bottom-0 w-2 bg-primary hidden lg:block"></div>
+<div class="fixed right-0 top-0 bottom-0 w-2 bg-secondary-container hidden lg:block"></div>
+<!-- Background Decoration Images -->
+<div class="fixed top-12 left-12 w-32 h-32 border-[3px] border-on-surface opacity-10 -rotate-12 pointer-events-none hidden xl:block overflow-hidden">
+<img class="w-full h-full object-cover grayscale" data-alt="Abstract geometric architectural concrete structure with sharp shadows and high contrast editorial aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEPzuRNYV2QhiwAZUFvA0QAu6KzgkgtWMs4CwUFkek-haFNHKhp1-D04QJj19q5ojrCrgt44SFW0jvqUbq9qnAYvKYETDEXVoDcTuGixR8-t34IbaBXTDuOinq5NK45FAJ1zvrYVojwgDnFrBRqLsGLpXnKHUHy0w1niRtFzsDNSXuoVWS62BXHT1hxOydKcb9rGD_v4aA8S_zCRuv4yV8RPEV1lIQPGKxpxd2z5r97M1PnIHX_pCNEQpEmAupKA2Z6E-aM4U5BAhp"/>
+</div>
+<div class="fixed bottom-12 right-12 w-48 h-48 border-[3px] border-on-surface opacity-10 rotate-6 pointer-events-none hidden xl:block overflow-hidden">
+<img class="w-full h-full object-cover grayscale" data-alt="High-tech server room components with industrial metal textures and dramatic overhead studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKGD96PTufPCM3vgs8GoZ8Pya6wFXanGOgEQoBIHXoimpXMc12wCijWK3yV7ukf40Vdy-T5u16htdm636C0lUvHf9Di-LbNHrJWI6i9aeSKx_TgUBZCDxFKN07uPF3nY4-nrA8V_7lfwp4WH4ymwT_4cPdSc9NuA7EvUK3RDOE2yj7eAPWZYoZKeLYKJwDAbybWOKFmt8wRvYZfH2WeX8yeIPFjzXLNfScbY2Iys6FO1NRLxFs6IwTYajWbp-i5Ot0GyTaSw7MKJHD"/>
+</div>
+</body></html>
