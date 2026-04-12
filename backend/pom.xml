@@ -19,7 +19,6 @@
         <postgresql.version>42.7.10</postgresql.version>
         <hikari.version>7.0.2</hikari.version>
         <jdbi.version>3.52.1</jdbi.version>
-        <flyway.version>10.20.1</flyway.version>
         <junit.version>6.0.3</junit.version>
         <mockito.version>5.23.0</mockito.version>
         <testcontainers.version>1.21.4</testcontainers.version>
@@ -71,18 +70,6 @@
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi3-sqlobject</artifactId>
             <version>${jdbi.version}</version>
-        </dependency>
-
-        <!-- Migrations -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
 
         <!-- Testing -->

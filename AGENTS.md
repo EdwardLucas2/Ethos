@@ -16,7 +16,7 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 - SuperTokens Java SDK — JWT verification on every protected request
 
 **Database**
-- PostgreSQL + Flyway (migrations) + HikariCP (connection pooling) + JDBI
+- PostgreSQL + dbmate (migrations) + HikariCP (connection pooling) + JDBI
 
 **Auth**
 - SuperTokens self-hosted (Docker) — email/password, issues JWTs, React Native SDK on frontend
@@ -30,7 +30,7 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 - OpenAPI (`/api/openapi.yaml`) — single source of truth for all endpoints and schemas
 
 **Testing**
-- Backend: JUnit 5 + Testcontainers
+- Backend: JUnit 6 + Testcontainers
 - Frontend: Jest + React Native Testing Library
 - E2E: Maestro
 
@@ -66,8 +66,7 @@ src/main/java/com/ethos/
   datastore/    - Database access (JDBI only)
   storage/      - FileStorageService interface + implementations
   auth/         - SuperTokens JWT verification
-src/main/resources/
-  db/migration/ - Flyway files: V{n}__{description}.sql
+db/migrations/  - dbmate migration files: {timestamp}_{description}.sql
 ```
 
 # Feature Development Flow
@@ -76,7 +75,7 @@ Follow this order for every feature. Do not skip steps.
 
 1. Update `/api/openapi.yaml` — define the endpoint, request schema, response schema
 2. Run Orval (`npx orval`) — regenerates `/app/src/api/`
-3. Add a Flyway migration — only if schema changes are required
+3. Add a dbmate migration — only if schema changes are required (`dbmate new <description>` from the `backend/` directory)
 4. Implement the backend endpoint — handler → service → datastore
 5. Implement the frontend — use Orval-generated hooks, handle loading and error states
 
@@ -122,10 +121,13 @@ Follow this order for every feature. Do not skip steps.
 
 ## Migrations
 
-- Files live at `/backend/src/main/resources/db/migration/`
-- Format: `V{n}__{description}.sql` (e.g. `V1__create_users.sql`)
+- Files live at `/backend/db/migrations/`
+- Format: `{timestamp}_{description}.sql` (e.g. `20240101120000_create_users.sql`)
+- Create a new migration: `cd backend && dbmate new <description>`
+- Each file has a `-- migrate:up` section (required) and `-- migrate:down` section (optional)
 - Migration files are **immutable once committed** — never edit an existing file
 - Always create a new migration file for schema changes
+- Migrations run automatically via `run-dev.sh` before the server starts
 
 ## Schema conventions
 
@@ -234,9 +236,10 @@ cd app && npx expo start                                 # Expo dev server
 ```
 
 Backend environment variables for local development:
-- `DATABASE_URL` — `jdbc:postgresql://localhost:5432/ethos`
+- `DATABASE_URL` — `jdbc:postgresql://localhost:5432/ethos` (HikariCP / Java)
 - `DATABASE_USER` — `ethos`
 - `DATABASE_PASSWORD` — `secret`
+- `DBMATE_URL` — `postgres://ethos:secret@localhost:5432/ethos` (dbmate migrations)
 - `SUPERTOKENS_URL` — `http://localhost:3567`
 - `STORAGE_BACKEND` — `local`
 - `UPLOAD_DIR` — `./data/uploads`

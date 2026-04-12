@@ -4,7 +4,6 @@ import com.ethos.dto.ErrorResponse;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.javalin.Javalin;
-import org.flywaydb.core.Flyway;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
@@ -12,7 +11,6 @@ public class Main {
 
     public static void main(String[] args) {
         var ds = buildDataSource();
-        runMigrations(ds);
         var jdbi = buildJdbi(ds);
         startServer(jdbi);
     }
@@ -23,10 +21,6 @@ public class Main {
         config.setUsername(System.getenv("DATABASE_USER"));
         config.setPassword(System.getenv("DATABASE_PASSWORD"));
         return new HikariDataSource(config);
-    }
-
-    private static void runMigrations(HikariDataSource ds) {
-        Flyway.configure().dataSource(ds).load().migrate();
     }
 
     private static Jdbi buildJdbi(HikariDataSource ds) {
