@@ -24,6 +24,7 @@
         <testcontainers.version>1.21.4</testcontainers.version>
         <spotless.version>2.44.0</spotless.version>
         <google-java-format.version>1.35.0</google-java-format.version>
+        <javalin-openapi.version>7.1.0</javalin-openapi.version>
     </properties>
 
     <dependencies>
@@ -32,6 +33,20 @@
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
             <version>${javalin.version}</version>
+        </dependency>
+
+        <!-- OpenAPI: runtime plugin serves spec at /openapi.json -->
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-openapi-plugin</artifactId>
+            <version>${javalin-openapi.version}</version>
+        </dependency>
+        <!-- OpenAPI: annotation processor generates spec at compile time (not in JAR) -->
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>openapi-annotation-processor</artifactId>
+            <version>${javalin-openapi.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- JSON -->
@@ -105,6 +120,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.0</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>io.javalin.community.openapi</groupId>
+                            <artifactId>openapi-annotation-processor</artifactId>
+                            <version>${javalin-openapi.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

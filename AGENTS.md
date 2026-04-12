@@ -27,7 +27,7 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 - `s3` → `S3FileStorageService`: AWS SDK v2 pointed at an S3-compatible endpoint
 
 **API Contract**
-- OpenAPI (`/api/openapi.yaml`) — single source of truth for all endpoints and schemas
+- OpenAPI — spec is generated at compile time from `@OpenApi` annotations on handlers via `javalin-openapi`; served at `GET /openapi.json` at runtime
 
 **Testing**
 - Backend: JUnit 6 + Testcontainers
@@ -40,7 +40,6 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 # Project Structure
 
 ```
-/api            - OpenAPI specification (openapi.yaml)
 /app            - Expo React Native application
 /backend        - Java 25 + Javalin server
 /docker         - Docker Compose files
@@ -73,18 +72,18 @@ db/migrations/  - dbmate migration files: {timestamp}_{description}.sql
 
 Follow this order for every feature. Do not skip steps.
 
-1. Update `/api/openapi.yaml` — define the endpoint, request schema, response schema
-2. Run Orval (`npx orval`) — regenerates `/app/src/api/`
+1. Annotate the new handler method with `@OpenApi` — define the path, method, request body, and response schemas
+2. Run Orval (`npx orval` with the backend server running) — regenerates `/app/src/api/`
 3. Add a dbmate migration — only if schema changes are required (`dbmate new <description>` from the `backend/` directory)
 4. Implement the backend endpoint — handler → service → datastore
 5. Implement the frontend — use Orval-generated hooks, handle loading and error states
 
 # OpenAPI
 
-- `/api/openapi.yaml` is the **single source of truth** for all API endpoints and data shapes
+- The spec is generated at compile time from `@OpenApi` annotations on handler methods — there is no hand-written spec file
+- The backend serves the generated spec at `GET /openapi.json`
 - Frontend types MUST come from Orval — never define API types by hand
-- Backend DTOs MUST match the spec exactly
-- Never define API shapes directly in Java or TypeScript
+- Never define API shapes directly in TypeScript; always regenerate via Orval after changing handler annotations
 
 # Backend
 
@@ -177,7 +176,7 @@ Use Expo SDK modules for all native device capabilities. Do not use bare React N
 
 # API Client (Orval + TanStack Query)
 
-- Orval reads `/api/openapi.yaml` and generates typed TanStack Query hooks into `/app/src/api/`
+- Orval reads `http://localhost:8080/openapi.json` (the running backend) and generates typed TanStack Query hooks into `/app/src/api/`
 - Never edit files in `/app/src/api/` manually
 - Run `npx orval` after any change to `openapi.yaml`
 - Always use generated hooks for all API calls — never raw `fetch`

@@ -4,6 +4,7 @@ import com.ethos.dto.ErrorResponse;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.javalin.Javalin;
+import io.javalin.openapi.plugin.OpenApiPlugin;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
@@ -31,6 +32,9 @@ public class Main {
 
     private static void startServer(Jdbi jdbi) {
         var app = Javalin.create(config -> {
+                    config.registerPlugin(new OpenApiPlugin(openApiConfig ->
+                            openApiConfig.withDocumentationPath("/openapi.json")));
+
                     config.routes.get("/health", ctx -> ctx.result("OK"));
 
                     config.routes.exception(Exception.class, (e, ctx) -> {
