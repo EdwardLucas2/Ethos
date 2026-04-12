@@ -1,0 +1,13 @@
+pre-commit:
+  parallel: true
+  commands:
+    frontend-lint:
+      glob: "app/**/*.{ts,tsx}"
+      exclude: ["app/src/api/**"]
+      run: cd app && npm run lint
+    frontend-format:
+      glob: "app/**/*.{ts,tsx,js,json}"
+      run: cd app && npx prettier --check .
+    backend-format:
+      glob: "backend/**/*.java"
+      run: cd backend && mvn spotless:check

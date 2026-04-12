@@ -49,11 +49,12 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 
 **`/app` source layout**
 ```
+app/            - Expo Router file-based routes (screens only)
+components/     - Shared UI components
+hooks/          - Custom hooks
 src/
   api/          - Orval-generated code (never edit manually)
-  components/   - Shared UI components
   context/      - React Context providers (auth, current user)
-  hooks/        - Custom hooks
 ```
 
 **`/backend` source layout**
@@ -181,6 +182,24 @@ Use Expo SDK modules for all native device capabilities. Do not use bare React N
 - Always use generated types — never redefine shapes that already exist in the generated code
 - `QueryClientProvider` is mounted in the root layout
 
+# Linting & Formatting
+
+## Frontend
+- ESLint via `npm run lint` — uses `eslint-config-expo` + `eslint-config-prettier`
+- Prettier via `npm run format` (fix) or `npm run format:check` (verify)
+- Config: `app/.prettierrc`
+- Orval-generated files in `src/api/` are excluded from Prettier
+
+## Backend
+- Google Java Format via Spotless
+- `mvn spotless:apply` — auto-fix all Java files
+- `mvn spotless:check` — verify formatting
+
+## Pre-commit hooks — Lefthook
+- Config: `lefthook.yml` at repo root
+- Runs `npm run lint` and `prettier --check` if any `.ts`/`.tsx` files are staged
+- Runs `mvn spotless:check` if any `.java` files are staged
+
 # Testing
 
 ## Backend — JUnit 5 + Testcontainers
@@ -210,7 +229,7 @@ Services run in Docker; applications run as local processes.
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml up -d   # PostgreSQL + SuperTokens
-cd backend && mvn javalin:run                            # Backend on :8080
+cd backend && ./run-dev.sh                               # Backend on :8080
 cd app && npx expo start                                 # Expo dev server
 ```
 

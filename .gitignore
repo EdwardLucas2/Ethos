@@ -1,1 +1,26 @@
+# Backend
+backend/target/
+backend/data/
+*.class
+
+# App
+app/node_modules/
+app/.expo/
+app/dist/
+app/.env
+
+# Docker volumes
+docker/volumes/
+
+# Environment files (never commit)
+.env
+.env.local
+backend/.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# macOS
 .DS_Store
