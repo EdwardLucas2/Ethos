@@ -36,20 +36,13 @@ public class Main {
     }
 
     private static void startServer(Jdbi jdbi) {
-        var app =
-                Javalin.create(
-                                config -> {
-                                    config.routes.get("/health", ctx -> ctx.result("OK"));
+        var app = Javalin.create(config -> {
+                    config.routes.get("/health", ctx -> ctx.result("OK"));
 
-                                    config.routes.exception(
-                                            Exception.class,
-                                            (e, ctx) -> {
-                                                ctx.status(500)
-                                                        .json(
-                                                                new ErrorResponse(
-                                                                        "Internal server error"));
-                                            });
-                                })
-                        .start(8080);
+                    config.routes.exception(Exception.class, (e, ctx) -> {
+                        ctx.status(500).json(new ErrorResponse("Internal server error"));
+                    });
+                })
+                .start(8080);
     }
 }

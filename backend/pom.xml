@@ -131,10 +131,10 @@
                 <version>${spotless.version}</version>
                 <configuration>
                     <java>
-                        <googleJavaFormat>
-                            <version>${google-java-format.version}</version>
-                            <style>AOSP</style>
-                        </googleJavaFormat>
+                        <palantirJavaFormat>
+                            <version>2.74.0</version>
+                            <style>PALANTIR</style>
+                        </palantirJavaFormat>
                     </java>
                 </configuration>
             </plugin>
