@@ -32,8 +32,8 @@ public class Main {
 
     private static void startServer(Jdbi jdbi) {
         var app = Javalin.create(config -> {
-                    config.registerPlugin(new OpenApiPlugin(openApiConfig ->
-                            openApiConfig.withDocumentationPath("/openapi.json")));
+                    config.registerPlugin(
+                            new OpenApiPlugin(openApiConfig -> openApiConfig.withDocumentationPath("/openapi.json")));
 
                     config.routes.get("/health", ctx -> ctx.result("OK"));
 
