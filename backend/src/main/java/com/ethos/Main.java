@@ -38,11 +38,6 @@ public class Main {
     private static void startServer(Jdbi jdbi) {
         var app =
                 Javalin.create(
-
-
-                    
-
-                    
                                 config -> {
                                     config.routes.get("/health", ctx -> ctx.result("OK"));
 
