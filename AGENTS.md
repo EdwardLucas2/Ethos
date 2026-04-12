@@ -1,83 +1,225 @@
-# Project definition
-Ethos is an app that helps people create new habits by creating and managing contracts with their friends and using social pressure and forfeits to hold them accountable. 
+# Ethos
+
+Ethos is a mobile app that helps people build habits by creating accountability contracts with friends. Participants agree on a habit, set a forfeit for failure, and use the app to submit and verify evidence each cycle.
+
+# Tech Stack
+
+**Frontend**
+- Expo (React Native, managed workflow) + TypeScript
+- Expo Router — file-based navigation (App Router pattern)
+- Orval — generates TypeScript types and TanStack Query hooks from the OpenAPI spec
+- TanStack Query (`@tanstack/react-query`) — all server state, caching, loading/error handling
+- React Context — global client state (current user, auth)
+
+**Backend**
+- Java 25 (LTS) + Javalin + Maven
+- SuperTokens Java SDK — JWT verification on every protected request
+
+**Database**
+- PostgreSQL + Flyway (migrations) + HikariCP (connection pooling) + JDBC
+
+**Auth**
+- SuperTokens self-hosted (Docker) — email/password, issues JWTs, React Native SDK on frontend
+
+**File Storage**
+- `FileStorageService` Java interface, implementation injected via `STORAGE_BACKEND` env var
+- `local` → `LocalFileStorageService`: saves to `./data/uploads/`, served via `GET /files/{key}`
+- `s3` → `S3FileStorageService`: AWS SDK v2 pointed at an S3-compatible endpoint
+
+**API Contract**
+- OpenAPI (`/api/openapi.yaml`) — single source of truth for all endpoints and schemas
+
+**Testing**
+- Backend: JUnit 5 + Testcontainers
+- Frontend: Jest + React Native Testing Library
+- E2E: Maestro
+
+**CI**
+- GitHub Actions — runs the test suite on every PR
 
 # Project Structure
-/api        - OpenAPI specification
-/backend    - Java + Jetty server
-/app        - React Native application
-/docs       - project documentation
 
-# Feature development flow
-1. Update OpenAPI spec
-2. Generate Orval client
-3. Add Flyway migration (if needed)
-4. Implement backend endpoint
-5. Implement frontend using generated Orval client
+```
+/api            - OpenAPI specification (openapi.yaml)
+/app            - Expo React Native application
+/backend        - Java 25 + Javalin server
+/docker         - Docker Compose files
+/docs           - Project documentation
+```
 
-# Tech stack and development guidelines:
-## Backend Architecture (Java + Jetty)
-The backend is structured into:
-- DTOs: request/response objects matching OpenAPI schemas
-- Handlers/Controllers: HTTP layer (Jetty endpoints)
-- Services: business logic
-- Datastore: database access (MariaDB)
+**`/app` source layout**
+```
+src/
+  api/          - Orval-generated code (never edit manually)
+  components/   - Shared UI components
+  context/      - React Context providers (auth, current user)
+  hooks/        - Custom hooks
+```
 
-Rules:
-- DTOs must match OpenAPI schemas exactly
-- Do not expose database entities directly in API responses
-- Keep handlers thin; business logic belongs in services
-- Backend must validate all incoming requests manually
-- Frontend assumes backend responses match OpenAPI spec
+**`/backend` source layout**
+```
+src/main/java/com/ethos/
+  dto/          - Request/response objects (must match OpenAPI schemas)
+  handler/      - Javalin route handlers (HTTP layer only)
+  service/      - Business logic
+  datastore/    - Database access (JDBC only)
+  storage/      - FileStorageService interface + implementations
+  auth/         - SuperTokens JWT verification
+src/main/resources/
+  db/migration/ - Flyway files: V{n}__{description}.sql
+```
 
-## Database (MariaDB and Flyway)
-### Schema Management
-- Database schema is version-controlled using Flyway migrations
-- Migration files are located in:
-  `/backend/src/main/resources/db/migration`
+# Feature Development Flow
 
-- Each migration file:
-  - Is immutable once committed
-  - Uses the format: `V{number}__description.sql`
+Follow this order for every feature. Do not skip steps.
 
-Rules:
-- NEVER modify existing migration files
-- ALWAYS create a new migration for schema changes
-- Migrations must be deterministic and idempotent where possible
+1. Update `/api/openapi.yaml` — define the endpoint, request schema, response schema
+2. Run Orval (`npx orval`) — regenerates `/app/src/api/`
+3. Add a Flyway migration — only if schema changes are required
+4. Implement the backend endpoint — handler → service → datastore
+5. Implement the frontend — use Orval-generated hooks, handle loading and error states
 
-### Development guide
-- Prefer simple schemas
-- Avoid premature optimisation
-- Use explicit columns (avoid JSON blobs for MVP)
+# OpenAPI
 
-### Data Access
-- Use JDBC for database interaction
-- Database access must be isolated in Datastore classes
-- Do NOT access the database directly from handlers
+- `/api/openapi.yaml` is the **single source of truth** for all API endpoints and data shapes
+- Frontend types MUST come from Orval — never define API types by hand
+- Backend DTOs MUST match the spec exactly
+- Never define API shapes directly in Java or TypeScript
 
-## Frontend Architecture (React Native)
-- Use TypeScript for all code
-- All API calls MUST go through Orval-generated clients
-- Do NOT use raw fetch directly in components
+# Backend
 
-Rules:
-- Handle loading and error states for all API calls
+## Layers
 
-## Orval
-- Orval generates:
-  - TypeScript types from OpenAPI schemas
-  - API client functions for all endpoints
-- Generated code is located in: `/app/src/api`
+- **Handler** — HTTP only: parse request, call service, return response. No business logic.
+- **Service** — Business logic and orchestration. No HTTP concerns, no DB access.
+- **Datastore** — JDBC queries only. No business logic.
+- **DTO** — Carries data in/out of the API. No logic.
 
-Rules:
-- Do not manually edit generated files
-- Regenerate after any OpenAPI change
-- Always use generated types instead of redefining interfaces
+## Rules
 
-## OpenAPI - Source of Truth
-- The OpenAPI specification (`/api/openapi.yaml`) is the single source of truth for:
-  - All API endpoints
-  - Request/response schemas
+- Handlers must be thin — no logic beyond request parsing and response mapping
+- Never access the database from a handler or service directly; use Datastore classes
+- Never expose database row objects in API responses; always map to DTOs
+- Validate all incoming requests in the handler layer
+- All protected routes must verify the SuperTokens JWT via a Javalin before-handler
+- Extract the user ID from the verified session; never trust user-supplied IDs in request bodies
 
-- Frontend types MUST be generated from OpenAPI using Orval
-- Backend implementations MUST conform to the OpenAPI spec
-- Do NOT define API shapes directly in Java or TypeScript
+## File Storage
+
+- All file I/O goes through the `FileStorageService` interface — never reference implementations directly in handlers or services
+- Inject the correct implementation via the `STORAGE_BACKEND` environment variable
+- The `GET /files/{key}` static file route is only registered when `STORAGE_BACKEND=local`
+
+# Database
+
+## Migrations
+
+- Files live at `/backend/src/main/resources/db/migration/`
+- Format: `V{n}__{description}.sql` (e.g. `V1__create_users.sql`)
+- Migration files are **immutable once committed** — never edit an existing file
+- Always create a new migration file for schema changes
+
+## Schema conventions
+
+- Use `GENERATED ALWAYS AS IDENTITY` for primary keys
+- Use `BOOLEAN` for boolean columns
+- Prefer explicit columns over JSON blobs
+- Prefer simple schemas; no premature optimisation
+
+## Data access
+
+- All queries live in Datastore classes
+- Use JDBC via the HikariCP connection pool
+- Never access the database from handlers or services
+
+# Authentication
+
+- SuperTokens runs as a sidecar container (see `docker/docker-compose.dev.yml`)
+- The backend verifies JWTs using the SuperTokens Java SDK in a before-handler
+- The frontend uses the SuperTokens React Native SDK for login, signup, and token refresh
+- Auth tokens are stored using `expo-secure-store` — never `AsyncStorage`
+
+# Frontend
+
+## Rules
+
+- TypeScript for all files
+- All API calls go through Orval-generated TanStack Query hooks — never raw `fetch`
+- Handle loading and error states for every API call
+- Use `expo-secure-store` for any sensitive data
+
+## State
+
+- **Server state**: TanStack Query via Orval hooks only
+- **Global client state**: React Context (auth, current user)
+- **Local UI state**: `useState`
+- Do not introduce external state libraries
+
+## Navigation
+
+- Routes are defined by the file structure under `app/`
+- Programmatic navigation: `useRouter()`
+- Route parameters: `useLocalSearchParams()`
+
+## Expo modules in use
+
+- `expo-camera` — evidence capture
+- `expo-location` — GPS metadata on evidence
+- `expo-notifications` — push notifications
+- `expo-image-picker` — photo library access
+- `expo-secure-store` — token storage
+
+# API Client (Orval + TanStack Query)
+
+- Orval reads `/api/openapi.yaml` and generates typed TanStack Query hooks into `/app/src/api/`
+- Never edit files in `/app/src/api/` manually
+- Run `npx orval` after any change to `openapi.yaml`
+- Always use generated types — never redefine shapes that already exist in the generated code
+- `QueryClientProvider` is mounted in the root layout
+
+# Testing
+
+## Backend — JUnit 5 + Testcontainers
+
+- Use Testcontainers to spin up a real PostgreSQL instance for integration tests, don't use an in-memory database
+- Tests must be independent; clean up state in `@AfterEach`
+
+## Frontend — Jest + React Native Testing Library
+
+- Use RNTL for components with non-trivial logic: forms, conditional flows, state machines
+- Simple display components do not need tests
+- Mock Orval-generated hooks with `jest.mock`, not `fetch`
+- Test user-visible behaviour, not implementation details
+
+## E2E — Maestro
+
+- Maestro flows live in `/app/.maestro/`
+- Cover all critical user journeys
+
+# Local Development
+
+Services run in Docker; applications run as local processes.
+
+```bash
+docker compose -f docker/docker-compose.dev.yml up -d   # PostgreSQL + SuperTokens
+cd backend && mvn javalin:run                            # Backend on :8080
+cd app && npx expo start                                 # Expo dev server
+```
+
+Backend environment variables for local development:
+- `DATABASE_URL` — `jdbc:postgresql://localhost:5432/ethos`
+- `DATABASE_USER` — `ethos`
+- `DATABASE_PASSWORD` — `secret`
+- `SUPERTOKENS_URL` — `http://localhost:3567`
+- `STORAGE_BACKEND` — `local`
+- `UPLOAD_DIR` — `./data/uploads`
+
+# Deployment Considerations
+
+Deployment strategy is not yet finalised, but the following technology choices have been made:
+
+- The backend is Dockerised — runs as a container built via a multi-stage Maven + JRE Dockerfile
+- PostgreSQL and SuperTokens also run as containers
+- Nginx will act as a reverse proxy and handle SSL termination
+- File storage uses Cloudflare R2 in production (S3-compatible; the `S3FileStorageService` points to it via the AWS SDK v2)
+- The mobile app is distributed via EAS Build (App Store + Play Store)
