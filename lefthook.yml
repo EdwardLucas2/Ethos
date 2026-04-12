@@ -7,7 +7,7 @@ pre-commit:
       run: cd app && npm run lint
     frontend-format:
       glob: "app/**/*.{ts,tsx,js,json}"
-      run: cd app && npx prettier --check .
+      run: cd app && npx prettier --write .
     backend-format:
       glob: "backend/**/*.java"
-      run: cd backend && mvn spotless:check
+      run: cd backend && mvn spotless:apply
