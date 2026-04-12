@@ -16,7 +16,7 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 - SuperTokens Java SDK — JWT verification on every protected request
 
 **Database**
-- PostgreSQL + Flyway (migrations) + HikariCP (connection pooling) + JDBC
+- PostgreSQL + Flyway (migrations) + HikariCP (connection pooling) + JDBI
 
 **Auth**
 - SuperTokens self-hosted (Docker) — email/password, issues JWTs, React Native SDK on frontend
@@ -62,7 +62,7 @@ src/main/java/com/ethos/
   dto/          - Request/response objects (must match OpenAPI schemas)
   handler/      - Javalin route handlers (HTTP layer only)
   service/      - Business logic
-  datastore/    - Database access (JDBC only)
+  datastore/    - Database access (JDBI only)
   storage/      - FileStorageService interface + implementations
   auth/         - SuperTokens JWT verification
 src/main/resources/
@@ -92,7 +92,7 @@ Follow this order for every feature. Do not skip steps.
 
 - **Handler** — HTTP only: parse request, call service, return response. No business logic.
 - **Service** — Business logic and orchestration. No HTTP concerns, no DB access.
-- **Datastore** — JDBC queries only. No business logic.
+- **Datastore** — JDBI queries only. No business logic.
 - **DTO** — Carries data in/out of the API. No logic.
 
 ## Rules
@@ -103,6 +103,13 @@ Follow this order for every feature. Do not skip steps.
 - Validate all incoming requests in the handler layer
 - All protected routes must verify the SuperTokens JWT via a Javalin before-handler
 - Extract the user ID from the verified session; never trust user-supplied IDs in request bodies
+- Wire all dependencies via constructor injection; construct everything once in `main()` and inject — do not instantiate handlers, services, or datastores inside other classes
+
+## Error handling
+
+- All errors return a standard `ErrorResponse` DTO: `{ "message": "string" }`
+- Map exceptions to HTTP responses in a global `app.exception()` handler, not in individual handlers
+- Define error response schemas in `openapi.yaml`
 
 ## File Storage
 
@@ -129,7 +136,7 @@ Follow this order for every feature. Do not skip steps.
 ## Data access
 
 - All queries live in Datastore classes
-- Use JDBC via the HikariCP connection pool
+- Use JDBI for all queries; `Jdbi` is constructed once in `main()` and injected into Datastore constructors
 - Never access the database from handlers or services
 
 # Authentication
@@ -144,7 +151,6 @@ Follow this order for every feature. Do not skip steps.
 ## Rules
 
 - TypeScript for all files
-- All API calls go through Orval-generated TanStack Query hooks — never raw `fetch`
 - Handle loading and error states for every API call
 - Use `expo-secure-store` for any sensitive data
 
@@ -158,22 +164,20 @@ Follow this order for every feature. Do not skip steps.
 ## Navigation
 
 - Routes are defined by the file structure under `app/`
+- Protected screens live under `(app)/`; the root `_layout.tsx` handles auth redirection
 - Programmatic navigation: `useRouter()`
 - Route parameters: `useLocalSearchParams()`
 
-## Expo modules in use
+## Native capabilities
 
-- `expo-camera` — evidence capture
-- `expo-location` — GPS metadata on evidence
-- `expo-notifications` — push notifications
-- `expo-image-picker` — photo library access
-- `expo-secure-store` — token storage
+Use Expo SDK modules for all native device capabilities. Do not use bare React Native APIs for native features.
 
 # API Client (Orval + TanStack Query)
 
 - Orval reads `/api/openapi.yaml` and generates typed TanStack Query hooks into `/app/src/api/`
 - Never edit files in `/app/src/api/` manually
 - Run `npx orval` after any change to `openapi.yaml`
+- Always use generated hooks for all API calls — never raw `fetch`
 - Always use generated types — never redefine shapes that already exist in the generated code
 - `QueryClientProvider` is mounted in the root layout
 
@@ -181,8 +185,10 @@ Follow this order for every feature. Do not skip steps.
 
 ## Backend — JUnit 5 + Testcontainers
 
-- Use Testcontainers to spin up a real PostgreSQL instance for integration tests, don't use an in-memory database
+- **Unit tests**: test service logic with mocked Datastore dependencies (no database required)
+- **Integration tests**: use Testcontainers to spin up a real PostgreSQL instance; never use an in-memory database
 - Tests must be independent; clean up state in `@AfterEach`
+- Run: `mvn test`
 
 ## Frontend — Jest + React Native Testing Library
 
@@ -190,11 +196,13 @@ Follow this order for every feature. Do not skip steps.
 - Simple display components do not need tests
 - Mock Orval-generated hooks with `jest.mock`, not `fetch`
 - Test user-visible behaviour, not implementation details
+- Run: `npx jest`
 
 ## E2E — Maestro
 
 - Maestro flows live in `/app/.maestro/`
 - Cover all critical user journeys
+- Run: `maestro test /app/.maestro/`
 
 # Local Development
 
@@ -214,9 +222,7 @@ Backend environment variables for local development:
 - `STORAGE_BACKEND` — `local`
 - `UPLOAD_DIR` — `./data/uploads`
 
-# Deployment Considerations
-
-Deployment strategy is not yet finalised, but the following technology choices have been made:
+# Infrastructure
 
 - The backend is Dockerised — runs as a container built via a multi-stage Maven + JRE Dockerfile
 - PostgreSQL and SuperTokens also run as containers
