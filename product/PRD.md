@@ -103,14 +103,15 @@ At the end of a cycle, once all evidence is resolved (voted on or auto-approved)
 
 ## 4. Navigation Structure
 
-### Bottom Tab Bar (persistent, all screens except auth)
+### Bottom Tab Bar
 
-| Tab           | Icon      | Destination                                                    |
-| ------------- | --------- | -------------------------------------------------------------- |
-| **Home**      | grid_view | Home Dashboard — alerts, active contracts, pending resolutions |
-| **Contracts** | gavel     | Full contract list — active, pending, settled history          |
-| **Friends**   | group     | Friend management — add/remove in-app friends                  |
-| **Profile**   | person    | Placeholder for MVP — name, email, logout                      |
+Three tabs, visible only on the main tab screens. Suppressed on contract, evidence, and settlement screens.
+
+| Tab         | Icon      | Destination                                                    |
+| ----------- | --------- | -------------------------------------------------------------- |
+| **Home**    | grid_view | Home Dashboard — alerts, active contracts, pending resolutions |
+| **Friends** | group     | Contacts — search and manage people you challenge              |
+| **Profile** | person    | Placeholder for MVP — name, email, logout                      |
 
 ### Global Action
 
