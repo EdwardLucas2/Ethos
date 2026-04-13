@@ -8,9 +8,9 @@ Ethos is a high-stakes accountability app. The design should feel like it means 
 - **`surface-raised` `#FFFFFF`** — Cards and elevated containers.
 - **`ink` `#000000`** — Borders, shadows, primary text.
 - **`ink-secondary` `#3F3F3F`** — Secondary text and labels.
-- **`blue` `#0030BF`** — Primary actions, navigation anchors, verification.
+- **`blue` `#3B82F6`** — Primary actions, navigation anchors, verification.
 - **`yellow` `#FDDC00`** — Highlights, secondary actions, progress, success states.
-- **`red` `#DC2626`** — Alerts, destructive actions, defeat states.
+- **`red` `#FF3E3E`** — Alerts, destructive actions, defeat states.
 - **`white` `#FFFFFF`** — Text on dark or coloured backgrounds.
 
 `blue` drives the main user actions (sign, approve, continue). `yellow` signals momentum and progress — it's the colour of something going well. `red` signals urgency, loss, or something that needs immediate attention. Never use colour for decoration. Backgrounds should be `surface` or `surface-raised`.
