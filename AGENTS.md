@@ -5,6 +5,7 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 - [product/PRD.md](product/PRD.md) — full product requirements
 - [product/DESIGN.md](product/DESIGN.md) — design system
 - [docs/TECHSTACK.md](docs/TECHSTACK.md) — full tech stack details, env vars, infrastructure, linting config
+- [docs/DATAMODEL.md](docs/DATAMODEL.md) — database schema, table definitions, conventions
 - [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
 
 # Project Structure
@@ -83,7 +84,7 @@ Follow this order for every feature. Do not skip steps.
 - Migrations live at `/backend/db/migrations/` — format: `{timestamp}_{description}.sql`
 - Create a migration: `cd backend && dbmate new <description>`
 - Migration files are **immutable once committed** — never edit an existing file; always create a new one
-- Use `GENERATED ALWAYS AS IDENTITY` for primary keys; prefer `BOOLEAN` for booleans
+- Use `UUID DEFAULT gen_random_uuid()` for primary keys — never auto-increment integers; prefer `BOOLEAN` for booleans
 - Prefer explicit columns over JSON blobs; keep schemas simple
 - All queries live in Datastore classes via JDBI — never access the database from handlers or services
 
