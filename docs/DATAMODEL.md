@@ -197,9 +197,6 @@ Records the outcome of a settled cycle. Written once by the resolution service w
 - **`winner_ids`** `UUID[] NOT NULL DEFAULT '{}'` — user IDs of winners; empty = no winners (everyone tied or succeeded)
 - **`loser_ids`** `UUID[] NOT NULL DEFAULT '{}'` — user IDs of losers; empty = nobody owes anything
 - **`forfeit`** `TEXT NOT NULL` — snapshot of `contracts.forfeit` at resolution time; self-contained record
-- **`acknowledged_at`** `TIMESTAMPTZ` — nullable; set when any loser taps "I Know"
-- **`settled_at`** `TIMESTAMPTZ` — nullable; set when any winner marks as settled
-- **`settled_by_user_id`** `UUID REFERENCES users(id)`
 - **`created_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 
 Outcome states:
@@ -208,6 +205,28 @@ Outcome states:
 - Both empty — exact tie; nobody owes
 
 Query membership with `WHERE ? = ANY(loser_ids)` / `WHERE ? = ANY(winner_ids)`.
+
+Per-participant acknowledgment and settlement state lives in `resolution_acknowledgments` — one row per winner or loser once they act on this resolution.
+
+---
+
+### `resolution_acknowledgments`
+
+Per-participant acknowledgment and settlement tracking for a cycle resolution. One row per participant (winner or loser) per resolution. Written lazily — a row is created when the participant first acts on the resolution.
+
+- **`id`** `UUID PK DEFAULT gen_random_uuid()`
+- **`resolution_id`** `UUID NOT NULL REFERENCES cycle_resolutions(id)`
+- **`user_id`** `UUID NOT NULL REFERENCES users(id)`
+- **`acknowledged_at`** `TIMESTAMPTZ` — nullable; set when this loser taps "I Know". Irrelevant for winners.
+- **`settled_at`** `TIMESTAMPTZ` — nullable; set when this winner marks their debt as settled. Irrelevant for losers.
+
+Constraints: `UNIQUE (resolution_id, user_id)`.
+
+Indexes: `resolution_id`.
+
+A loser has fully acknowledged when their row has `acknowledged_at IS NOT NULL`. A winner has settled when their row has `settled_at IS NOT NULL`. Both are independent — one loser acknowledging does not affect another loser's row.
+
+The service must validate before writing that `user_id` is present in `cycle_resolutions.winner_ids` or `cycle_resolutions.loser_ids` for this resolution — there is no FK constraint enforcing this, as membership is stored as a UUID array rather than individual rows.
 
 ---
 

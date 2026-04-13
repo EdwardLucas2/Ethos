@@ -5,69 +5,79 @@ Ethos is a social accountability app where friends create habit contracts, stake
 ## 1. Core Concepts
 
 ### Contract
+
 The top-level agreement between 2–10 friends. Defines who's in, what's at stake, and how long each cycle lasts. A contract lives indefinitely through auto-renewing cycles until all but one participants opt out.
 
 ### Cycle
+
 A single time-bound period within a contract (e.g., Week 1, Week 2). Each cycle has its own progress tracking, evidence, votes, and resolution outcome. When one cycle ends, the next begins immediately.
 
 ### Participant
+
 A user within a contract. Each participant sets their own habit (free text) and frequency (X times per cycle period). These are locked once signed and fixed for the life of the contract.
 
 ### Evidence
+
 Proof that a participant completed their habit. Can be a photo, text, or both — but at least one must be provided. Evidence is submitted during the active cycle and voted on by other participants.
 
 ### Vote
+
 A binary approve/reject decision on a piece of evidence. Only other participants can vote (you can't vote on your own evidence). Majority rules. Voters can change their vote before resolution.
 
 ### Forfeit
+
 The real-world stake everyone agrees to at contract creation (e.g., "A Pint", "$50"). Ethos does not handle payments — this is pure honour system. The forfeit is fixed for the life of the contract.
 
 ### Rough Data Relationships
+
 Contract
-  ├── name, forfeit, period (weekly/bi-weekly/monthly), startDate, status
-  ├── Participants[] (2–10)
-  │     ├── user, habit (free text), frequency (int), signedStatus
-  │     └── optedOutOfNextCycle (bool)
-  └── Cycles[]
-        ├── startDate, endDate, status (active/pending_resolution/settled)
-        ├── Evidence[]
-        │     ├── participant, photo?, text?, timestamp
-        │     └── Votes[] (approve/reject, voterId)
-        └── Resolution
-              ├── winners[], losers[]
-              └── debts[] (who owes whom)
+├── name, forfeit, period (weekly/bi-weekly/monthly), startDate, status
+├── Participants[] (2–10)
+│ ├── user, habit (free text), frequency (int), signedStatus
+│ └── optedOutOfNextCycle (bool)
+└── Cycles[]
+├── startDate, endDate, status (active/pending_resolution/settled)
+├── Evidence[]
+│ ├── participant, photo?, text?, timestamp
+│ └── Votes[] (approve/reject, voterId)
+└── Resolution
+├── winners[], losers[]
+└── debts[] (who owes whom)
 
 ## 2. Contract Lifecycle
 
                     ┌─────────────────────────────────┐
                     │                                  │
                     ▼                                  │
+
 DRAFT/LOBBY ──→ ACTIVE (Cycle N) ──→ PENDING RESOLUTION (Cycle N)
-                    │                        │
-                    │                        ▼
-                    │                    SETTLED (Cycle N)
-                    │                        │
-                    │          ┌─────────────┤
-                    │          │             │
-                    │          ▼             ▼
-                    │   AUTO-RENEW      CONTRACT ENDS
-                    │   (Cycle N+1)    (all opted out)
-                    │          │
-                    └──────────┘
+│ │
+│ ▼
+│ SETTLED (Cycle N)
+│ │
+│ ┌─────────────┤
+│ │ │
+│ ▼ ▼
+│ AUTO-RENEW CONTRACT ENDS
+│ (Cycle N+1) (all opted out)
+│ │
+└──────────┘
 
 ### State Transitions
 
-| From | To | Trigger |
-|---|---|---|
-| **Draft/Lobby** | **Active** | Creator taps "Start Contract" AND at least 2 participants (creator + 1) have signed AND start date reached |
-| **Draft/Lobby** | **Cancelled** | Start date reached but fewer than 2 participants signed |
-| **Active** | **Pending Resolution** | Cycle end date reached. Evidence submission locks. New cycle starts in parallel |
-| **Pending Resolution** | **Settled** | All evidence has majority votes OR next cycle's end date is reached (remaining pending evidence auto-approves) |
-| **Settled** | **Active (next cycle)** | Auto-renewal. Participants who opted out on the last day of the previous cycle are removed |
-| **Settled** | **Contract Ends** | All participants have opted out |
+| From                   | To                      | Trigger                                                                                                        |
+| ---------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Draft/Lobby**        | **Active**              | Creator taps "Start Contract" AND at least 2 participants (creator + 1) have signed AND start date reached     |
+| **Draft/Lobby**        | **Cancelled**           | Start date reached but fewer than 2 participants signed                                                        |
+| **Active**             | **Pending Resolution**  | Cycle end date reached. Evidence submission locks. New cycle starts in parallel                                |
+| **Pending Resolution** | **Settled**             | All evidence has majority votes OR next cycle's end date is reached (remaining pending evidence auto-approves) |
+| **Settled**            | **Active (next cycle)** | Auto-renewal. Participants who opted out on the last day of the previous cycle are removed                     |
+| **Settled**            | **Contract Ends**       | All participants have opted out                                                                                |
 
 ### The Overlap Period
+
 When a cycle ends, two things happen simultaneously:
+
 1. **Cycle N** enters Pending Resolution — no new uploads, voting begins
 2. **Cycle N+1** enters Active — progress resets, new evidence can be uploaded
 
@@ -77,14 +87,15 @@ Users toggle between these views on the Contract Overview screen.
 
 At the end of a cycle, once all evidence is resolved (voted on or auto-approved), the system evaluates:
 
-| Scenario | Outcome |
-|---|---|
-| **Everyone hit their target** | Nobody owes anything |
-| **Some hit, some didn't** | Those who missed owe the forfeit to those who hit. Distributed as evenly as possible among winners |
-| **Nobody hit their target** | The person(s) with the least verified progress owe the forfeit to the person(s) with the most verified progress |
-| **Exact tie at the bottom and top** | Nobody owes anything |
+| Scenario                            | Outcome                                                                                                         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Everyone hit their target**       | Nobody owes anything                                                                                            |
+| **Some hit, some didn't**           | Those who missed owe the forfeit to those who hit. Distributed as evenly as possible among winners              |
+| **Nobody hit their target**         | The person(s) with the least verified progress owe the forfeit to the person(s) with the most verified progress |
+| **Exact tie at the bottom and top** | Nobody owes anything                                                                                            |
 
 **Clarifications:**
+
 - Only **verified** evidence (majority-approved) counts toward the final tally
 - In the "total failure" scenario, only the bottom-ranked person(s) owe, and only to the top-ranked person(s) — not a cascading debt
 - If the bottom is tied, all tied losers owe. If the top is tied, all tied winners are owed
@@ -93,17 +104,20 @@ At the end of a cycle, once all evidence is resolved (voted on or auto-approved)
 ## 4. Navigation Structure
 
 ### Bottom Tab Bar (persistent, all screens except auth)
-| Tab | Icon | Destination |
-|---|---|---|
-| **Home** | grid_view | Home Dashboard — alerts, active contracts, pending resolutions |
-| **Contracts** | gavel | Full contract list — active, pending, settled history |
-| **Friends** | group | Friend management — add/remove in-app friends |
-| **Profile** | person | Placeholder for MVP — name, email, logout |
+
+| Tab           | Icon      | Destination                                                    |
+| ------------- | --------- | -------------------------------------------------------------- |
+| **Home**      | grid_view | Home Dashboard — alerts, active contracts, pending resolutions |
+| **Contracts** | gavel     | Full contract list — active, pending, settled history          |
+| **Friends**   | group     | Friend management — add/remove in-app friends                  |
+| **Profile**   | person    | Placeholder for MVP — name, email, logout                      |
 
 ### Global Action
+
 - Floating Action Button (FAB) on Home screen to create a new contract
 
 ### Screen Map
+
 ```
 Auth Flow:
   Sign Up → Home Dashboard
@@ -152,9 +166,11 @@ Main Flow:
 **Entry points:** "Request Access" link on Login screen, or fresh app open with no session.
 
 **User Stories:**
+
 - "As a new user, I want to create an account quickly so I can start challenging my friends."
 
 **Features:**
+
 - Google sign-in button (placeholder for MVP — not functional)
 - Apple sign-in button (placeholder for MVP — not functional)
 - Email address input
@@ -163,6 +179,7 @@ Main Flow:
 - Link to Login for existing users
 
 **States:**
+
 - **Default:** Empty form
 - **Validation error:** Inline errors on invalid email format or weak password
 - **Loading:** Button shows spinner on submit
@@ -183,9 +200,11 @@ Main Flow:
 **Entry points:** App open with no active session, or "Login" link from Sign Up.
 
 **User Stories:**
+
 - "As a returning user, I want to log in quickly to check my contracts."
 
 **Features:**
+
 - Email address input
 - Password input with "Forgot?" link
 - "Continue" primary CTA
@@ -194,6 +213,7 @@ Main Flow:
 - Link to Sign Up for new users
 
 **States:**
+
 - **Default:** Empty form
 - **Validation error:** Inline error on bad credentials
 - **Loading:** Button shows spinner
@@ -212,6 +232,7 @@ Main Flow:
 **Entry points:** App open (authenticated), bottom tab "Home", back-navigation from most screens.
 
 **User Stories:**
+
 - "As a user, I want to see if anyone has uploaded proof I need to verify so I can keep the game moving."
 - "As a user, I want to see which contract has the least time remaining so I know what to prioritise today."
 - "As a user with multiple contracts, I want a summary of my overall progress."
@@ -222,12 +243,14 @@ Main Flow:
 
 **A. Alert Stack (top of scroll)**
 A stack of high-contrast banners, ordered by urgency:
+
 - **Verification Needed:** "[Name] uploaded proof. [VERIFY]" — taps through to Evidence Approval
 - **New Invite:** "[Name] challenged you to '[Contract Name]'. [VIEW]" — taps through to Challenge Received
 - **Settle Up:** "Last week's results are in! [SETTLE]" — taps through to Contract Overview (Unsettled)
 
 **B. Active Contracts (main list)**
 Vertical list of cards for every contract the user is currently in:
+
 - Contract name and participant names/avatars
 - Multi-tone progress bar: solid fill = verified, patterned fill = pending, empty = remaining
 - Dynamic CTA: "SNAP PROOF" button if the user hasn't completed enough this cycle
@@ -236,6 +259,7 @@ Vertical list of cards for every contract the user is currently in:
 
 **C. Pending Resolution (secondary section)**
 Slightly muted section for cycles that have ended but aren't settled:
+
 - Shows contract name, final progress summary, and "X reviews needed"
 - Tapping navigates to Contract Overview (Unsettled)
 
@@ -243,6 +267,7 @@ Slightly muted section for cycles that have ended but aren't settled:
 Persistent "+" button to create a new contract. Navigates to Contract Builder (Creator).
 
 **States:**
+
 - **Empty (new user):** No contracts. Show onboarding prompt: "No active contracts. Challenge your friends!" with prominent create CTA
 - **Populated:** Full alert stack + contract cards
 - **All caught up:** No alerts, contracts show "Waiting on others" or progress summaries
@@ -265,6 +290,7 @@ Persistent "+" button to create a new contract. Navigates to Contract Builder (C
 **Entry points:** FAB on Home Dashboard.
 
 **User Stories:**
+
 - "As a creator, I want to name the contract so we have a shared identity."
 - "As a creator, I want to set the forfeit so everyone knows what's at stake."
 - "As a creator, I want to pick the cycle period and start date."
@@ -274,36 +300,43 @@ Persistent "+" button to create a new contract. Navigates to Contract Builder (C
 **Sections:**
 
 **A. Ground Rules**
+
 - Contract name (free text input)
 - Cycle period selector: Weekly / Bi-Weekly / Monthly
 - Forfeit input (free text, e.g., "A Pint", "$20")
 - Start date picker (today or a future date)
 
 **B. Invite Friends**
+
 - Search and select from in-app friends list
 - Up to 9 invitees (10 total including creator)
 - Shows selected friends with remove option
 
 **C. Your Commitment**
+
 - Habit input (free text, e.g., "Gym", "Cold Plunge")
 - Frequency selector (number input, label adapts to period: "X times per week" / "X times per 2 weeks" / "X times per month")
 
 **D. Actions**
+
 - "Sign Contract" primary CTA — locks the creator's commitment and sends invites
 - "Decline" / cancel — discards the draft
 
 **Lobby View (after invites sent):**
 Once invites go out, this screen transitions to a live lobby showing:
+
 - All participants with status badges: `WAITING` (hasn't responded), `DRAFTING` (joined, editing habit), `SIGNED` (locked in and ready)
 - Each participant's habit and frequency (visible to all, updates in real-time)
 - "Start Contract" button — enabled only when at least 1 invitee has signed
 
 **Creator Powers (while in lobby):**
+
 - Can continue editing contract rules (name, forfeit, period, start date) — changes visible to all participants in real-time
 - Can remove a participant or cancel an unresponded invite
 - Can start the contract once conditions are met
 
 **States:**
+
 - **Building:** Form inputs, no invites sent yet
 - **Lobby (waiting):** Invites sent, waiting for responses. Shows participant status list
 - **Lobby (ready):** At least 1 invitee signed — "Start Contract" becomes active
@@ -325,6 +358,7 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Entry points:** Invite alert on Home Dashboard, or push notification.
 
 **User Stories:**
+
 - "As an invitee, I want to see who invited me, what's at stake, and when it starts before I decide."
 - "As an invitee, I want to see what my friends committed to so I can set an appropriately challenging goal."
 - "As an invitee, I want to be able to change my mind and unsign before the contract starts."
@@ -332,31 +366,38 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Sections:**
 
 **A. Invitation Header**
+
 - "CHALLENGE RECEIVED" banner
 - Creator name and contract name
 
 **B. Ground Rules**
+
 - Contract name, cycle period, forfeit, start date — read-only display
 - Updates in real-time if the creator edits them
 
 **C. Squad Intel**
+
 - List of all participants with their habit, frequency, and status (SIGNED / WAITING / DRAFTING)
 - Updates in real-time as others join and set their commitments
 
 **D. Your Commitment**
+
 - Habit input (free text)
 - Frequency selector (adapts to the contract's cycle period)
 
 **E. Actions**
+
 - "Sign Contract" — locks commitment, sets status to SIGNED
 - "Decline" — opts out of the invitation
 
 **Post-Sign State:**
+
 - Commitment fields become read-only
 - "Sign Contract" button changes to show SIGNED status
 - An "Edit" option appears that unsigns (reverts to DRAFTING) so the user can modify their commitment — only available while the contract hasn't started
 
 **States:**
+
 - **Viewing:** Reading the invitation details, hasn't set a commitment yet
 - **Drafting:** Has entered a habit/frequency but hasn't signed
 - **Signed:** Commitment locked, waiting for the contract to start
@@ -379,6 +420,7 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Entry points:** Tap contract card on Home Dashboard, or navigate from Contracts tab.
 
 **User Stories:**
+
 - "As a participant, I want to see my progress vs. my friends' progress in real-time."
 - "As a participant, I want to see what's at stake to keep the pressure on."
 - "As a participant, I want to know how much time is left so I can plan my remaining actions."
@@ -388,35 +430,42 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Sections:**
 
 **A. Period Switcher**
+
 - Segmented control at the top: "THIS WEEK" (active, selected) / "LAST WEEK"
 - "LAST WEEK" navigates to Contract Overview — Unsettled (if previous cycle exists and is unresolved)
 
 **B. Stakes Card**
+
 - Forfeit displayed prominently (e.g., "ON THE LINE: A PINT")
 - Cycle timeline: start date → "today" marker → end date
 
 **C. Progress Arena**
+
 - Vertical list of all participants, each showing:
-  - Name, habit, and frequency label (e.g., "GYM 3X/WEEK")
-  - Fractional progress (e.g., "2/3")
-  - Multi-tone progress bar: solid = verified, patterned = pending, empty = remaining
+    - Name, habit, and frequency label (e.g., "GYM 3X/WEEK")
+    - Fractional progress (e.g., "2/3")
+    - Multi-tone progress bar: solid = verified, patterned = pending, empty = remaining
 
 **D. Proof Feed Preview**
+
 - Horizontal carousel or grid of the latest evidence uploads
 - Timestamp on each (e.g., "MON 7AM")
 - "VIEW ALL EVIDENCE" link → Evidence Review
 - Cards with unreviewed evidence show "REVIEW NEEDED" badge
 
 **E. Primary Action**
+
 - Dynamic CTA that changes based on state:
-  - **"SNAP PROOF"** — user hasn't hit their frequency target yet → opens Evidence Upload
-  - **"REVIEW [NAME]'S PROOF"** — there's unreviewed evidence from others → opens Evidence Approval
-  - **"ALL CAUGHT UP"** — nothing to do, muted state
+    - **"SNAP PROOF"** — user hasn't hit their frequency target yet → opens Evidence Upload
+    - **"REVIEW [NAME]'S PROOF"** — there's unreviewed evidence from others → opens Evidence Approval
+    - **"ALL CAUGHT UP"** — nothing to do, muted state
 
 **F. Footer Actions**
+
 - "Opt Out of Next Cycle" — only visible on the last day of the cycle. Confirmation dialog. Takes effect at cycle end
 
 **States:**
+
 - **Active (behind):** User hasn't hit target, "SNAP PROOF" prominent
 - **Active (on track):** User has hit target, focus shifts to reviewing others' evidence
 - **Active (all caught up):** No actions needed, waiting on others
@@ -440,6 +489,7 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Entry points:** "Snap Proof" CTA on Contract Overview or Home Dashboard.
 
 **User Stories:**
+
 - "As a participant, I want a fast way to capture and submit proof so it doesn't interrupt my routine."
 - "As a participant, I want to add an optional note for context."
 - "As a participant, I want to confirm my photo looks good before uploading."
@@ -447,27 +497,33 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Sections:**
 
 **A. Camera Viewport**
+
 - Live camera view with viewfinder overlay
 - Capture button to take photo
 - "Retake" button to clear and try again
 
 **B. Note Input**
+
 - Optional text area: "Add a note..."
 - Free text for context (e.g., "Crushed legs today!")
 
 **C. Metadata Display (read-only)**
+
 - Timestamp (auto-captured)
 - Location: not shown for MVP (GPS is aspirational, not in scope)
 
 **D. Upload CTA**
+
 - "UPLOAD PROOF" primary button — submits evidence to the contract
 
 **Validation:**
+
 - At least one of photo or text must be provided
 - If only text: that's fine
 - If only photo: that's fine
 
 **States:**
+
 - **Camera active:** Viewfinder live, no photo taken
 - **Photo captured:** Preview shown, retake available
 - **Submitting:** Upload button shows progress
@@ -488,6 +544,7 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Entry points:** "View All Evidence" on Contract Overview, verification alert on Dashboard, or proof feed tap.
 
 **User Stories:**
+
 - "As a participant, I want to see a feed of all evidence so I can stay motivated."
 - "As a voter, I want to clearly see which evidence I haven't reviewed yet."
 - "As a participant, I want to see the time and context of each upload."
@@ -495,26 +552,30 @@ Once invites go out, this screen transitions to a live lobby showing:
 **Sections:**
 
 **A. Participant Filter**
+
 - Segmented control / tabs to switch between participants (e.g., "YOU" / "ALEX" / "SARAH")
 - Defaults to showing all, or the participant with unreviewed evidence
 
 **B. Evidence Cards**
 Each card shows:
+
 - Photo (if uploaded) — large, prominent
 - Timestamp badge (e.g., "WED 7AM")
 - Text note (if provided)
 - Review status:
-  - **"REVIEW NEEDED"** (red border, urgent) — you haven't voted yet
-  - **"VERIFIED"** (green checkmark) — majority approved
-  - **"REJECTED"** — majority rejected
-  - **"PENDING"** — not enough votes yet, but you've already voted
+    - **"REVIEW NEEDED"** (red border, urgent) — you haven't voted yet
+    - **"VERIFIED"** (green checkmark) — majority approved
+    - **"REJECTED"** — majority rejected
+    - **"PENDING"** — not enough votes yet, but you've already voted
 - Consensus summary: who has approved/rejected
 
 **C. Navigation**
+
 - Tapping an unreviewed card opens Evidence Approval
 - Tapping a reviewed card shows detail view (read-only)
 
 **States:**
+
 - **Has unreviewed items:** Cards with red "REVIEW NEEDED" badges sorted to top
 - **All reviewed:** All cards show verified/rejected/pending status
 - **Empty (no evidence yet):** "No evidence uploaded yet" message
@@ -535,6 +596,7 @@ Each card shows:
 **Entry points:** Tap unreviewed card in Evidence Review, or verification alert on Dashboard.
 
 **User Stories:**
+
 - "As a voter, I want to see a large, clear photo so I can make an informed decision."
 - "As a voter, I want to see what commitment this proof relates to."
 - "As a voter, I want simple approve/reject buttons."
@@ -542,23 +604,28 @@ Each card shows:
 **Sections:**
 
 **A. Context Banner**
+
 - "VERIFY [NAME]'S PROOF" header
 - The participant's commitment highlighted (e.g., "Alex went to the gym")
 
 **B. Evidence Display**
+
 - Large-format photo
 - Timestamp and metadata badges
 - Optional note from the uploader
 
 **C. Action Zone (fixed to bottom)**
+
 - Two large buttons side by side:
-  - **REJECT** (red)
-  - **APPROVE** (blue)
+    - **REJECT** (red)
+    - **APPROVE** (blue)
 
 **Changing Your Vote:**
+
 - If you return to an evidence item you already voted on, your previous vote is shown. You can change it (tap the other button) as long as the cycle hasn't been resolved.
 
 **States:**
+
 - **Unvoted:** Both buttons active, no selection
 - **Voted:** Your choice highlighted, other button available to change vote
 - **Resolved:** Read-only, shows final outcome
@@ -578,6 +645,7 @@ Each card shows:
 **Entry points:** Period switcher "Last Week" on Contract Overview, or "Settle" alert on Dashboard.
 
 **User Stories:**
+
 - "As a participant, I want to see the final standings from last week while it's still being resolved."
 - "As a voter, I want to know exactly how many items I need to review to finalise the stakes."
 - "As a user, I want to see a summary of everyone's final progress."
@@ -585,28 +653,35 @@ Each card shows:
 **Sections:**
 
 **A. Period Switcher**
+
 - "LAST WEEK" selected, "THIS WEEK" available to toggle back
 
 **B. Final Standings**
+
 - Ranked list of participants with:
-  - Final verified count (e.g., "3/3 VERIFIED")
-  - Success/fail badges
-  - Pending count if evidence still unresolved
+    - Final verified count (e.g., "3/3 VERIFIED")
+    - Success/fail badges
+    - Pending count if evidence still unresolved
 
 **C. Verification CTA**
+
 - Prominent card: "VERIFICATION PENDING — X items to review"
 - "REVIEW NOW" button → Evidence Review (filtered to unreviewed items from this cycle)
 
 **D. Contract Summary**
+
 - Recap of each participant's habit and the cycle's end date
 
 **E. Upload Lock Notice**
+
 - Footer clarifying "Submission window closed for this cycle"
 
 **Auto-Resolution:**
-- If votes aren't all in by the time the *next* cycle ends, all remaining pending evidence auto-approves and the cycle resolves
+
+- If votes aren't all in by the time the _next_ cycle ends, all remaining pending evidence auto-approves and the cycle resolves
 
 **States:**
+
 - **Pending (reviews needed):** Verification CTA prominent, standings show estimated outcome
 - **Resolved:** Transitions to Contract Settled view
 
@@ -626,6 +701,7 @@ Each card shows:
 **Entry points:** Auto-transition from Unsettled view when all votes are in. Also accessible from contract history.
 
 **User Stories:**
+
 - "As a winner, I want to celebrate and see who owes me."
 - "As a loser, I want to understand why I lost."
 - "As a participant, I want to share the results with others."
@@ -633,22 +709,27 @@ Each card shows:
 **Sections:**
 
 **A. Resolution Banner**
+
 - "CYCLE COMPLETE" header with checkmark
 
 **B. Final Standings Leaderboard**
+
 - Ranked list showing each participant:
-  - Rank number
-  - Name and final verified count (e.g., "3/3 DAYS")
-  - "CLEARED" badge for winners, "OWES" badge for losers
+    - Rank number
+    - Name and final verified count (e.g., "3/3 DAYS")
+    - "CLEARED" badge for winners, "OWES" badge for losers
 
 **C. Payout Card**
+
 - High-contrast card stating the specific debt: "[LOSER] OWES [WINNER]: [FORFEIT]"
 - If multiple debts, listed individually
 
 **D. Share Action**
+
 - "SHARE RESULTS" button — opens native share sheet with a summary graphic
 
 **States:**
+
 - **All cleared:** Everyone hit their target — celebration state, no debts
 - **Mixed results:** Winners and losers shown, payout card visible
 - **Total failure:** Bottom owes top, "Relative Failure" explanation shown
@@ -670,6 +751,7 @@ Each card shows:
 **Entry points:** Tap debt from Contract Settled, or alert on Dashboard.
 
 **User Stories:**
+
 - "As a loser, I want a clear notification of what I owe and to whom."
 - "As a loser, I want to see why I lost."
 - "As a loser, I want to acknowledge the debt so the notification goes away."
@@ -677,22 +759,28 @@ Each card shows:
 **Sections:**
 
 **A. Defeat Stamp**
+
 - Massive "PAY UP" graphic — impossible to miss
 
 **B. Settlement Block**
+
 - "YOU OWE [WINNER]: [FORFEIT]" (e.g., "YOU OWE ALEX: A PINT AT THE PUB")
 
 **C. Contract Recap**
+
 - The habit you committed to and your final count
 - The opponent who won
 
 **D. Proof Context**
+
 - Thumbnails of the winner's successful evidence (rubbing it in)
 
 **E. Acknowledgment**
+
 - "I KNOW" button — dismisses the alert. Does not settle the debt; it just removes the in-your-face notification. The winner must mark it as settled from their side.
 
 **States:**
+
 - **Active debt:** Full display with acknowledgment button
 - **Acknowledged:** Alert dismissed, but debt remains visible in contract history until winner settles
 
@@ -711,6 +799,7 @@ Each card shows:
 **Entry points:** Tap credit from Contract Settled, or alert on Dashboard.
 
 **User Stories:**
+
 - "As a winner, I want a dedicated reminder that I'm owed a reward."
 - "As a winner, I want to pester my friend if they haven't paid up."
 - "As a winner, I want to officially clear the debt once it's settled in real life."
@@ -718,19 +807,24 @@ Each card shows:
 **Sections:**
 
 **A. Victory Stamp**
+
 - Massive "YOU'RE OWED" graphic
 
 **B. Contract Detail Card**
+
 - The habit and the opponent involved
 
 **C. Debt Block**
+
 - "[LOSER] OWES YOU: [FORFEIT]" (e.g., "ALEX OWES YOU: A PINT AT THE PUB")
 
 **D. Actions**
+
 - "PESTER [NAME]" — sends a push notification to the loser reminding them of the debt. Can be sent repeatedly until settled
 - "MARK AS SETTLED" — archives the debt. Only the winner needs to confirm; no acknowledgment needed from the loser
 
 **States:**
+
 - **Active debt:** Pester and settle actions available
 - **Settled:** Debt archived, screen shows "SETTLED" state (accessible from history)
 
@@ -745,25 +839,25 @@ Each card shows:
 
 ### 5.14 Friends
 
-**Purpose:** Manage in-app friends. This is required because contract invitations are limited to in-app friends.
+**Purpose:** Manage your contacts. Contacts are one-way: adding someone does not require their approval, and does not add you to their contacts. Anyone is findable and invitable by tag regardless of whether they're in your contacts; contacts just make the invite flow faster.
 
 **Entry points:** Bottom tab "Friends".
 
 **User Stories:**
-- "As a user, I want to add friends so I can invite them to contracts."
-- "As a user, I want to remove friends I no longer want to challenge."
-- "As a user, I want to see incoming friend requests."
+
+- "As a user, I want to add someone by their tag so I can invite them quickly next time."
+- "As a user, I want to remove a contact I no longer challenge."
 
 **Features:**
-- Friend list with names and avatars
-- Search to find users and send friend requests
-- Incoming friend requests with accept/decline
-- Remove friend option (with confirmation)
+
+- Contact list with names, avatars, and tags
+- Tag search to find any user and add them as a contact
+- Remove contact option (with confirmation)
 
 **States:**
-- **Empty:** No friends yet — prompt to search and add
-- **Populated:** List of friends, search bar at top
-- **Pending requests:** Badge on tab, requests shown at top of list
+
+- **Empty:** No contacts yet — prompt to search by tag
+- **Populated:** List of contacts, search bar at top
 
 **Note:** This screen has no mockup in the current design package. It needs to be designed consistent with the established visual style.
 
@@ -776,6 +870,7 @@ Each card shows:
 **Entry points:** Bottom tab "Profile".
 
 **Features (MVP minimal):**
+
 - Display name
 - Email address
 - Logout button
@@ -787,9 +882,11 @@ Each card shows:
 ## 6. Cross-Cutting Concerns
 
 ### Notifications (MVP)
+
 Notifications are surfaced as banners in the Dashboard Alert Stack. No dedicated notifications/inbox screen for MVP.
 
 Notification triggers:
+
 - Someone uploads evidence to a contract you're in → "VERIFY" alert
 - You receive a contract invitation → "CHALLENGE" alert
 - A cycle completes and is ready for resolution → "SETTLE" alert
@@ -797,6 +894,7 @@ Notification triggers:
 - Push notifications for the above (if the user has granted permission)
 
 ### Auto-Renewal
+
 - Contracts automatically renew into the next cycle when a cycle settles
 - Participants can opt out only on the last day of a cycle
 - Opt-out takes effect at cycle end — the participant completes the current cycle normally
@@ -805,13 +903,15 @@ Notification triggers:
 - New participants cannot join an existing contract — only the original (non-opted-out) members continue
 
 ### Real-Time Updates
+
 - The Lobby/Contract Builder screens should update in real-time as participants join, set habits, and sign
 - If the creator edits contract rules while participants are viewing, changes should appear immediately
 - Progress bars on Contract Overview should reflect new evidence and votes without requiring a manual refresh
 
 ### Evidence Voting Deadlines
+
 - There is no explicit deadline for voting within a cycle
-- If evidence remains unvoted when the *next* cycle ends, it auto-approves
+- If evidence remains unvoted when the _next_ cycle ends, it auto-approves
 - This means a cycle can remain in "Pending Resolution" for up to one full cycle period before auto-resolving
 
 ---
