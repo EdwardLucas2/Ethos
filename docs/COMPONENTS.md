@@ -163,14 +163,15 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 **Variants**
 
-- _Default_ — canonical yellow header described above. Used on all main app screens.
-- _Back_ — replaces the hamburger icon with a back arrow (`arrow_back`). Used on focused screens that sit above the main navigation (PayUp, YouAreOwed). Same yellow background.
+- _Default_ — canonical yellow header described above. Used on tab screens (Dashboard, Friends, Profile).
+- _Stack_ — back arrow (`arrow_back`) on the left, "ETHOS" wordmark centre-left, hamburger icon on the right (avatar dropped). Used on all stack screens navigated into from the tabs: contract lobby, contract overview, evidence, unsettled, and settled screens.
+- _Back_ — back arrow (`arrow_back`) on the left, "ETHOS" wordmark centre-left, avatar on the right (no hamburger). Used on fully focused screens that sit above all navigation: PayUp, YouAreOwed.
 - _Auth_ — white background, gavel icon + "ETHOS" wordmark on the left, "LOGIN" or "SIGN UP" link on the right. Used on auth screens only.
 
 **Props**
 
-- `variant` — `"default"` | `"back"` | `"auth"`
-- `onBack` — back navigation callback for `"back"` variant
+- `variant` — `"default"` | `"stack"` | `"back"` | `"auth"`
+- `onBack` — back navigation callback for `"stack"` and `"back"` variants
 - `avatarUri` — user avatar image for `"default"` and `"back"` variants
 
 **Design notes** — 4px bottom border, `shadow-sm`. Sticky, `z-50`. The "ETHOS" wordmark is italic, Black weight, tracking tighter, ALL CAPS. Avatar is square (not circular), 2px border, 40×40.
