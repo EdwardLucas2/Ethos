@@ -41,7 +41,7 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 **Settlement**
 
 - [PayoutCard](#payoutcard) — high-contrast debt statement ("[LOSER] OWES [WINNER]: [FORFEIT]")
-- [ContractDetailsCard](#contractdetailscard) — habit + opponent summary for resolution screens
+- [ResolutionContextCard](#resolutioncontextcard) — habit + opponent(s) summary for Pay Up and You're Owed screens
 
 ---
 
@@ -80,8 +80,17 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 **Props**
 
 - `activePeriod` — `"current"` or `"previous"`
+- `contractPeriod` — `"weekly"` | `"biweekly"` | `"monthly"` — drives the label text (see mapping below)
 - `onSelect` — callback with the selected period
-- `previousDisabled` — hides or disables the "LAST WEEK" option when no previous cycle exists
+- `previousDisabled` — hides or disables the previous-period option when no previous cycle exists
+
+**Label mapping** (both segments ALL CAPS):
+
+| `contractPeriod` | Current label | Previous label |
+|---|---|---|
+| `weekly` | THIS WEEK | LAST WEEK |
+| `biweekly` | THIS FORTNIGHT | LAST FORTNIGHT |
+| `monthly` | THIS MONTH | LAST MONTH |
 
 **Design notes** — Full-width container, 4px border, hard offset shadow. Active segment uses `yellow` fill. Both segments are ALL CAPS, font-black, tracked wide.
 
@@ -204,10 +213,12 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 - `verify` — blue background, white text, `verified_user` icon
 - `challenge` — yellow background, black text, `mail` icon
 - `settle` — red background, white text, `payments` icon
+- `owed` — yellow background, black text, `emoji_events` icon
+- `pay-up` — red background, white text, `payments` icon
 
 **Props**
 
-- `type` — `"verify"` | `"challenge"` | `"settle"`
+- `type` — `"verify"` | `"challenge"` | `"settle"` | `"owed"` | `"pay-up"`
 - `message` — the action text (e.g. "ALEX UPLOADED PROOF. [VERIFY]")
 - `onPress` — navigation callback
 
@@ -221,23 +232,22 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 **Purpose** — The primary card on the Dashboard summarising one active contract: who you're up against, your progress this cycle, time remaining, and a contextual action button.
 
-**Variants** — the CTA button at the bottom changes based on state:
+**Variants** — the CTA button at the bottom changes based on `ctaState`:
 
-- _Behind_ — "SNAP PROOF" (blue or standard)
-- _Urgent_ — "SNAP PROOF" (red, time-remaining badge in red)
-- _Review needed_ — "REVIEW [NAME]'S PROOF"
-- _All caught up_ — "ALL CAUGHT UP" (muted)
+- _snap_ — "SNAP PROOF" (`blue` background)
+- _snap-urgent_ — "SNAP PROOF" (`red` background, time-remaining badge also red). Use when user hasn't hit target AND ≤ 24h remain.
+- _review_ — "REVIEW [NAME]'S PROOF" (`ink` background). Navigates to the most recently uploaded unreviewed evidence item for this contract.
+- _caught-up_ — "ALL CAUGHT UP" (muted, not tappable)
 
 **Props**
 
 - `contractName`
-- `opponentLabel` — e.g. "VS ALEX" or "SQUAD BATTLE"
+- `opponentLabel` — e.g. "VS ALEX" (2 participants) or "SQUAD BATTLE" (≥ 3 participants)
 - `verified`, `pending`, `total` — passed through to `ProgressBar`
-- `timeRemaining` — string, e.g. "14H 20M" or "2H REMAINING"
-- `isUrgent` — turns time badge red
-- `ctaState` — `"snap"` | `"review"` | `"caught-up"`
+- `timeRemaining` — string, e.g. "14H 20M" or "2 DAYS LEFT"
+- `ctaState` — `"snap"` | `"snap-urgent"` | `"review"` | `"caught-up"`. Time badge is red iff `ctaState === "snap-urgent"`.
 - `onPress` — navigates to Contract Overview
-- `onCta` — action for the CTA button
+- `onCta` — action for the CTA button (no-op when `caught-up`)
 
 **Design notes** — White `surface-raised` background, 4px border, `shadow-lg`. `shadow-md` is also acceptable. The CTA button is full-width, font-black italic, ALL CAPS. Time-remaining badge is a small bordered chip top-right of the card.
 
@@ -398,17 +408,16 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 ---
 
-## ContractDetailsCard
+## ResolutionContextCard
 
-**Purpose** — A compact summary of the contract context on resolution screens: what the habit was and who the opponent is. Provides the "why did this happen" context alongside the `PayoutCard`.
+**Purpose** — A compact summary of the resolution context on Pay Up and You're Owed screens: the current user's habit commitment and the opponent(s) on the other side of the debt. Provides the "why did this happen" context alongside the `PayoutCard`. Used only on `/pay-up/[resolutionId]` and `/owed/[resolutionId]`.
 
 **Props**
 
-- `habit` — e.g. "Gym 3x/week"
-- `opponentName`
-- `opponentAvatarUri`
+- `habit` — the current user's habit, e.g. "Gym 3x/week"
+- `opponents` — `Array<{ name: string; avatarUri?: string }>` — the winner(s) shown on the PayUp screen, or the loser(s) shown on the YouAreOwed screen. Renders as a stacked list of avatar + name rows; handles 1–N opponents gracefully.
 - `onViewCycleDetails` — navigates to the full Contract Settled screen
 
-**Design notes** — White background, 4px border, `shadow-lg`. "CONTRACT DETAILS" section header with a `verified` icon. Habit shown as italic bold text. Opponent shown as an avatar + name row. "VIEW CYCLE DETAILS" is a text link with heavy underline decoration and a forward arrow.
+**Design notes** — White background, 4px border, `shadow-lg`. "CONTRACT DETAILS" section header with a `verified` icon. Habit shown as italic bold text. Each opponent shown as an avatar + name row. "VIEW CYCLE DETAILS" is a text link with heavy underline decoration and a forward arrow.
 
-**File** — `app/components/ContractDetailsCard.tsx`
+**File** — `app/components/ResolutionContextCard.tsx`

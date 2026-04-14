@@ -39,6 +39,8 @@ src/main/java/com/ethos/
   service/      - Business logic
   datastore/    - Database access (JDBI only)
   storage/      - FileStorageService interface + implementations
+  push/         - PushNotificationService interface + ExpoPushNotificationService implementation
+  scheduler/    - ScheduledExecutorService setup; cycle transition jobs
   auth/         - SuperTokens JWT verification
 db/migrations/  - dbmate migration files: {timestamp}_{description}.sql
 ```

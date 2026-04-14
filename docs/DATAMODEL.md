@@ -6,6 +6,7 @@ PostgreSQL database. Migrations live in `backend/db/migrations/` — create with
 
 - All primary keys are `UUID DEFAULT gen_random_uuid()` — never auto-increment integers.
 - All timestamps are `TIMESTAMPTZ`.
+- **Timezones (MVP):** All date logic runs in UTC. `DATE` columns (`cycles.start_date`, `cycles.end_date`, `contracts.start_date`) are interpreted as UTC midnight. The background scheduler uses UTC when evaluating cycle transitions. **Future:** add `timezone TEXT NOT NULL DEFAULT 'UTC'` (IANA format, e.g. `'Europe/London'`) to `contracts` and convert cycle date columns to `TIMESTAMPTZ` storing the UTC instant of local midnight.
 - Booleans use `BOOLEAN`, not integers.
 - Prefer `TEXT` with `CHECK` constraints over PostgreSQL enums — easier to extend without migrations.
 - Prefer explicit columns over JSON blobs.
@@ -86,6 +87,7 @@ The top-level accountability agreement. Created in `draft` status during the lob
 - **`created_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 
 Status transitions:
+
 - `draft` → `active`: creator starts contract, ≥2 participants signed, start date reached
 - `draft` → `cancelled`: start date reached with <2 signed participants
 - `active` → `ended`: all remaining participants opt out after a cycle settles
@@ -101,7 +103,7 @@ A user's membership and commitment within a contract. The creator also has a par
 - **`user_id`** `UUID NOT NULL REFERENCES users(id)`
 - **`habit`** `TEXT` — nullable until entered; locked when signed
 - **`frequency`** `INTEGER CHECK (frequency > 0)` — number of habit actions per cycle; nullable until set; locked when signed
-- **`sign_status`** `TEXT NOT NULL DEFAULT 'waiting' CHECK (sign_status IN ('waiting', 'drafting', 'signed'))`
+- **`sign_status`** `TEXT NOT NULL DEFAULT 'waiting' CHECK (sign_status IN ('waiting', 'drafting', 'signed', 'declined', 'removed'))` — `declined`: invitee chose not to join; `removed`: creator kicked them from the lobby. Rows are **never deleted** — set the status instead. All queries counting active participants must filter `WHERE sign_status NOT IN ('declined', 'removed')`.
 - **`opted_out_of_next_cycle`** `BOOLEAN NOT NULL DEFAULT false` — set on last day of a cycle; service excludes this participant when creating the next cycle; never reset (opt-out is permanent removal)
 - **`invited_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 - **`signed_at`** `TIMESTAMPTZ` — nullable until signed
@@ -147,7 +149,9 @@ Indexes: `(cycle_id, participant_id)`.
 
 ### `evidence`
 
-Proof submitted by a participant against a specific habit action. Multiple evidence rows can exist per action (e.g. first attempt rejected, participant resubmits). At least one of `photo_id` or `note` must be present.
+Proof submitted by a participant against a specific habit action. At least one of `photo_id` or `note` must be present.
+
+**MVP constraint:** The service enforces one evidence row per `habit_action_id` — a second submission is rejected if any evidence row already exists for that action. The evidence upload API accepts `habit_action_id` explicitly in the request body — the client passes the specific action ID derived from the participant's incomplete habit actions list; the backend does not auto-assign.
 
 - **`id`** `UUID PK DEFAULT gen_random_uuid()`
 - **`habit_action_id`** `UUID NOT NULL REFERENCES habit_actions(id)`
@@ -177,7 +181,8 @@ An approve/reject cast by a co-participant on a piece of evidence. Voters can ch
 Constraints: `UNIQUE (evidence_id, voter_participant_id)` — one vote per voter per evidence item.
 
 **Evidence status computation:**
-- `eligible_voters` = total signed participants in the contract minus the submitter
+
+- `eligible_voters` = total participants with `sign_status = 'signed'` in the contract, minus the submitter (excludes `declined` and `removed`)
 - `VERIFIED` if `approvals > eligible_voters / 2`
 - `REJECTED` if `rejections > eligible_voters / 2`
 - `PENDING` otherwise
@@ -194,12 +199,13 @@ Records the outcome of a settled cycle. Written once by the resolution service w
 
 - **`id`** `UUID PK DEFAULT gen_random_uuid()`
 - **`cycle_id`** `UUID NOT NULL UNIQUE REFERENCES cycles(id)`
-- **`winner_ids`** `UUID[] NOT NULL DEFAULT '{}'` — user IDs of winners; empty = no winners (everyone tied or succeeded)
-- **`loser_ids`** `UUID[] NOT NULL DEFAULT '{}'` — user IDs of losers; empty = nobody owes anything
+- **`winner_ids`** `UUID[] NOT NULL DEFAULT '{}'` — **user IDs** (not participant IDs) of winners; empty = no winners (everyone tied or succeeded). Using `user_id` rather than `participant_id` keeps historical resolutions stable if participant membership changes between cycles in the future.
+- **`loser_ids`** `UUID[] NOT NULL DEFAULT '{}'` — **user IDs** of losers; empty = nobody owes anything
 - **`forfeit`** `TEXT NOT NULL` — snapshot of `contracts.forfeit` at resolution time; self-contained record
 - **`created_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 
 Outcome states:
+
 - `winner_ids` non-empty, `loser_ids` non-empty — losers owe forfeit to winners
 - `winner_ids` = all participants, `loser_ids` empty — everyone succeeded; nobody owes
 - Both empty — exact tie; nobody owes
@@ -240,9 +246,9 @@ Records each instance of a winner pestering a loser to pay up. Used for rate-lim
 - **`to_user_id`** `UUID NOT NULL REFERENCES users(id)` — the loser being pestered
 - **`sent_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 
-Rate limit check: `WHERE resolution_id = ? AND from_user_id = ? AND sent_at > now() - interval '24 hours'`.
+Rate limit check: `WHERE resolution_id = ? AND from_user_id = ? AND to_user_id = ? AND sent_at > now() - interval '24 hours'` — rate limit is **per winner–loser pair**, not per resolution. A winner can pester each loser independently.
 
-Indexes: `(resolution_id, from_user_id)`.
+Indexes: `(resolution_id, from_user_id, to_user_id)`.
 
 ---
 
@@ -252,7 +258,7 @@ Persistent per-user alert records. Drives the Dashboard Alert Stack and push not
 
 - **`id`** `UUID PK DEFAULT gen_random_uuid()`
 - **`recipient_user_id`** `UUID NOT NULL REFERENCES users(id)`
-- **`type`** `TEXT NOT NULL CHECK (type IN ('evidence_uploaded', 'contract_invited', 'cycle_pending_resolution', 'resolution_loser', 'pester'))`
+- **`type`** `TEXT NOT NULL CHECK (type IN ('evidence_uploaded', 'contract_invited', 'cycle_pending_resolution', 'resolution_loser', 'resolution_winner', 'pester'))`
 - **`entity_id`** `UUID` — polymorphic reference to the relevant row
 - **`entity_type`** `TEXT CHECK (entity_type IN ('evidence', 'contract', 'cycle', 'cycle_resolution', 'pester'))` — identifies which table `entity_id` points to
 - **`read_at`** `TIMESTAMPTZ` — nullable; null = unread
@@ -264,6 +270,7 @@ Type → entity mapping:
 - `contract_invited` / `contract` → the contract the user was invited to
 - `cycle_pending_resolution` / `cycle` → the cycle entering resolution (triggers a "Settle" alert)
 - `resolution_loser` / `cycle_resolution` → the resolution where the user is a loser (triggers a "Pay Up" alert)
+- `resolution_winner` / `cycle_resolution` → the resolution where the user is a winner (triggers a "You're Owed" alert on the Dashboard)
 - `pester` / `pester` → the pester row that triggered it (triggers a "Pay Up" reminder)
 
 Indexes: `(recipient_user_id, read_at)` — for loading the unread alert stack.

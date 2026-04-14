@@ -30,8 +30,8 @@ A confrontational, unavoidable screen informing the loser they owe a forfeit. De
 ### Payout Card
 `PayoutCard` component, `perspective="loser"` — "YOU OWE [WINNER]: [FORFEIT]". Black variant. Large forfeit text, font-black, italic, ALL CAPS.
 
-### Contract Details Card
-`ContractDetailsCard` component — habit summary and winner's name/avatar. "VIEW CYCLE DETAILS" link navigates to `/contract/[contractId]/[cycleNumber]/settled`.
+### Resolution Context Card
+`ResolutionContextCard` component — the current user's habit summary and the winner(s) as an `opponents` array. "VIEW CYCLE DETAILS" link navigates to `/contract/[contractId]/[cycleNumber]/settled`.
 
 ### Winner's Evidence
 Section header "THEIR PROOF" — rubbing it in. Horizontal row of `EvidenceThumbnail` components showing the winner's verified evidence. Max 4 thumbnails; no "view all" needed here.

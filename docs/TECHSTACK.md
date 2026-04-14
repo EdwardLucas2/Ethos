@@ -4,8 +4,8 @@
 
 - **Expo** (React Native, managed workflow) + TypeScript
 - **Expo Router** — file-based navigation (App Router pattern)
-- **Orval** — generates TypeScript types and TanStack Query hooks from the OpenAPI spec
-- **TanStack Query** (`@tanstack/react-query`) — all server state, caching, loading/error handling
+- **Orval** — generates TypeScript types and TanStack Query hooks from the OpenAPI spec; generated files are committed to the repo at `app/src/api/` — only regenerate when handler annotations change
+- **TanStack Query** (`@tanstack/react-query`) — all server state, caching, loading/error handling. **Polling:** screens that require near-real-time updates (contract lobby, active contract overview) use TanStack Query's `refetchInterval: 500` (500ms). No WebSockets.
 - **React Context** — global client state (current user, auth)
 - **expo-secure-store** — secure storage for auth tokens (never AsyncStorage)
 
@@ -14,6 +14,8 @@
 - **Java 25 (LTS) + Javalin + Maven**
 - **SuperTokens Java SDK** — JWT verification on every protected request
 - **javalin-openapi** — generates the OpenAPI spec at compile time from `@OpenApi` annotations; served at `GET /openapi.json`
+- **`ScheduledExecutorService`** (in-process scheduler) — runs every 60 seconds; evaluates cycle transitions (active → pending_resolution, pending_resolution → settled, contract renewal/ending).
+- **`PushNotificationService`** interface — wraps push delivery to the Expo Push API
 
 ## Database
 

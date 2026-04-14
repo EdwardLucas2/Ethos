@@ -99,7 +99,8 @@ At the end of a cycle, once all evidence is resolved (voted on or auto-approved)
 - Only **verified** evidence (majority-approved) counts toward the final tally
 - In the "total failure" scenario, only the bottom-ranked person(s) owe, and only to the top-ranked person(s) — not a cascading debt
 - If the bottom is tied, all tied losers owe. If the top is tied, all tied winners are owed
-- The forfeit is the same label for everyone (e.g., "A Pint") — there's no splitting of monetary amounts
+- **There is one forfeit per cycle, shared collectively** — not one forfeit per loser–winner pair. If 2 people lose and 3 people win, the 2 losers collectively owe the 3 winners one forfeit The settled screen should include a brief in-context explanation when a group distribution is involved
+- The forfeit is always free text (e.g., "A Round", "Dinner") — Ethos does not split or calculate monetary amounts
 
 ## 4. Navigation Structure
 
@@ -130,6 +131,8 @@ Main Flow:
     ├── [tap verification alert] → Evidence Approval
     ├── [tap settle alert] → Contract Overview (Unsettled)
     ├── [tap invite alert] → Challenge Received (Invitee)
+    ├── [tap "you're owed" alert] → You're Owed (Winner)
+    ├── [tap "pay up" alert] → Pay Up (Loser)
     └── [tap FAB "+"] → Contract Builder (Creator)
 
   Contract Overview (Active Cycle)
@@ -164,7 +167,7 @@ Main Flow:
 
 **Purpose:** Create a new Ethos account.
 
-**Entry points:** "Request Access" link on Login screen, or fresh app open with no session.
+**Entry points:** "Sign Up" link on Login screen, or fresh app open with no session.
 
 **User Stories:**
 
@@ -224,7 +227,7 @@ Main Flow:
 |---|---|
 | Submit valid credentials | Home Dashboard |
 | Tap "Sign Up" link | Sign Up screen |
-| Tap "Forgot?" | Password reset flow (MVP: can be email-based simple flow) |
+| Tap "Forgot?" | Password reset email sent; user follows link to `/reset-password` screen |
 
 ### 5.3 Home Dashboard
 
@@ -248,6 +251,8 @@ A stack of high-contrast banners, ordered by urgency:
 - **Verification Needed:** "[Name] uploaded proof. [VERIFY]" — taps through to Evidence Approval
 - **New Invite:** "[Name] challenged you to '[Contract Name]'. [VIEW]" — taps through to Challenge Received
 - **Settle Up:** "Last week's results are in! [SETTLE]" — taps through to Contract Overview (Unsettled)
+- **You're Owed:** "[Name] owes you. [COLLECT]" — taps through to You're Owed screen
+- **Pay Up:** "You owe [Name]. [PAY UP]" — taps through to Pay Up screen
 
 **B. Active Contracts (main list)**
 Vertical list of cards for every contract the user is currently in:
@@ -875,10 +880,38 @@ Each card shows:
 **Features (MVP minimal):**
 
 - Display name
+- Tag (e.g. `edward4f2a`) — read-only, shown so users can share their tag for friend search
 - Email address
 - Logout button
 
 **Note:** This is a placeholder. Future versions may include stats, settings, notification preferences, etc. No mockup exists — design to match the established style.
+
+---
+
+### 5.16 Password Reset
+
+**Purpose:** Allow a user to set a new password after requesting a reset from the Login screen.
+
+**Entry points:** Deep link from the SuperTokens password reset email
+
+**User Stories:**
+
+- "As a user who forgot their password, I want to set a new one and get back into the app."
+
+**Features:**
+
+- New password input
+- Confirm password input
+- "Reset Password" primary CTA — submits the new password via the SuperTokens reset flow
+- On success: confirmation message and link back to Login screen
+
+**States:**
+
+- **Default:** Empty form
+- **Validation error:** Inline error if passwords don't match or don't meet strength requirements
+- **Loading:** Button shows spinner on submit
+- **Success:** "Password updated. You can now log in." with "Go to Login" link
+- **Error:** Invalid or expired token — "This reset link has expired. Request a new one." with link back to Login
 
 ---
 
@@ -893,8 +926,10 @@ Notification triggers:
 - Someone uploads evidence to a contract you're in → "VERIFY" alert
 - You receive a contract invitation → "CHALLENGE" alert
 - A cycle completes and is ready for resolution → "SETTLE" alert
+- A cycle resolves and you are a **winner** → "YOU'RE OWED" alert (navigates to `/owed/[resolutionId]`)
+- A cycle resolves and you are a **loser** → "PAY UP" alert (navigates to `/pay-up/[resolutionId]`)
 - A winner pesters you for a forfeit → "PAY UP" reminder
-- Push notifications for the above (if the user has granted permission)
+- Push notifications for all of the above
 
 ### Auto-Renewal
 
@@ -937,11 +972,6 @@ These are mentioned in the original design materials but explicitly excluded fro
 ## 8. Open Questions
 
 These are edge cases or decisions that may need resolution during development:
-
-1. **Forfeit distribution in groups > 2:** If 3 people win and 2 lose, does each loser owe each winner a full forfeit, or is it split? (Current assumption: each loser owes each winner the forfeit — e.g., 2 losers × 3 winners = 6 forfeits of "A Pint")
-2. **What happens if a participant is removed from the lobby after they've already signed?** Do they get a notification?
-3. **Can a creator cancel a contract that's already active?** Or only before it starts?
-4. **Friend request flow:** How do users find each other? By username, email, phone number?
-5. **What's the minimum evidence for "progress"?** If someone uploads a text-only note saying "I went to the gym", does that count the same as a photo? (Current answer: yes, the group votes on it regardless)
-6. **Opt-out confirmation:** Should other participants be notified when someone opts out of the next cycle?
-7. **Empty contract:** If everyone opts out except one person, does the last person "win" the final cycle by default?
+**What happens if a participant is removed from the lobby after they've already signed?** Do they get a notification?
+**Can a creator cancel a contract that's already active?** Or only before it starts?
+**Opt-out confirmation:** Should other participants be notified when someone opts out of the next cycle?

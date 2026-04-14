@@ -13,6 +13,7 @@ app/
     _layout.tsx                            ← Stack. No tab bar.
     login.tsx                              → /login
     sign-up.tsx                            → /sign-up
+    reset-password.tsx                     → /reset-password  (deep-link target from password reset email)
 
   (app)/
     _layout.tsx                            ← Stack. Auth-protected. No tab bar at this level.
@@ -61,12 +62,15 @@ app/
 - `evidenceId` — `evidence.id` (UUID)
 - `resolutionId` — `cycle_resolutions.id` (UUID)
 
+`/reset-password` receives a SuperTokens password-reset token via deep link query param (handled by the SuperTokens React Native SDK).
+
 ## Navigation flows
 
 ```
 Auth
   /login         → /dashboard  (on success)
   /sign-up       → /dashboard  (on success)
+  /reset-password → /login     (on success — password updated, user redirected to log in)
 
 Dashboard
   tap contract card          → /contract/[contractId]/[cycleNumber]/active

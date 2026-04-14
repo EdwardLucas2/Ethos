@@ -29,6 +29,8 @@ Zero or more `AlertBanner` components stacked with `gap-3`, no horizontal paddin
 - `verify` type — "ALEX UPLOADED PROOF. [VERIFY]" — navigates to `/contract/[contractId]/[cycleNumber]/evidence/[evidenceId]`
 - `challenge` type — "SARAH CHALLENGED YOU. [VIEW]" — navigates to `/contract/[contractId]/join`
 - `settle` type — "LAST WEEK'S RESULTS ARE IN. [SETTLE]" — navigates to `/contract/[contractId]/[cycleNumber]/unsettled`
+- `owed` type — "ALEX OWES YOU. [COLLECT]" — navigates to `/owed/[resolutionId]`
+- `pay-up` type — "YOU OWE ALEX. [PAY UP]" — navigates to `/pay-up/[resolutionId]`
 
 No alert stack section rendered when there are no unread notifications of these types.
 

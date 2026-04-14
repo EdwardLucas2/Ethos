@@ -26,8 +26,8 @@ A victory screen reminding the winner they are owed a forfeit, with tools to pes
 ### Hero Stamp
 `HeroStamp` component, `victory` variant — "YOU'RE OWED", large neon-green stamp, rotated ~−10°, centred. `shadow-lg`.
 
-### Contract Details Card
-`ContractDetailsCard` component — habit summary and loser's name/avatar. "VIEW CYCLE DETAILS" link navigates to `/contract/[contractId]/[cycleNumber]/settled`.
+### Resolution Context Card
+`ResolutionContextCard` component — the current user's habit summary and the loser(s) as an `opponents` array. "VIEW CYCLE DETAILS" link navigates to `/contract/[contractId]/[cycleNumber]/settled`.
 
 ### Payout Card
 `PayoutCard` component, `yellow` variant, `perspective="winner"` — "[LOSER] OWES YOU: [FORFEIT]".
