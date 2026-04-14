@@ -288,6 +288,8 @@ Persistent "+" button to create a new contract. Navigates to Contract Builder (C
 
 **Purpose:** Create a new contract and invite friends. The creator sets the ground rules and makes their own commitment before inviting others.
 
+> **Note:** Sections 5.4 and 5.5 are both lobby screens — they are the same conceptual screen rendered for two different roles. The contract is initialised immediately when the creator lands here (FAB tap → API creates contract → navigate to `/contract/[contractId]/build`), so a `contractId` exists from the start. Invitees land on `/contract/[contractId]/join`. Both screens show the same real-time participant list; the only difference is that the creator can edit ground rules and has the "Start Contract" button.
+
 **Entry points:** FAB on Home Dashboard.
 
 **User Stories:**
