@@ -508,58 +508,58 @@ Returns all unread notifications enriched server-side with the display context n
 
 ```json
 [
-  {
-    "id": "uuid",
-    "type": "evidence_uploaded",
-    "createdAt": "2026-04-15T08:00:00Z",
-    "submitterName": "Alex",
-    "contractId": "uuid",
-    "contractName": "Gym Bros",
-    "cycleNumber": 3,
-    "evidenceId": "uuid"
-  },
-  {
-    "id": "uuid",
-    "type": "contract_invited",
-    "createdAt": "2026-04-15T07:00:00Z",
-    "inviterName": "Alex",
-    "contractId": "uuid",
-    "contractName": "Gym Bros"
-  },
-  {
-    "id": "uuid",
-    "type": "cycle_pending_resolution",
-    "createdAt": "2026-04-14T00:00:00Z",
-    "contractId": "uuid",
-    "contractName": "Gym Bros",
-    "cycleNumber": 2
-  },
-  {
-    "id": "uuid",
-    "type": "resolution_winner",
-    "createdAt": "2026-04-13T12:00:00Z",
-    "resolutionId": "uuid",
-    "contractName": "Gym Bros",
-    "forfeit": "A pint",
-    "loserNames": ["Bob"]
-  },
-  {
-    "id": "uuid",
-    "type": "resolution_loser",
-    "createdAt": "2026-04-13T12:00:00Z",
-    "resolutionId": "uuid",
-    "contractName": "Gym Bros",
-    "forfeit": "A pint",
-    "winnerNames": ["Alex", "Sarah"]
-  },
-  {
-    "id": "uuid",
-    "type": "pester",
-    "createdAt": "2026-04-15T09:00:00Z",
-    "resolutionId": "uuid",
-    "fromName": "Alex",
-    "forfeit": "A pint"
-  }
+    {
+        "id": "uuid",
+        "type": "evidence_uploaded",
+        "createdAt": "2026-04-15T08:00:00Z",
+        "submitterName": "Alex",
+        "contractId": "uuid",
+        "contractName": "Gym Bros",
+        "cycleNumber": 3,
+        "evidenceId": "uuid"
+    },
+    {
+        "id": "uuid",
+        "type": "contract_invited",
+        "createdAt": "2026-04-15T07:00:00Z",
+        "inviterName": "Alex",
+        "contractId": "uuid",
+        "contractName": "Gym Bros"
+    },
+    {
+        "id": "uuid",
+        "type": "cycle_pending_resolution",
+        "createdAt": "2026-04-14T00:00:00Z",
+        "contractId": "uuid",
+        "contractName": "Gym Bros",
+        "cycleNumber": 2
+    },
+    {
+        "id": "uuid",
+        "type": "resolution_winner",
+        "createdAt": "2026-04-13T12:00:00Z",
+        "resolutionId": "uuid",
+        "contractName": "Gym Bros",
+        "forfeit": "A pint",
+        "loserNames": ["Bob"]
+    },
+    {
+        "id": "uuid",
+        "type": "resolution_loser",
+        "createdAt": "2026-04-13T12:00:00Z",
+        "resolutionId": "uuid",
+        "contractName": "Gym Bros",
+        "forfeit": "A pint",
+        "winnerNames": ["Alex", "Sarah"]
+    },
+    {
+        "id": "uuid",
+        "type": "pester",
+        "createdAt": "2026-04-15T09:00:00Z",
+        "resolutionId": "uuid",
+        "fromName": "Alex",
+        "forfeit": "A pint"
+    }
 ]
 ```
 
@@ -575,23 +575,23 @@ Contracts where `status = 'active'` and the caller is a `signed` participant. Ca
 
 ```json
 [
-  {
-    "contractId": "uuid",
-    "name": "Gym Bros",
-    "cycleNumber": 3,
-    "startDate": "2026-04-14",
-    "endDate": "2026-04-20",
-    "myProgress": {
-      "completed": 2,
-      "pending": 0,
-      "total": 3
-    },
-    "hasUnreviewedEvidence": true,
-    "participants": [
-      { "displayName": "Edward", "avatarUrl": null },
-      { "displayName": "Alex", "avatarUrl": null }
-    ]
-  }
+    {
+        "contractId": "uuid",
+        "name": "Gym Bros",
+        "cycleNumber": 3,
+        "startDate": "2026-04-14",
+        "endDate": "2026-04-20",
+        "myProgress": {
+            "completed": 2,
+            "pending": 0,
+            "total": 3
+        },
+        "hasUnreviewedEvidence": true,
+        "participants": [
+            { "displayName": "Edward", "avatarUrl": null },
+            { "displayName": "Alex", "avatarUrl": null }
+        ]
+    }
 ]
 ```
 
@@ -613,16 +613,16 @@ Contracts where the caller is a `signed` participant and a cycle has `status = '
 
 ```json
 [
-  {
-    "contractId": "uuid",
-    "contractName": "Gym Bros",
-    "cycleNumber": 2,
-    "unreviewedEvidenceCount": 3,
-    "participants": [
-      { "displayName": "Edward", "completed": 3, "total": 3 },
-      { "displayName": "Alex", "completed": 1, "total": 3 }
-    ]
-  }
+    {
+        "contractId": "uuid",
+        "contractName": "Gym Bros",
+        "cycleNumber": 2,
+        "unreviewedEvidenceCount": 3,
+        "participants": [
+            { "displayName": "Edward", "completed": 3, "total": 3 },
+            { "displayName": "Alex", "completed": 1, "total": 3 }
+        ]
+    }
 ]
 ```
 
@@ -633,7 +633,30 @@ Contracts where the caller is a `signed` participant and a cycle has `status = '
 
 ## Cycles
 
-_To be designed._
+### `GET /contracts/{contractId}/cycles/{cycleNumber}` — Get cycle
+
+Used to establish dates, status, and (when settled) the resolution to fetch next.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+{
+    "cycleNumber": 1,
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-07",
+    "status": "active",
+    "resolutionId": null
+}
+```
+
+`resolutionId` is non-null only when `status = "settled"`.
+
+**Errors:**
+
+- `403` — caller is not the creator or a non-removed participant
+- `404` — contract or cycle not found
 
 ---
 
