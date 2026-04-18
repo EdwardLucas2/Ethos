@@ -662,7 +662,144 @@ Used to establish dates, status, and (when settled) the resolution to fetch next
 
 ## Evidence
 
-_To be designed._
+### `GET /contracts/{contractId}/cycles/{cycleNumber}/participants/{participantId}/habit-actions` — Get participant habit actions
+
+Returns a participant's habit action slots for the cycle, each with their evidence nested. Used by the upload screen (to select which slot to fill) and for per-participant progress and timeline views.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+    {
+        "id": "uuid",
+        "actionNumber": 1,
+        "evidence": {
+            "id": "uuid",
+            "photoUrl": null,
+            "note": "Went to the gym!",
+            "submittedAt": "2026-05-03T08:00:00Z",
+            "status": "VERIFIED"
+        }
+    },
+    {
+        "id": "uuid",
+        "actionNumber": 2,
+        "evidence": null
+    },
+    {
+        "id": "uuid",
+        "actionNumber": 3,
+        "evidence": null
+    }
+]
+```
+
+**Errors:**
+
+- `403` — caller is not a participant
+- `404` — contract, cycle, or participant not found
+
+---
+
+### `GET /contracts/{contractId}/cycles/{cycleNumber}/evidence` — List cycle evidence
+
+All submitted evidence across all participants. Used by the active screen (per-participant progress, `hasUnreviewedEvidence`), unsettled screen, and evidence review feed.
+
+- `hasMyVote: null` — caller's own evidence (cannot vote)
+- `hasMyVote: false` — caller has not yet voted
+- `hasMyVote: true` — caller has voted
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+    {
+        "id": "uuid",
+        "participantId": "uuid",
+        "displayName": "Alex",
+        "avatarUrl": null,
+        "actionNumber": 2,
+        "photoUrl": null,
+        "note": "Went to the gym!",
+        "submittedAt": "2026-05-03T08:00:00Z",
+        "status": "PENDING",
+        "hasMyVote": false
+    }
+]
+```
+
+**Errors:**
+
+- `403` — caller is not a participant
+- `404` — contract or cycle not found
+
+---
+
+### `POST /contracts/{contractId}/cycles/{cycleNumber}/evidence` — Submit evidence
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{
+    "habitActionId": "uuid",
+    "note": "Went to the gym!",
+    "photoId": "uuid"
+}
+```
+
+At least one of `note` or `photoId` required. `photoId` is a UUID returned from a prior file upload (presigned URL flow — TBD).
+
+**Response `201`:** the created evidence item (same shape as list item above, with `hasMyVote: null`).
+
+**Errors:**
+
+- `400` — neither `note` nor `photoId` provided, or `habitActionId` does not belong to the caller
+- `409` — evidence already submitted for this action, or cycle is not `active`
+
+---
+
+### `GET /contracts/{contractId}/cycles/{cycleNumber}/evidence/{evidenceId}` — Get evidence detail
+
+Used by the evidence detail screen. Includes full vote breakdown.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+{
+    "id": "uuid",
+    "participantId": "uuid",
+    "displayName": "Alex",
+    "avatarUrl": null,
+    "actionNumber": 2,
+    "photoUrl": null,
+    "note": "Went to the gym!",
+    "submittedAt": "2026-05-03T08:00:00Z",
+    "status": "PENDING",
+    "hasMyVote": false,
+    "votes": [
+        {
+            "voterParticipantId": "uuid",
+            "displayName": "Edward",
+            "avatarUrl": null,
+            "decision": "approve",
+            "updatedAt": "2026-05-03T09:00:00Z"
+        }
+    ]
+}
+```
+
+**Errors:**
+
+- `403` — caller is not a participant
+- `404` — evidence not found
 
 ---
 
