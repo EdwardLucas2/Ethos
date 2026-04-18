@@ -954,4 +954,36 @@ Winner pesters a specific loser to pay up. Rate-limited to once per winner–los
 
 ## Device Tokens
 
-_To be designed._
+Expo push tokens are stored per-device so the backend can fan out push notifications to all of a user's devices. One user may have multiple tokens. When Expo returns `DeviceNotRegistered` for a token, the backend deletes that row. `last_seen_at` is updated on each registration and used to prune stale tokens.
+
+### `POST /device-tokens` — Register device token
+
+Upsert semantics — if the token already exists, updates `last_seen_at`. Safe to call on every app open.
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{ "token": "ExponentPushToken[xxx]", "platform": "ios" }
+```
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `400` — invalid token format or platform value
+
+---
+
+### `DELETE /device-tokens/{token}` — Unregister device token
+
+Path param is the token string (the app knows its token, not the DB UUID). Called on logout.
+
+**Auth:** `requireAuth`
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `404` — token not found
