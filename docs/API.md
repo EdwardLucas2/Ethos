@@ -404,9 +404,9 @@ Sets `sign_status = 'removed'`. Row is never deleted.
 
 ---
 
-### `PATCH /contracts/{contractId}/participants/me` — Update own commitment
+### `PATCH /contracts/{contractId}/participants/me` — Update commitment
 
-Used by both creator and invitees. Draft status only.
+Updates `habit` and/or `frequency`. Used by both creator and invitees. Draft status only. Transitions `sign_status` from `waiting` → `drafting` implicitly if not already there.
 
 **Auth:** `requireAuth`
 
@@ -415,26 +415,65 @@ Used by both creator and invitees. Draft status only.
 ```json
 {
     "habit": "Go to the gym",
-    "frequency": 3,
-    "signStatus": "signed"
+    "frequency": 3
 }
 ```
-
-Valid `signStatus` transitions:
-
-| From       | To         | Condition                                                                  |
-| ---------- | ---------- | -------------------------------------------------------------------------- |
-| `waiting`  | `drafting` | Implicit when `habit` or `frequency` updated without explicit `signStatus` |
-| `drafting` | `signed`   | `habit` and `frequency` must both be set                                   |
-| `signed`   | `drafting` | Unsigns to allow editing                                                   |
-| any        | `declined` | Declines invitation                                                        |
 
 **Response `200`:** updated participant (same shape as in GET contract response).
 
 **Errors:**
 
-- `400` — invalid transition, or `signStatus: "signed"` with missing `habit` or `frequency`
+- `400` — body is empty
 - `409` — contract not in `draft` status
+
+---
+
+### `POST /contracts/{contractId}/participants/me/sign` — Sign contract
+
+Locks the caller's commitment. Requires `habit` and `frequency` to already be set.
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Response `200`:** updated participant.
+
+**Errors:**
+
+- `400` — `habit` or `frequency` not set
+- `409` — contract not in `draft` status, or already `signed`
+
+---
+
+### `POST /contracts/{contractId}/participants/me/unsign` — Unsign contract
+
+Reverts `signed` → `drafting` to allow editing commitment.
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Response `200`:** updated participant.
+
+**Errors:**
+
+- `409` — not currently `signed`, or contract not in `draft` status
+
+---
+
+### `POST /contracts/{contractId}/participants/me/decline` — Decline invitation
+
+Sets `sign_status = 'declined'`. Valid from any non-`declined` status.
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `409` — already `declined`, or contract not in `draft` status
 
 ---
 
