@@ -494,7 +494,140 @@ Permanently sets `opted_out_of_next_cycle = true`. Only valid on the last day of
 
 ## Dashboard
 
-_To be designed._
+The dashboard loads with two parallel requests: `GET /contracts/active` and `GET /contracts/pending-resolution`. Alerts are fetched separately via `GET /notifications`. All three run in parallel on app open.
+
+---
+
+### `GET /notifications`
+
+Returns all unread notifications enriched server-side with the display context needed to render each alert. Frontend handles ordering. Only `read_at IS NULL` rows returned.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+  {
+    "id": "uuid",
+    "type": "evidence_uploaded",
+    "createdAt": "2026-04-15T08:00:00Z",
+    "submitterName": "Alex",
+    "contractId": "uuid",
+    "contractName": "Gym Bros",
+    "cycleNumber": 3,
+    "evidenceId": "uuid"
+  },
+  {
+    "id": "uuid",
+    "type": "contract_invited",
+    "createdAt": "2026-04-15T07:00:00Z",
+    "inviterName": "Alex",
+    "contractId": "uuid",
+    "contractName": "Gym Bros"
+  },
+  {
+    "id": "uuid",
+    "type": "cycle_pending_resolution",
+    "createdAt": "2026-04-14T00:00:00Z",
+    "contractId": "uuid",
+    "contractName": "Gym Bros",
+    "cycleNumber": 2
+  },
+  {
+    "id": "uuid",
+    "type": "resolution_winner",
+    "createdAt": "2026-04-13T12:00:00Z",
+    "resolutionId": "uuid",
+    "contractName": "Gym Bros",
+    "forfeit": "A pint",
+    "loserNames": ["Bob"]
+  },
+  {
+    "id": "uuid",
+    "type": "resolution_loser",
+    "createdAt": "2026-04-13T12:00:00Z",
+    "resolutionId": "uuid",
+    "contractName": "Gym Bros",
+    "forfeit": "A pint",
+    "winnerNames": ["Alex", "Sarah"]
+  },
+  {
+    "id": "uuid",
+    "type": "pester",
+    "createdAt": "2026-04-15T09:00:00Z",
+    "resolutionId": "uuid",
+    "fromName": "Alex",
+    "forfeit": "A pint"
+  }
+]
+```
+
+---
+
+### `GET /contracts/active`
+
+Contracts where `status = 'active'` and the caller is a `signed` participant. Carries all data needed for the dashboard contract card.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+  {
+    "contractId": "uuid",
+    "name": "Gym Bros",
+    "cycleNumber": 3,
+    "startDate": "2026-04-14",
+    "endDate": "2026-04-20",
+    "myProgress": {
+      "completed": 2,
+      "pending": 0,
+      "total": 3
+    },
+    "hasUnreviewedEvidence": true,
+    "participants": [
+      { "displayName": "Edward", "avatarUrl": null },
+      { "displayName": "Alex", "avatarUrl": null }
+    ]
+  }
+]
+```
+
+- `completed` — habit actions with VERIFIED evidence (majority approved)
+- `pending` — habit actions with PENDING evidence (submitted, not yet resolved)
+- `total` — caller's `frequency` for this cycle
+- `hasUnreviewedEvidence` — `true` if any co-participant has evidence the caller hasn't voted on; drives the "REVIEW [NAME]'S PROOF" CTA
+- `participants` — all `signed` participants, for the avatar cluster on the card
+
+---
+
+### `GET /contracts/pending-resolution`
+
+Contracts where the caller is a `signed` participant and a cycle has `status = 'pending_resolution'`. A contract can appear here and in `GET /contracts/active` simultaneously during the overlap period — they represent different cycles.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+  {
+    "contractId": "uuid",
+    "contractName": "Gym Bros",
+    "cycleNumber": 2,
+    "unreviewedEvidenceCount": 3,
+    "participants": [
+      { "displayName": "Edward", "completed": 3, "total": 3 },
+      { "displayName": "Alex", "completed": 1, "total": 3 }
+    ]
+  }
+]
+```
+
+- `unreviewedEvidenceCount` — evidence items in this cycle the caller hasn't voted on; drives the "X reviews needed" label
+- `participants` — final verified counts for the progress summary; no `pending` since evidence submission is locked in `pending_resolution`
 
 ---
 
