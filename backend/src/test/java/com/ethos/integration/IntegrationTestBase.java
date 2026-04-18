@@ -30,6 +30,10 @@ public abstract class IntegrationTestBase {
     @SuppressWarnings("resource")
     private static final PostgreSQLContainer<?> POSTGRES;
 
+    // Held for the JVM lifetime; closed by HikariCP's own shutdown hook.
+    @SuppressWarnings("resource")
+    private static final HikariDataSource DATA_SOURCE;
+
     /** Shared Jdbi instance. Available to all subclasses. */
     protected static final Jdbi JDBI;
 
@@ -45,7 +49,8 @@ public abstract class IntegrationTestBase {
         config.setUsername(POSTGRES.getUsername());
         config.setPassword(POSTGRES.getPassword());
 
-        JDBI = Jdbi.create(new HikariDataSource(config));
+        DATA_SOURCE = new HikariDataSource(config);
+        JDBI = Jdbi.create(DATA_SOURCE);
         JDBI.installPlugin(new SqlObjectPlugin());
 
         applyMigrations();
