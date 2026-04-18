@@ -838,7 +838,78 @@ Upsert semantics — voter can change their decision. Voting is allowed when cyc
 
 ## Resolutions
 
-_To be designed._
+### `GET /resolutions/{resolutionId}` — Get resolution
+
+Used by the settled cycle screen, pay-up screen, and owed screen. `contractName` is included because pay-up and owed screens can be reached directly from the dashboard without contract data in cache. Client determines its own role by checking its `userId` against `winners` and `losers`.
+
+Empty `winners` and `losers` = everyone succeeded or exact tie — nobody owes anything.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+{
+    "id": "uuid",
+    "contractId": "uuid",
+    "contractName": "Gym Bros",
+    "cycleNumber": 2,
+    "forfeit": "A pint",
+    "winners": [
+        {
+            "userId": "uuid",
+            "displayName": "Edward",
+            "avatarUrl": null,
+            "settledAt": null
+        }
+    ],
+    "losers": [
+        {
+            "userId": "uuid",
+            "displayName": "Alex",
+            "avatarUrl": null,
+            "acknowledgedAt": null
+        }
+    ]
+}
+```
+
+**Errors:**
+
+- `403` — caller is not a winner or loser in this resolution
+- `404` — resolution not found
+
+---
+
+### `POST /resolutions/{resolutionId}/acknowledge` — Acknowledge loss
+
+Loser taps "I Know". Sets `acknowledged_at` on the caller's `resolution_acknowledgments` row.
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `400` — caller is not a loser in this resolution, or already acknowledged
+
+---
+
+### `POST /resolutions/{resolutionId}/settle` — Mark as settled
+
+Winner taps "Mark as Settled". Sets `settled_at` on the caller's `resolution_acknowledgments` row.
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `400` — caller is not a winner in this resolution, or already settled
 
 ---
 
