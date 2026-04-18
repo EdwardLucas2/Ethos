@@ -59,8 +59,7 @@ public abstract class IntegrationTestBase {
     private static void applyMigrations() {
         var migrationsDir = Paths.get("db/migrations");
         try (var stream = Files.list(migrationsDir)) {
-            var migrationFiles = stream
-                    .filter(p -> p.toString().endsWith(".sql"))
+            var migrationFiles = stream.filter(p -> p.toString().endsWith(".sql"))
                     .sorted(Comparator.comparing(Path::getFileName))
                     .collect(Collectors.toList());
 
@@ -102,7 +101,8 @@ public abstract class IntegrationTestBase {
     @BeforeEach
     void resetDatabase() {
         JDBI.useHandle(h -> {
-            var tables = h.createQuery("""
+            var tables = h.createQuery(
+                            """
                             SELECT table_name
                             FROM information_schema.tables
                             WHERE table_schema = 'public' AND table_type = 'BASE TABLE'

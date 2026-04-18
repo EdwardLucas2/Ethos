@@ -37,8 +37,7 @@ public final class DbInvariantChecker {
         violations.addAll(checkNoCycleNumberGaps());
 
         if (!violations.isEmpty()) {
-            Assertions.fail("Data invariant violations [" + context + "]:\n  - "
-                    + String.join("\n  - ", violations));
+            Assertions.fail("Data invariant violations [" + context + "]:\n  - " + String.join("\n  - ", violations));
         }
     }
 
@@ -47,7 +46,9 @@ public final class DbInvariantChecker {
      * participants.frequency. Catches over- or under-creation during cycle start.
      */
     private List<String> checkHabitActionCounts() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT ha.cycle_id, ha.participant_id, p.frequency, COUNT(*) AS actual
                         FROM habit_actions ha
                         JOIN participants p ON p.id = ha.participant_id
@@ -58,8 +59,11 @@ public final class DbInvariantChecker {
                 .list()
                 .stream()
                 .map(row -> "habit_actions count mismatch: participant=%s cycle=%s expected=%s actual=%s"
-                        .formatted(row.get("participant_id"), row.get("cycle_id"),
-                                row.get("frequency"), row.get("actual")))
+                        .formatted(
+                                row.get("participant_id"),
+                                row.get("cycle_id"),
+                                row.get("frequency"),
+                                row.get("actual")))
                 .toList());
     }
 
@@ -68,7 +72,9 @@ public final class DbInvariantChecker {
      * Active participant queries must filter these statuses; this catches missing filters.
      */
     private List<String> checkNoActionsForNonSignedParticipants() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT DISTINCT ha.participant_id, p.sign_status
                         FROM habit_actions ha
                         JOIN participants p ON p.id = ha.participant_id
@@ -87,7 +93,9 @@ public final class DbInvariantChecker {
      * unique constraint. A second submission must be rejected, not inserted.
      */
     private List<String> checkOneEvidencePerHabitAction() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT habit_action_id, COUNT(*) AS evidence_count
                         FROM evidence
                         GROUP BY habit_action_id
@@ -107,7 +115,9 @@ public final class DbInvariantChecker {
      * cross-contract membership.
      */
     private List<String> checkVotersInSameContract() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT DISTINCT v.id AS vote_id, v.voter_participant_id, e.id AS evidence_id
                         FROM votes v
                         JOIN evidence e ON e.id = v.evidence_id
@@ -120,8 +130,7 @@ public final class DbInvariantChecker {
                 .list()
                 .stream()
                 .map(row -> "voter from different contract: vote=%s voter_participant=%s evidence=%s"
-                        .formatted(row.get("vote_id"), row.get("voter_participant_id"),
-                                row.get("evidence_id")))
+                        .formatted(row.get("vote_id"), row.get("voter_participant_id"), row.get("evidence_id")))
                 .toList());
     }
 
@@ -130,7 +139,9 @@ public final class DbInvariantChecker {
      * constraint prevents duplicates but not absence.
      */
     private List<String> checkSettledCyclesHaveResolution() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT cy.id AS cycle_id
                         FROM cycles cy
                         LEFT JOIN cycle_resolutions cr ON cr.cycle_id = cy.id
@@ -148,7 +159,9 @@ public final class DbInvariantChecker {
      * resolution service writing a row before the cycle status transition completes.
      */
     private List<String> checkNoResolutionForUnsettledCycles() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT cr.id AS resolution_id, cr.cycle_id, cy.status
                         FROM cycle_resolutions cr
                         JOIN cycles cy ON cy.id = cr.cycle_id
@@ -167,7 +180,9 @@ public final class DbInvariantChecker {
      * linked resolution. No FK enforces this — membership is stored as a UUID array.
      */
     private List<String> checkAcknowledgmentUsersInResolution() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT ra.id, ra.resolution_id, ra.user_id
                         FROM resolution_acknowledgments ra
                         JOIN cycle_resolutions cr ON cr.id = ra.resolution_id
@@ -186,7 +201,9 @@ public final class DbInvariantChecker {
      * linked resolution. Only winners can pester and only losers can be pestered.
      */
     private List<String> checkPestersAreWinnerToLoser() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT pe.id AS pester_id, pe.from_user_id, pe.to_user_id, pe.resolution_id
                         FROM pesters pe
                         JOIN cycle_resolutions cr ON cr.id = pe.resolution_id
@@ -197,8 +214,7 @@ public final class DbInvariantChecker {
                 .list()
                 .stream()
                 .map(row -> "invalid pester (sender not winner or recipient not loser):"
-                        + " pester=%s resolution=%s".formatted(row.get("pester_id"),
-                                row.get("resolution_id")))
+                        + " pester=%s resolution=%s".formatted(row.get("pester_id"), row.get("resolution_id")))
                 .toList());
     }
 
@@ -207,7 +223,9 @@ public final class DbInvariantChecker {
      * COUNT(*). A gap means the scheduler skipped or deleted a cycle.
      */
     private List<String> checkNoCycleNumberGaps() {
-        return jdbi.withHandle(h -> h.createQuery("""
+        return jdbi.withHandle(h -> h
+                .createQuery(
+                        """
                         SELECT contract_id, MAX(cycle_number) AS max_num, COUNT(*) AS total
                         FROM cycles
                         GROUP BY contract_id
