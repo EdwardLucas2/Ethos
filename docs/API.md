@@ -938,7 +938,17 @@ Winner pesters a specific loser to pay up. Rate-limited to once per winner–los
 
 ## Notifications
 
-_To be designed._
+### `POST /notifications/{notificationId}/read` — Mark notification read
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `404` — notification not found or does not belong to the caller
 
 ---
 
