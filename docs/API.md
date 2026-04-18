@@ -249,6 +249,7 @@ Polled by both lobby screens to reflect real-time changes.
     "period": "weekly",
     "startDate": "2026-05-01",
     "status": "draft",
+    "currentCycleNumber": null,
     "creatorId": "uuid",
     "createdAt": "2026-04-15T10:00:00Z",
     "participants": [
@@ -269,7 +270,9 @@ Polled by both lobby screens to reflect real-time changes.
 
 `participants` excludes `removed` rows. Includes `waiting`, `drafting`, `signed`, and `declined` (so the creator can see who declined in the lobby).
 
-Caller must be the creator or a non-removed participant.
+`currentCycleNumber` is `null` when `status` is `draft`, `cancelled`, or `ended`; set to the current active cycle's sequence number when `status` is `active`.
+
+Caller must be the creator or a participant whose own `sign_status` is not in `('declined', 'removed')`.
 
 **Errors:**
 
@@ -280,7 +283,7 @@ Caller must be the creator or a non-removed participant.
 
 ### `PATCH /contracts/{contractId}` — Update ground rules
 
-Creator only. Any status except `cancelled` or `ended`. All fields optional; at least one required.
+Creator only. Draft status only. All fields optional; at least one required.
 
 **Auth:** `requireAuth`
 
@@ -300,7 +303,7 @@ Creator only. Any status except `cancelled` or `ended`. All fields optional; at 
 **Errors:**
 
 - `403` — not the creator
-- `409` — contract is `cancelled` or `ended`
+- `409` — contract is not in `draft` status
 
 ---
 
@@ -379,9 +382,8 @@ Creator only. Draft status only. Creates a participant row (`sign_status = 'wait
 
 **Errors:**
 
-- `400` — user already a participant (any status, including `declined`)
 - `403` — not the creator
-- `409` — contract not in `draft` status, or already at 10 participants
+- `409` — user already a participant (any status, including `declined`), contract not in `draft` status, or already at 10 participants
 
 ---
 
@@ -424,6 +426,7 @@ Updates `habit` and/or `frequency`. Used by both creator and invitees. Draft sta
 **Errors:**
 
 - `400` — body is empty
+- `403` — caller is not a participant in this contract
 - `409` — contract not in `draft` status
 
 ---
@@ -473,6 +476,7 @@ Sets `sign_status = 'declined'`. Valid from any non-`declined` status.
 
 **Errors:**
 
+- `400` — caller is the contract creator (use `DELETE /contracts/{contractId}` to cancel a draft contract)
 - `409` — already `declined`, or contract not in `draft` status
 
 ---
@@ -494,7 +498,7 @@ Permanently sets `opted_out_of_next_cycle = true`. Only valid on the last day of
 
 ## Dashboard
 
-The dashboard loads with two parallel requests: `GET /contracts/active` and `GET /contracts/pending-resolution`. Alerts are fetched separately via `GET /notifications`. All three run in parallel on app open.
+The dashboard loads with two parallel requests: `GET /contracts/me/active` and `GET /contracts/me/pending-resolution`. Alerts are fetched separately via `GET /notifications`. All three run in parallel on app open.
 
 ---
 
@@ -565,7 +569,7 @@ Returns all unread notifications enriched server-side with the display context n
 
 ---
 
-### `GET /contracts/active`
+### `GET /contracts/me/active`
 
 Contracts where `status = 'active'` and the caller is a `signed` participant. Carries all data needed for the dashboard contract card.
 
@@ -586,26 +590,36 @@ Contracts where `status = 'active'` and the caller is a `signed` participant. Ca
             "pending": 0,
             "total": 3
         },
-        "hasUnreviewedEvidence": true,
+        "unreviewedEvidenceCount": 2,
         "participants": [
-            { "displayName": "Edward", "avatarUrl": null },
-            { "displayName": "Alex", "avatarUrl": null }
+            {
+                "displayName": "Edward",
+                "avatarUrl": null,
+                "completed": 2,
+                "pending": 0,
+                "total": 3
+            },
+            {
+                "displayName": "Alex",
+                "avatarUrl": null,
+                "completed": 1,
+                "pending": 1,
+                "total": 3
+            }
         ]
     }
 ]
 ```
 
-- `completed` — habit actions with VERIFIED evidence (majority approved)
-- `pending` — habit actions with PENDING evidence (submitted, not yet resolved)
-- `total` — caller's `frequency` for this cycle
-- `hasUnreviewedEvidence` — `true` if any co-participant has evidence the caller hasn't voted on; drives the "REVIEW [NAME]'S PROOF" CTA
-- `participants` — all `signed` participants, for the avatar cluster on the card
+- `completed` / `pending` / `total` in `myProgress` — caller's verified, pending, and total habit actions for this cycle
+- `unreviewedEvidenceCount` — number of co-participant evidence items the caller hasn't voted on yet; drives the "REVIEW [NAME]'S PROOF" CTA and badge count
+- `participants` — all `signed` participants; includes `completed`/`pending`/`total` for rendering per-participant progress bars on the dashboard card
 
 ---
 
-### `GET /contracts/pending-resolution`
+### `GET /contracts/me/pending-resolution`
 
-Contracts where the caller is a `signed` participant and a cycle has `status = 'pending_resolution'`. A contract can appear here and in `GET /contracts/active` simultaneously during the overlap period — they represent different cycles.
+Contracts where the caller is a `signed` participant and a cycle has `status = 'pending_resolution'`. A contract can appear here and in `GET /contracts/me/active` simultaneously during the overlap period — they represent different cycles.
 
 **Auth:** `requireAuth`
 
@@ -655,7 +669,7 @@ Used to establish dates, status, and (when settled) the resolution to fetch next
 
 **Errors:**
 
-- `403` — caller is not the creator or a non-removed participant
+- `403` — caller is not the creator or a participant whose `sign_status` is not in `('declined', 'removed')`
 - `404` — contract or cycle not found
 
 ---
@@ -705,7 +719,7 @@ Returns a participant's habit action slots for the cycle, each with their eviden
 
 ### `GET /contracts/{contractId}/cycles/{cycleNumber}/evidence` — List cycle evidence
 
-All submitted evidence across all participants. Used by the active screen (per-participant progress, `hasUnreviewedEvidence`), unsettled screen, and evidence review feed.
+All submitted evidence across all participants. Used by the active screen (per-participant progress, `unreviewedEvidenceCount`), unsettled screen, and evidence review feed.
 
 - `hasMyVote: null` — caller's own evidence (cannot vote)
 - `hasMyVote: false` — caller has not yet voted
@@ -840,9 +854,11 @@ Upsert semantics — voter can change their decision. Voting is allowed when cyc
 
 ### `GET /resolutions/{resolutionId}` — Get resolution
 
-Used by the settled cycle screen, pay-up screen, and owed screen. `contractName` is included because pay-up and owed screens can be reached directly from the dashboard without contract data in cache. Client determines its own role by checking its `userId` against `winners` and `losers`.
+Used by the settled cycle screen, pay-up screen, and owed screen. `contractName` is included because pay-up and owed screens can be reached directly from the dashboard without contract data in cache.
 
-Empty `winners` and `losers` = everyone succeeded or exact tie — nobody owes anything.
+`participants` carries each participant's final verified count, habit, and frequency — sufficient to render the Contract Settled leaderboard without an additional evidence call.
+
+Client determines its own role by checking its `userId` against `winners` and `losers`. Empty `winners` and `losers` = everyone succeeded or exact tie — nobody owes anything.
 
 **Auth:** `requireAuth`
 
@@ -870,13 +886,31 @@ Empty `winners` and `losers` = everyone succeeded or exact tie — nobody owes a
             "avatarUrl": null,
             "acknowledgedAt": null
         }
+    ],
+    "participants": [
+        {
+            "userId": "uuid",
+            "displayName": "Edward",
+            "avatarUrl": null,
+            "habit": "Go to the gym",
+            "frequency": 3,
+            "verified": 3
+        },
+        {
+            "userId": "uuid",
+            "displayName": "Alex",
+            "avatarUrl": null,
+            "habit": "Cold plunge",
+            "frequency": 3,
+            "verified": 1
+        }
     ]
 }
 ```
 
 **Errors:**
 
-- `403` — caller is not a winner or loser in this resolution
+- `403` — caller was not a participant in the resolved cycle
 - `404` — resolution not found
 
 ---
@@ -933,6 +967,28 @@ Winner pesters a specific loser to pay up. Rate-limited to once per winner–los
 
 - `400` — caller is not a winner in this resolution, or `toUserId` is not a loser
 - `409` — already pestered this loser within the last 24 hours
+
+---
+
+## Files
+
+### `POST /files/upload` — Upload a file
+
+Uploads a binary image and returns a `photoId` for use in `POST …/evidence`. The backend streams the file directly to `FileStorageService` — in local dev this writes to `./data/uploads/` and the file is served via `GET /files/{key}`; in production it writes to Cloudflare R2. The `photoId` UUID is generated by the service and the storage key is `evidence/{photoId}`.
+
+**Auth:** `requireAuth`
+
+**Request:** `multipart/form-data`
+
+**Response `201`:**
+
+```json
+{ "photoId": "3fa85f64-..." }
+```
+
+**Errors:**
+
+- `400` — file field missing, content type is not `image/jpeg` or `image/png`, or file exceeds 10 MB
 
 ---
 

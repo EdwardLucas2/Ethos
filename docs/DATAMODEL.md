@@ -199,16 +199,15 @@ Records the outcome of a settled cycle. Written once by the resolution service w
 
 - **`id`** `UUID PK DEFAULT gen_random_uuid()`
 - **`cycle_id`** `UUID NOT NULL UNIQUE REFERENCES cycles(id)`
-- **`winner_ids`** `UUID[] NOT NULL DEFAULT '{}'` — **user IDs** (not participant IDs) of winners; empty = no winners (everyone tied or succeeded). Using `user_id` rather than `participant_id` keeps historical resolutions stable if participant membership changes between cycles in the future.
-- **`loser_ids`** `UUID[] NOT NULL DEFAULT '{}'` — **user IDs** of losers; empty = nobody owes anything
+- **`winner_ids`** `UUID[] NOT NULL DEFAULT '{}'` — **user IDs** (not participant IDs) of participants who are owed the forfeit. Empty if nobody is owed (everyone succeeded or exact tie). Using `user_id` rather than `participant_id` keeps historical resolutions stable if participant membership changes between cycles in the future.
+- **`loser_ids`** `UUID[] NOT NULL DEFAULT '{}'` — **user IDs** of participants who owe the forfeit. Empty if nobody owes (everyone succeeded or exact tie).
 - **`forfeit`** `TEXT NOT NULL` — snapshot of `contracts.forfeit` at resolution time; self-contained record
 - **`created_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 
 Outcome states:
 
-- `winner_ids` non-empty, `loser_ids` non-empty — losers owe forfeit to winners
-- `winner_ids` = all participants, `loser_ids` empty — everyone succeeded; nobody owes
-- Both empty — exact tie; nobody owes
+- `winner_ids` non-empty, `loser_ids` non-empty — losers owe the forfeit to winners
+- Both empty — nobody owes anything (everyone succeeded or exact tie)
 
 Query membership with `WHERE ? = ANY(loser_ids)` / `WHERE ? = ANY(winner_ids)`.
 
