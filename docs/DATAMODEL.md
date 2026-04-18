@@ -96,7 +96,7 @@ Status transitions:
 
 ### `participants`
 
-A user's membership and commitment within a contract. The creator also has a participant row, signed at contract creation. `participants.id` is the contract-scoped identity used throughout (evidence, votes) — prefer this over `user_id` when operating within contract context.
+A user's membership and commitment within a contract. The creator has a participant row created at contract creation with `sign_status = 'drafting'`; they sign explicitly via the lobby before starting the contract. `participants.id` is the contract-scoped identity used throughout (evidence, votes) — prefer this over `user_id` when operating within contract context.
 
 - **`id`** `UUID PK DEFAULT gen_random_uuid()`
 - **`contract_id`** `UUID NOT NULL REFERENCES contracts(id)`

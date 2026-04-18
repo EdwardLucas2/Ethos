@@ -151,12 +151,12 @@ Used in the contract builder invite flow and Friends screen. Prefix-matches agai
 
 ```json
 [
-  {
-    "id": "3fa85f64-...",
-    "displayName": "Alex",
-    "tag": "alex3b9c",
-    "avatarUrl": null
-  }
+    {
+        "id": "3fa85f64-...",
+        "displayName": "Alex",
+        "tag": "alex3b9c",
+        "avatarUrl": null
+    }
 ]
 ```
 
@@ -180,10 +180,10 @@ The `userId` comes from a prior tag search result.
 
 ```json
 {
-  "id": "3fa85f64-...",
-  "displayName": "Alex",
-  "tag": "alex3b9c",
-  "avatarUrl": null
+    "id": "3fa85f64-...",
+    "displayName": "Alex",
+    "tag": "alex3b9c",
+    "avatarUrl": null
 }
 ```
 
@@ -211,13 +211,245 @@ Path param is the target user's ID (not the contacts row ID).
 
 ## Contracts
 
-_To be designed._
+### `POST /contracts` — Create contract
+
+Called on FAB tap. Creates a contract with default values and the creator's participant row (`sign_status = 'drafting'`). Everything stays mutable until `POST /contracts/{contractId}/start`.
+
+**Auth:** `requireAuth`
+
+**Request body:** none.
+
+**Defaults applied by the server:**
+
+| Field       | Default        |
+| ----------- | -------------- |
+| `name`      | `""`           |
+| `forfeit`   | `""`           |
+| `period`    | `"weekly"`     |
+| `startDate` | tomorrow (UTC) |
+| `status`    | `"draft"`      |
+
+**Response `201`:** full contract (see `GET /contracts/{contractId}` shape below).
+
+---
+
+### `GET /contracts/{contractId}` — Get contract
+
+Polled by both lobby screens to reflect real-time changes.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+{
+    "id": "uuid",
+    "name": "Gym Bros",
+    "forfeit": "A pint",
+    "period": "weekly",
+    "startDate": "2026-05-01",
+    "status": "draft",
+    "creatorId": "uuid",
+    "createdAt": "2026-04-15T10:00:00Z",
+    "participants": [
+        {
+            "id": "uuid",
+            "userId": "uuid",
+            "displayName": "Edward",
+            "tag": "edward4f2a",
+            "avatarUrl": null,
+            "habit": "Go to the gym",
+            "frequency": 3,
+            "signStatus": "signed",
+            "optedOutOfNextCycle": false
+        }
+    ]
+}
+```
+
+`participants` excludes `removed` rows. Includes `waiting`, `drafting`, `signed`, and `declined` (so the creator can see who declined in the lobby).
+
+Caller must be the creator or a non-removed participant.
+
+**Errors:**
+
+- `403` — caller is not the creator or a participant
+- `404` — contract not found
+
+---
+
+### `PATCH /contracts/{contractId}` — Update ground rules
+
+Creator only. Any status except `cancelled` or `ended`. All fields optional; at least one required.
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{
+    "name": "Gym Bros 2026",
+    "forfeit": "Two pints",
+    "period": "biweekly",
+    "startDate": "2026-05-08"
+}
+```
+
+**Response `200`:** updated contract (same shape as GET).
+
+**Errors:**
+
+- `403` — not the creator
+- `409` — contract is `cancelled` or `ended`
+
+---
+
+### `POST /contracts/{contractId}/start` — Start contract
+
+Creator only. Transitions `draft → active` and creates the first cycle.
+
+**Auth:** `requireAuth`
+
+Validates:
+
+- Status is `draft`
+- `name` and `forfeit` are non-empty
+- At least 2 `signed` participants (creator + ≥1 invitee)
+- `startDate` ≤ today
+
+**Response `200`:**
+
+```json
+{ "contractId": "uuid", "cycleNumber": 1 }
+```
+
+Client navigates to `/contract/{contractId}/1/active`.
+
+**Errors:**
+
+- `403` — not the creator
+- `409` — validation failed (status not draft, fewer than 2 signed participants, name/forfeit empty, or start date not yet reached)
+
+---
+
+### `DELETE /contracts/{contractId}` — Cancel contract
+
+Creator only. Draft status only.
+
+**Auth:** `requireAuth`
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `403` — not the creator
+- `409` — contract not in `draft` status
 
 ---
 
 ## Participants
 
-_To be designed._
+### `POST /contracts/{contractId}/participants` — Invite participant
+
+Creator only. Draft status only. Creates a participant row (`sign_status = 'waiting'`) and sends a `contract_invited` notification.
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{ "userId": "uuid" }
+```
+
+**Response `201`:**
+
+```json
+{
+    "id": "uuid",
+    "userId": "uuid",
+    "displayName": "Alex",
+    "tag": "alex3b9c",
+    "avatarUrl": null,
+    "habit": null,
+    "frequency": null,
+    "signStatus": "waiting",
+    "optedOutOfNextCycle": false
+}
+```
+
+**Errors:**
+
+- `400` — user already a participant (any status, including `declined`)
+- `403` — not the creator
+- `409` — contract not in `draft` status, or already at 10 participants
+
+---
+
+### `DELETE /contracts/{contractId}/participants/{participantId}` — Remove participant
+
+Creator only. Draft status only. Cannot remove self.
+
+Sets `sign_status = 'removed'`. Row is never deleted.
+
+**Auth:** `requireAuth`
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `400` — attempt to remove self
+- `403` — not the creator
+- `404` — participant not found
+- `409` — contract not in `draft` status
+
+---
+
+### `PATCH /contracts/{contractId}/participants/me` — Update own commitment
+
+Used by both creator and invitees. Draft status only.
+
+**Auth:** `requireAuth`
+
+**Request body** (all fields optional; at least one required):
+
+```json
+{
+    "habit": "Go to the gym",
+    "frequency": 3,
+    "signStatus": "signed"
+}
+```
+
+Valid `signStatus` transitions:
+
+| From       | To         | Condition                                                                  |
+| ---------- | ---------- | -------------------------------------------------------------------------- |
+| `waiting`  | `drafting` | Implicit when `habit` or `frequency` updated without explicit `signStatus` |
+| `drafting` | `signed`   | `habit` and `frequency` must both be set                                   |
+| `signed`   | `drafting` | Unsigns to allow editing                                                   |
+| any        | `declined` | Declines invitation                                                        |
+
+**Response `200`:** updated participant (same shape as in GET contract response).
+
+**Errors:**
+
+- `400` — invalid transition, or `signStatus: "signed"` with missing `habit` or `frequency`
+- `409` — contract not in `draft` status
+
+---
+
+### `POST /contracts/{contractId}/participants/me/opt-out` — Opt out of next cycle
+
+Permanently sets `opted_out_of_next_cycle = true`. Only valid on the last day of the current active cycle.
+
+**Auth:** `requireAuth`
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `400` — already opted out
+- `409` — not the last day of the active cycle, or contract not `active`
 
 ---
 
