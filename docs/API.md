@@ -915,7 +915,24 @@ Winner taps "Mark as Settled". Sets `settled_at` on the caller's `resolution_ack
 
 ## Pesters
 
-_To be designed._
+### `POST /resolutions/{resolutionId}/pesters` — Send pester
+
+Winner pesters a specific loser to pay up. Rate-limited to once per winner–loser pair per 24 hours — a winner can pester each loser independently.
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{ "toUserId": "uuid" }
+```
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `400` — caller is not a winner in this resolution, or `toUserId` is not a loser
+- `409` — already pestered this loser within the last 24 hours
 
 ---
 
