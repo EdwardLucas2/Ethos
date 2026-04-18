@@ -805,7 +805,34 @@ Used by the evidence detail screen. Includes full vote breakdown.
 
 ## Votes
 
-_To be designed._
+### `POST /contracts/{contractId}/cycles/{cycleNumber}/evidence/{evidenceId}/votes` — Cast or update vote
+
+Upsert semantics — voter can change their decision. Voting is allowed when cycle status is `active` or `pending_resolution`. Closed once `settled`.
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{ "decision": "approve" }
+```
+
+**Response `200`:**
+
+```json
+{
+    "voterParticipantId": "uuid",
+    "decision": "approve",
+    "updatedAt": "2026-05-03T09:30:00Z"
+}
+```
+
+**Errors:**
+
+- `400` — caller is the evidence submitter (cannot vote on own evidence)
+- `403` — caller is not a signed participant
+- `404` — evidence not found
+- `409` — cycle is `settled`
 
 ---
 
