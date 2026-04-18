@@ -143,7 +143,69 @@ Used in the contract builder invite flow and Friends screen. Prefix-matches agai
 
 ## Contacts
 
-_To be designed._
+### `GET /contacts` — List contacts
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+  {
+    "id": "3fa85f64-...",
+    "displayName": "Alex",
+    "tag": "alex3b9c",
+    "avatarUrl": null
+  }
+]
+```
+
+Ordered alphabetically by `displayName`. Returns the full list (no pagination).
+
+---
+
+### `POST /contacts` — Add a contact
+
+**Auth:** `requireAuth`
+
+**Request body:**
+
+```json
+{ "userId": "3fa85f64-..." }
+```
+
+The `userId` comes from a prior tag search result.
+
+**Response `201`:**
+
+```json
+{
+  "id": "3fa85f64-...",
+  "displayName": "Alex",
+  "tag": "alex3b9c",
+  "avatarUrl": null
+}
+```
+
+**Errors:**
+
+- `400` — `userId` is the caller's own ID
+- `404` — user not found
+- `409` — already a contact
+
+---
+
+### `DELETE /contacts/{contactUserId}` — Remove a contact
+
+Path param is the target user's ID (not the contacts row ID).
+
+**Auth:** `requireAuth`
+
+**Response `204`** — no body.
+
+**Errors:**
+
+- `404` — not in contacts
 
 ---
 
