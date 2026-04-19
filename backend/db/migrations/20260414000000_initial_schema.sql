@@ -96,6 +96,7 @@ CREATE TABLE evidence (
     habit_action_id UUID        NOT NULL REFERENCES habit_actions (id),
     photo_id        UUID,
     note            TEXT,
+    status          TEXT        NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'auto_approved')),
     submitted_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (photo_id IS NOT NULL OR note IS NOT NULL)
 );
@@ -124,6 +125,10 @@ CREATE TABLE cycle_resolutions (
     forfeit    TEXT        NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- GIN indexes required for ANY() membership queries on UUID arrays
+CREATE INDEX idx_cycle_resolutions_winner_ids ON cycle_resolutions USING GIN (winner_ids);
+CREATE INDEX idx_cycle_resolutions_loser_ids  ON cycle_resolutions USING GIN (loser_ids);
 
 -- Resolution acknowledgments (per-participant ack and settlement state)
 CREATE TABLE resolution_acknowledgments (

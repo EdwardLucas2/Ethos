@@ -141,7 +141,7 @@ Individual completion slots for a participant within a cycle. Created by the ser
 
 Constraints: `UNIQUE (cycle_id, participant_id, action_number)`.
 
-Completion is **computed on read**: a habit action is complete if any of its `evidence` rows has VERIFIED status (see `votes` for the computation). The service should reject evidence submission against an already-complete action.
+A habit action is complete when its `evidence` row has `status = 'verified'` or `status = 'auto_approved'`. The service rejects evidence submission against an already-complete action.
 
 Indexes: `(cycle_id, participant_id)`.
 
@@ -157,11 +157,10 @@ Proof submitted by a participant against a specific habit action. At least one o
 - **`habit_action_id`** `UUID NOT NULL REFERENCES habit_actions(id)`
 - **`photo_id`** `UUID` — nullable; resolves to `evidence/{photo_id}` in object storage
 - **`note`** `TEXT` — nullable
+- **`status`** `TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'auto_approved'))` — written by the service on every vote cast; set to `auto_approved` by the scheduler at settlement if zero votes were cast.
 - **`submitted_at`** `TIMESTAMPTZ NOT NULL DEFAULT now()`
 
 Constraints: `CHECK (photo_id IS NOT NULL OR note IS NOT NULL)`.
-
-Evidence status is **computed on read** from the `votes` table — not stored. See `votes` for the computation logic.
 
 Indexes: `habit_action_id`.
 
@@ -180,14 +179,15 @@ An approve/reject cast by a co-participant on a piece of evidence. Voters can ch
 
 Constraints: `UNIQUE (evidence_id, voter_participant_id)` — one vote per voter per evidence item.
 
-**Evidence status computation:**
+**Evidence status computation** (applied after every vote; result written to `evidence.status`):
 
-- `eligible_voters` = total participants with `sign_status = 'signed'` in the contract, minus the submitter (excludes `declined` and `removed`)
-- `VERIFIED` if `approvals > eligible_voters / 2`
-- `REJECTED` if `rejections > eligible_voters / 2`
-- `PENDING` otherwise
+- `VERIFIED` if `approvals > votes_cast / 2`
+- `REJECTED` if `rejections > votes_cast / 2`
+- `PENDING` otherwise (tie, or no votes yet)
 
-**Auto-approval:** when a cycle settles, any evidence still in `PENDING` state auto-approves. This is triggered by the cycle settlement service — not a DB constraint.
+Status is determined by simple majority of votes **actually cast** — not of all eligible voters. A single vote is sufficient to decide the outcome.
+
+**Auto-approval:** when a cycle settles, any evidence still `pending` (zero votes cast) is set to `auto_approved` by the scheduler. Evidence that already has votes retains the outcome computed from those votes.
 
 Indexes: `evidence_id`.
 
@@ -210,6 +210,8 @@ Outcome states:
 - Both empty — nobody owes anything (everyone succeeded or exact tie)
 
 Query membership with `WHERE ? = ANY(loser_ids)` / `WHERE ? = ANY(winner_ids)`.
+
+Indexes: GIN on `winner_ids`, GIN on `loser_ids` — required for `WHERE ? = ANY(winner_ids)` membership queries; B-tree indexes do not serve array containment checks.
 
 Per-participant acknowledgment and settlement state lives in `resolution_acknowledgments` — one row per winner or loser once they act on this resolution.
 

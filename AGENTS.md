@@ -39,7 +39,7 @@ src/main/java/com/ethos/
   dto/          - Request/response objects (must match OpenAPI schemas)
   handler/      - Javalin route handlers (HTTP layer only)
   service/      - Business logic
-  datastore/    - Database access (JDBI only)
+  store/        - Database access (JDBI only); grouped by domain
   storage/      - FileStorageService interface + implementations
   push/         - PushNotificationService interface + ExpoPushNotificationService implementation
   scheduler/    - ScheduledExecutorService setup; cycle transition jobs
