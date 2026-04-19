@@ -12,7 +12,7 @@
 ## Backend
 
 - **Java 25 (LTS) + Javalin + Maven**
-- **SuperTokens Java SDK** — JWT verification on every protected request
+- **JJWT** (`io.jsonwebtoken:jjwt-api`) — JWT verification on every protected request. SuperTokens has no Java SDK; `AuthMiddleware` fetches the JWKS from `{SUPERTOKENS_URL}/.well-known/jwks.json` at startup, caches the RSA public keys, and verifies Bearer tokens on each request
 - **javalin-openapi** — generates the OpenAPI spec at compile time from `@OpenApi` annotations; served at `GET /openapi.json`
 - **`ScheduledExecutorService`** (in-process scheduler) — runs every 60 seconds; evaluates cycle transitions (active → pending_resolution, pending_resolution → settled, contract renewal/ending).
 - **`PushNotificationService`** interface — wraps push delivery to the Expo Push API
