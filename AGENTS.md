@@ -6,6 +6,7 @@ Read these docs when working on anything that touches their domain:
 
 - [docs/API.md](docs/API.md) — all endpoints, request/response shapes, error codes
 - [docs/BACKEND.md](docs/BACKEND.md) — service/store architecture, transaction strategy, scheduler
+- [docs/BACKEND_STYLE.md](docs/BACKEND_STYLE.md) — naming, nulls, JDBI, DTOs, logging, comments, tests, OpenAPI conventions
 - [docs/DATAMODEL.md](docs/DATAMODEL.md) — database schema, table definitions, conventions
 - [docs/ROUTING.md](docs/ROUTING.md) — Expo Router file structure, route params, navigation flows
 - [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
