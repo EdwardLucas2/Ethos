@@ -123,9 +123,10 @@ A single time-bound period within a contract. Cycle N+1 is created and set to `a
 - **`cycle_number`** `INTEGER NOT NULL` — 1, 2, 3…; drives the period switcher UI
 - **`start_date`** `DATE NOT NULL`
 - **`end_date`** `DATE NOT NULL`
+- **`voting_deadline`** `DATE NOT NULL` — set at cycle creation as `end_date + VOTING_WINDOW_DAYS` (server constant, default 3). When `voting_deadline <= today` and the cycle is `pending_resolution`, the scheduler auto-approves any remaining `pending` evidence and settles the cycle.
 - **`status`** `TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_resolution', 'settled'))`
 
-Constraints: `UNIQUE (contract_id, cycle_number)`, `CHECK (end_date > start_date)`.
+Constraints: `UNIQUE (contract_id, cycle_number)`, `CHECK (end_date > start_date)`, `CHECK (voting_deadline > end_date)`.
 
 ---
 
