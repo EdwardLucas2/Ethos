@@ -71,11 +71,13 @@ CREATE TABLE cycles (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     contract_id  UUID    NOT NULL REFERENCES contracts (id),
     cycle_number INTEGER NOT NULL,
-    start_date   DATE    NOT NULL,
-    end_date     DATE    NOT NULL,
-    status       TEXT    NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_resolution', 'settled')),
+    start_date      DATE    NOT NULL,
+    end_date        DATE    NOT NULL,
+    voting_deadline DATE    NOT NULL,
+    status          TEXT    NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_resolution', 'settled')),
     UNIQUE (contract_id, cycle_number),
-    CHECK (end_date > start_date)
+    CHECK (end_date > start_date),
+    CHECK (voting_deadline > end_date)
 );
 
 -- Habit actions (one slot per participant per frequency unit per cycle)
