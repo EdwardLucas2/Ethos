@@ -2,14 +2,17 @@
 
 Ethos is a mobile app that helps people build habits by creating accountability contracts with friends. Participants agree on a habit, set a forfeit for failure, and use the app to submit and verify evidence each cycle.
 
+Read these docs when working on anything that touches their domain:
+
+- [docs/API.md](docs/API.md) — all endpoints, request/response shapes, error codes
+- [docs/BACKEND.md](docs/BACKEND.md) — service/store architecture, transaction strategy, scheduler
+- [docs/DATAMODEL.md](docs/DATAMODEL.md) — database schema, table definitions, conventions
+- [docs/ROUTING.md](docs/ROUTING.md) — Expo Router file structure, route params, navigation flows
+- [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
+- [docs/TESTS.md](docs/TESTS.md) — testing strategy and invariant checks
+- [docs/TECHSTACK.md](docs/TECHSTACK.md) — full tech stack, env vars, infrastructure
 - [product/PRD.md](product/PRD.md) — full product requirements
 - [product/DESIGN.md](product/DESIGN.md) — design system
-- [docs/TECHSTACK.md](docs/TECHSTACK.md) — full tech stack details, env vars, infrastructure, linting config
-- [docs/DATAMODEL.md](docs/DATAMODEL.md) — database schema, table definitions, conventions
-- [docs/TESTS.md](docs/TESTS.md) — testing strategy, layers, and data invariant checks
-- [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
-- [docs/ROUTING.md](docs/ROUTING.md) — Expo Router file structure, route params, and navigation flows
-- [docs/BACKEND.md](docs/BACKEND.md) — backend structure, services, data types
 
 # Project Structure
 
@@ -65,48 +68,35 @@ Follow this order for every feature. Do not skip steps.
 
 # Backend
 
-## Layers
-
-- **Handler** — HTTP only: parse request, call service, return response. No business logic.
-- **Service** — Business logic and orchestration. No HTTP concerns, no DB access.
-- **Datastore** — JDBI queries only. No business logic.
-- **DTO** — Carries data in/out of the API. No logic.
-
-## Rules
-
-- Handlers must be thin — no logic beyond request parsing and response mapping
-- Never access the database from a handler or service; use Datastore classes
-- Never expose database row objects in API responses; always map to DTOs
-- Validate all incoming requests in the handler layer
-- All protected routes must verify the SuperTokens JWT via a Javalin before-handler
-- Extract the user ID from the verified session; never trust user-supplied IDs in request bodies
-- Wire all dependencies via constructor injection; construct everything once in `main()` and inject
-- All errors return `ErrorResponse` DTO — map exceptions in a global `app.exception()` handler, not per-handler
-- All file I/O goes through the `FileStorageService` interface — never reference implementations directly in handlers or services
+- Never access the database from a handler or service; use Store classes
+- Never expose Store/model objects in API responses; always map to DTOs
+- Two validation levels: structural (handler — is the request well-formed?) and business (service — is the request valid given current state?)
+- Extract `userId` from the verified JWT context — never trust user-supplied identity in request bodies
+- All file I/O goes through `FileStorageService` — never reference implementations directly
+- All errors are mapped globally in `AppRouter` via `app.exception()` — no per-handler error handling
+- Wire all dependencies via constructor injection; construct the full object graph once in `Main.java`
 
 # Database
 
-- Migrations live at `/backend/db/migrations/` — format: `{timestamp}_{description}.sql`
-- Create a migration: `cd backend && dbmate new <description>`
-- Migration files are **immutable once committed** — never edit an existing file; always create a new one
-- Use `UUID DEFAULT gen_random_uuid()` for primary keys — never auto-increment integers; prefer `BOOLEAN` for booleans
-- Prefer explicit columns over JSON blobs; keep schemas simple
-- All queries live in Datastore classes via JDBI — never access the database from handlers or services
+- Migrations live at `backend/db/migrations/` — create with `cd backend && dbmate new <description>`
+- Migration files are **immutable once run against a shared or persistent database** — never edit; always create a new one
+- Primary keys: `UUID DEFAULT gen_random_uuid()` — never auto-increment integers
 
 # Authentication
 
-- SuperTokens runs as a sidecar container (see `docker/docker-compose.dev.yml`)
-- The backend verifies JWTs via the SuperTokens Java SDK in a before-handler
-- Auth tokens must be stored using `expo-secure-store` — never `AsyncStorage`
+Two auth before-handlers — use the right one per route:
+
+- **`requireAuth`** — verifies JWT and loads the `users` row; attaches `userId` UUID to context. Used on all protected routes.
+- **`requireJwt`** — verifies JWT only, no DB lookup. Used only on `POST /users` (the `users` row does not exist yet at registration time).
+
+Auth tokens must be stored with `expo-secure-store` — never `AsyncStorage`.
 
 # Frontend
 
-- TypeScript for all files
 - Handle loading and error states for every API call
 - **Server state**: TanStack Query via Orval-generated hooks only — never raw `fetch`
 - **Global client state**: React Context (auth, current user)
 - **Local UI state**: `useState` — do not introduce external state libraries
-- Routes are defined by file structure under `app/`; protected screens live under `(app)/`; the root `_layout.tsx` handles auth redirection
 - Use Expo SDK modules for all native device capabilities — do not use bare React Native APIs
 
 # Testing
