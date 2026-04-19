@@ -9,6 +9,7 @@ Ethos is a mobile app that helps people build habits by creating accountability 
 - [docs/TESTS.md](docs/TESTS.md) — testing strategy, layers, and data invariant checks
 - [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
 - [docs/ROUTING.md](docs/ROUTING.md) — Expo Router file structure, route params, and navigation flows
+- [docs/BACKEND.md](docs/BACKEND.md) — backend structure, services, data types
 
 # Project Structure
 
