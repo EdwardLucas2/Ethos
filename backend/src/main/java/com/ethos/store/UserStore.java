@@ -30,7 +30,8 @@ public class UserStore {
 
     public User insert(User user) {
         try {
-            return jdbi.withHandle(handle -> handle.createQuery("""
+            return jdbi.withHandle(handle -> handle.createQuery(
+                            """
                             INSERT INTO users (supertokens_user_id, display_name, tag, email)
                             VALUES (:supertokensUserId, :displayName, :tag, :email)
                             RETURNING id, supertokens_user_id, display_name, tag, email, avatar_id, created_at
@@ -48,7 +49,8 @@ public class UserStore {
     }
 
     public Optional<User> findById(UUID id) {
-        return jdbi.withHandle(handle -> handle.createQuery("""
+        return jdbi.withHandle(handle -> handle.createQuery(
+                        """
                         SELECT id, supertokens_user_id, display_name, tag, email, avatar_id, created_at
                         FROM users
                         WHERE id = :id
@@ -59,7 +61,8 @@ public class UserStore {
     }
 
     public Optional<User> findBySupertokensUserId(String supertokensUserId) {
-        return jdbi.withHandle(handle -> handle.createQuery("""
+        return jdbi.withHandle(handle -> handle.createQuery(
+                        """
                         SELECT id, supertokens_user_id, display_name, tag, email, avatar_id, created_at
                         FROM users
                         WHERE supertokens_user_id = :supertokensUserId
@@ -70,7 +73,8 @@ public class UserStore {
     }
 
     public List<User> findByTagPrefix(String prefix, UUID excludeUserId, int limit) {
-        return jdbi.withHandle(handle -> handle.createQuery("""
+        return jdbi.withHandle(handle -> handle.createQuery(
+                        """
                         SELECT id, supertokens_user_id, display_name, tag, email, avatar_id, created_at
                         FROM users
                         WHERE tag LIKE :prefix

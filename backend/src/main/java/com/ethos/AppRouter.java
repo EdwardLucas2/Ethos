@@ -38,21 +38,14 @@ public class AppRouter {
     private void registerExceptionHandlers(JavalinDefaultRoutingApi routes) {
         routes.exception(
                 BadRequestException.class, (e, ctx) -> ctx.status(400).json(new ErrorResponse(e.getMessage())));
-        routes.exception(
-                BadRequestResponse.class, (e, ctx) -> ctx.status(400).json(new ErrorResponse(e.getMessage())));
-        routes.exception(
-                JwtException.class, (e, ctx) -> ctx.status(401).json(new ErrorResponse("Unauthorized")));
-        routes.exception(
-                RegistrationIncompleteException.class,
-                (e, ctx) -> ctx.status(401).json(new ErrorResponse("registration_incomplete")));
-        routes.exception(
-                ForbiddenException.class, (e, ctx) -> ctx.status(403).json(new ErrorResponse(e.getMessage())));
-        routes.exception(
-                NotFoundException.class, (e, ctx) -> ctx.status(404).json(new ErrorResponse(e.getMessage())));
-        routes.exception(
-                ConflictException.class, (e, ctx) -> ctx.status(409).json(new ErrorResponse(e.getMessage())));
-        routes.exception(
-                Exception.class, (e, ctx) -> ctx.status(500).json(new ErrorResponse("Internal server error")));
+        routes.exception(BadRequestResponse.class, (e, ctx) -> ctx.status(400).json(new ErrorResponse(e.getMessage())));
+        routes.exception(JwtException.class, (e, ctx) -> ctx.status(401).json(new ErrorResponse("Unauthorized")));
+        routes.exception(RegistrationIncompleteException.class, (e, ctx) -> ctx.status(401)
+                .json(new ErrorResponse("registration_incomplete")));
+        routes.exception(ForbiddenException.class, (e, ctx) -> ctx.status(403).json(new ErrorResponse(e.getMessage())));
+        routes.exception(NotFoundException.class, (e, ctx) -> ctx.status(404).json(new ErrorResponse(e.getMessage())));
+        routes.exception(ConflictException.class, (e, ctx) -> ctx.status(409).json(new ErrorResponse(e.getMessage())));
+        routes.exception(Exception.class, (e, ctx) -> ctx.status(500).json(new ErrorResponse("Internal server error")));
     }
 
     private void registerRoutes(JavalinDefaultRoutingApi routes) {

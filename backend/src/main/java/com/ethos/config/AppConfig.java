@@ -1,11 +1,7 @@
 package com.ethos.config;
 
 public record AppConfig(
-        String databaseUrl,
-        String databaseUser,
-        String databasePassword,
-        String supertokensUrl,
-        int port) {
+        String databaseUrl, String databaseUser, String databasePassword, String supertokensUrl, int port) {
 
     public static AppConfig fromEnv() {
         return new AppConfig(

@@ -48,8 +48,8 @@ public class Main {
 
     static Javalin buildJavalin(AppRouter router) {
         return Javalin.create(config -> {
-            config.jsonMapper(new JavalinJackson().updateMapper(
-                    mapper -> mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)));
+            config.jsonMapper(new JavalinJackson()
+                    .updateMapper(mapper -> mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)));
             config.registerPlugin(
                     new OpenApiPlugin(openApiConfig -> openApiConfig.withDocumentationPath("/openapi.json")));
             router.configure(config.routes);

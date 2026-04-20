@@ -50,8 +50,7 @@ class UserServiceTest {
                     .thenReturn(Optional.of(user("st-id-1", "Edward", "edward4f2a", "edward@example.com")));
 
             assertThrows(
-                    ConflictException.class,
-                    () -> userService.registerUser("st-id-1", "edward@example.com", "Edward"));
+                    ConflictException.class, () -> userService.registerUser("st-id-1", "edward@example.com", "Edward"));
 
             verify(userStore, never()).insert(any());
         }
@@ -76,9 +75,7 @@ class UserServiceTest {
 
             var result = userService.registerUser("st-id", "e@test.com", "El!ias Smith");
 
-            assertTrue(
-                    result.tag().startsWith("elias"),
-                    "tag should start with 'elias' but was: " + result.tag());
+            assertTrue(result.tag().startsWith("elias"), "tag should start with 'elias' but was: " + result.tag());
         }
 
         @Test
@@ -91,8 +88,7 @@ class UserServiceTest {
             // prefix truncated to 8 chars + 4 random suffix = 12 total
             assertEquals(12, result.tag().length());
             assertTrue(
-                    result.tag().startsWith("bartholo"),
-                    "tag should start with 'bartholo' but was: " + result.tag());
+                    result.tag().startsWith("bartholo"), "tag should start with 'bartholo' but was: " + result.tag());
         }
 
         private User user(String supertokensUserId, String displayName, String tag, String email) {

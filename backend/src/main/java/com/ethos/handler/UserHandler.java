@@ -30,9 +30,7 @@ public class UserHandler {
                             + " Returns 409 if a users row already exists for this account.",
             tags = {"users"},
             requestBody =
-                    @OpenApiRequestBody(
-                            required = true,
-                            content = @OpenApiContent(from = CreateUserRequest.class)),
+                    @OpenApiRequestBody(required = true, content = @OpenApiContent(from = CreateUserRequest.class)),
             responses = {
                 @OpenApiResponse(
                         status = "201",
