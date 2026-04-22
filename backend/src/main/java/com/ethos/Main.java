@@ -1,7 +1,9 @@
 package com.ethos;
 
 import com.ethos.auth.JwtVerifier;
+import com.ethos.auth.SuperTokensCoreClient;
 import com.ethos.config.AppConfig;
+import com.ethos.handler.AuthHandler;
 import com.ethos.handler.UserHandler;
 import com.ethos.service.UserService;
 import com.ethos.store.UserStore;
@@ -39,14 +41,16 @@ public class Main {
     }
 
     private static AppRouter buildObjectGraph(AppConfig config, Jdbi jdbi) {
+        var superTokensCoreClient = new SuperTokensCoreClient(config.supertokensUrl());
         var jwtVerifier = JwtVerifier.fromJwksUrl(config.supertokensUrl() + "/.well-known/jwks.json");
         var userStore = new UserStore(jdbi);
         var userService = new UserService(userStore);
         var userHandler = new UserHandler(userService);
-        return new AppRouter(jwtVerifier, userStore, userHandler);
+        var authHandler = new AuthHandler(superTokensCoreClient);
+        return new AppRouter(jwtVerifier, userStore, userHandler, authHandler);
     }
 
-    static Javalin buildJavalin(AppRouter router) {
+    public static Javalin buildJavalin(AppRouter router) {
         return Javalin.create(config -> {
             config.jsonMapper(new JavalinJackson()
                     .updateMapper(mapper -> mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)));

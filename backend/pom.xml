@@ -21,10 +21,13 @@
         <junit.version>6.0.3</junit.version>
         <mockito.version>5.23.0</mockito.version>
         <testcontainers.version>1.21.4</testcontainers.version>
+        <postgres.image>postgres:17</postgres.image>
+        <supertokens.image>supertokens/supertokens-postgresql:9.3</supertokens.image>
         <spotless.version>2.44.0</spotless.version>
         <google-java-format.version>1.35.0</google-java-format.version>
         <javalin-openapi.version>7.1.0</javalin-openapi.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <jackson.version>2.21.0</jackson.version>
     </properties>
 
     <dependencies>
@@ -47,6 +50,13 @@
             <artifactId>openapi-annotation-processor</artifactId>
             <version>${javalin-openapi.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Pin jackson-databind to override the older 2.12.x pulled in transitively by jjwt-jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- JWT verification (SuperTokens issues RS256 JWTs; we verify against JWKS endpoint) -->
@@ -146,6 +156,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <postgres.image>${postgres.image}</postgres.image>
+                        <supertokens.image>${supertokens.image}</supertokens.image>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
             <!-- Formatting: mvn spotless:apply (fix), mvn spotless:check (verify) -->
             <plugin>
