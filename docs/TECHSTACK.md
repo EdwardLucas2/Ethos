@@ -23,8 +23,9 @@
 
 ## Auth
 
-- **SuperTokens** self-hosted (Docker) — email/password, issues JWTs
-- **SuperTokens React Native SDK** — login, signup, and token refresh on the frontend
+- **SuperTokens Core** self-hosted (Docker) — stores users and sessions, signs and issues JWTs. Exposes an internal HTTP API on port 3567 (never public-facing) used by the auth server, and a JWKS endpoint used by the Java backend for token verification.
+- **Node.js auth server** (Express + `supertokens-node`) — thin Express app that mounts the `supertokens-node` middleware, which auto-generates all `/auth/*` routes (signup, signin, signout, token refresh). Talks to SuperTokens Core via the internal Docker network. The Java backend has no dependency on this server.
+- **SuperTokens React Native SDK** (`supertokens-react-native`) — handles login/signup flows and automatic silent token refresh on the frontend.
 
 ## File Storage
 
@@ -45,7 +46,7 @@
 ## Infrastructure
 
 - The backend is Dockerised — multi-stage Maven + JRE Dockerfile
-- PostgreSQL and SuperTokens run as containers
+- PostgreSQL, SuperTokens Core, and the Node.js auth server run as containers
 - Nginx acts as a reverse proxy
 - File storage uses Cloudflare R2 in production
 - The mobile app is distributed via EAS Build (App Store + Play Store)
@@ -73,12 +74,18 @@
 
 ## Local Environment Variables
 
-Backend environment variables for local development:
+**Java backend** (`backend/.env`):
 
 - `DATABASE_URL` — `jdbc:postgresql://localhost:5432/ethos`
 - `DATABASE_USER` — `ethos`
 - `DATABASE_PASSWORD` — `secret`
 - `DBMATE_URL` — `postgres://ethos:secret@localhost:5432/ethos`
-- `SUPERTOKENS_URL` — `http://localhost:3567`
+- `SUPERTOKENS_URL` — `http://localhost:3567` — used to fetch the JWKS for JWT verification
 - `STORAGE_BACKEND` — `local`
 - `UPLOAD_DIR` — `./data/uploads`
+
+**Node.js auth server** (`auth/.env`):
+
+- `SUPERTOKENS_CORE_URL` — `http://localhost:3567`
+- `API_DOMAIN` — `http://localhost:8080` — the domain Nginx exposes to the outside world
+- `WEBSITE_DOMAIN` — `http://localhost:8080` — required by SuperTokens; set to the API domain for mobile

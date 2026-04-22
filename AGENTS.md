@@ -47,7 +47,7 @@ src/main/java/com/ethos/
   storage/      - FileStorageService interface + implementations
   push/         - PushNotificationService interface + ExpoPushNotificationService implementation
   scheduler/    - ScheduledExecutorService setup; cycle transition jobs
-  auth/         - SuperTokens JWT verification
+  auth/         - JWT verification (JJWT + SuperTokens Core JWKS)
 db/migrations/  - dbmate migration files: {timestamp}_{description}.sql
 ```
 
@@ -117,7 +117,7 @@ maestro test /app/.maestro/       # E2E
 # Local Development
 
 ```bash
-docker compose -f docker/docker-compose.dev.yml up -d   # PostgreSQL + SuperTokens
+docker compose -f docker/docker-compose.dev.yml up -d   # PostgreSQL + SuperTokens Core + auth server
 cd backend && ./run-dev.sh                               # Backend on :8080
 cd app && npx expo start                                 # Expo dev server
 ```
