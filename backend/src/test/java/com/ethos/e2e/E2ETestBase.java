@@ -43,13 +43,13 @@ public abstract class E2ETestBase {
     private static final String POSTGRES_ALIAS = "postgres";
 
     @SuppressWarnings("resource")
-    private static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>(System.getProperty("postgres.image"))
-                    .withNetwork(NETWORK)
-                    .withNetworkAliases(POSTGRES_ALIAS)
-                    .withDatabaseName(DB_NAME)
-                    .withUsername(DB_USER)
-                    .withPassword(DB_PASSWORD);
+    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
+                    System.getProperty("postgres.image"))
+            .withNetwork(NETWORK)
+            .withNetworkAliases(POSTGRES_ALIAS)
+            .withDatabaseName(DB_NAME)
+            .withUsername(DB_USER)
+            .withPassword(DB_PASSWORD);
 
     private static final GenericContainer<?> SUPERTOKENS;
 
@@ -101,7 +101,8 @@ public abstract class E2ETestBase {
         return new GenericContainer<>(System.getProperty("supertokens.image"))
                 .withNetwork(NETWORK)
                 .withExposedPorts(3567)
-                .withEnv("POSTGRESQL_CONNECTION_URI",
+                .withEnv(
+                        "POSTGRESQL_CONNECTION_URI",
                         "postgresql://" + DB_USER + ":" + DB_PASSWORD + "@" + POSTGRES_ALIAS + ":5432/supertokens")
                 .waitingFor(Wait.forHttp("/hello").forStatusCode(200));
     }

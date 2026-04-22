@@ -1,12 +1,12 @@
 package com.ethos.integration;
 
+import com.ethos.testutil.Dbmate;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
-import com.ethos.testutil.Dbmate;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -26,11 +26,11 @@ public abstract class IntegrationTestBase {
 
     // Testcontainers registers a JVM shutdown hook to stop the container — no explicit close needed.
     @SuppressWarnings("resource")
-    private static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>(System.getProperty("postgres.image"))
-                    .withDatabaseName(DB_NAME)
-                    .withUsername(DB_USER)
-                    .withPassword(DB_PASSWORD);
+    private static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
+                    System.getProperty("postgres.image"))
+            .withDatabaseName(DB_NAME)
+            .withUsername(DB_USER)
+            .withPassword(DB_PASSWORD);
 
     // Held for the JVM lifetime; closed by HikariCP's own shutdown hook.
     @SuppressWarnings("resource")

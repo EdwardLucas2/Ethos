@@ -31,10 +31,12 @@ public class SuperTokensCoreClient {
         return switch (json.get("status").asText()) {
             case "OK" -> json.get("user").get("id").asText();
             case "EMAIL_ALREADY_EXISTS_ERROR" -> throw new ConflictException("Email already registered");
-            case "FIELD_ERROR" -> throw new BadRequestException(
-                    json.get("formFields").get(0).get("error").asText());
-            default -> throw new RuntimeException(
-                    "Unexpected SuperTokens status: " + json.get("status").asText());
+            case "FIELD_ERROR" ->
+                throw new BadRequestException(
+                        json.get("formFields").get(0).get("error").asText());
+            default ->
+                throw new RuntimeException(
+                        "Unexpected SuperTokens status: " + json.get("status").asText());
         };
     }
 
@@ -61,8 +63,8 @@ public class SuperTokensCoreClient {
                     .build();
             var response = http.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                throw new RuntimeException("SuperTokens CDI call to " + path + " failed: "
-                        + response.statusCode() + " " + response.body());
+                throw new RuntimeException("SuperTokens CDI call to " + path + " failed: " + response.statusCode() + " "
+                        + response.body());
             }
             return mapper.readTree(response.body());
         } catch (RuntimeException e) {

@@ -25,8 +25,7 @@ public class AuthHandler {
             methods = {HttpMethod.POST},
             summary = "Sign up with email and password",
             tags = {"auth"},
-            requestBody =
-                    @OpenApiRequestBody(required = true, content = @OpenApiContent(from = SignupRequest.class)),
+            requestBody = @OpenApiRequestBody(required = true, content = @OpenApiContent(from = SignupRequest.class)),
             responses = {
                 @OpenApiResponse(
                         status = "201",

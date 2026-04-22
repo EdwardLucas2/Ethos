@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Test;
 class UserApiE2ETest extends E2ETestBase {
 
     private HttpResponse<String> get(String path) throws Exception {
-        var req = HttpRequest.newBuilder()
-                .uri(URI.create(APP_URL + path))
-                .GET()
-                .build();
+        var req = HttpRequest.newBuilder().uri(URI.create(APP_URL + path)).GET().build();
         return HTTP.send(req, HttpResponse.BodyHandlers.ofString());
     }
 
