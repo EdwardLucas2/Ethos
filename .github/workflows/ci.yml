@@ -45,6 +45,14 @@ jobs:
               working-directory: auth
               run: npm ci
 
+            - name: Lint
+              working-directory: auth
+              run: npm run lint
+
+            - name: Format check
+              working-directory: auth
+              run: npx prettier --check .
+
             - name: TypeScript check
               working-directory: auth
               run: npx tsc --noEmit
