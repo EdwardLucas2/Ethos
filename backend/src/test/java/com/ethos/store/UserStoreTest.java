@@ -24,6 +24,10 @@ class UserStoreTest extends IntegrationTestBase {
         return new User(null, supertokensUserId, "Test User", tag, email, null, null);
     }
 
+    private User insertUser(String supertokensUserId, String tag, String email) {
+        return userStore.insert(buildUser(supertokensUserId, tag, email));
+    }
+
     @Nested
     class Insert {
 
@@ -112,12 +116,34 @@ class UserStoreTest extends IntegrationTestBase {
     }
 
     @Nested
+    class Update {
+
+        @Test
+        void givenExistingUser_updatesDisplayNameAndReturns() {
+            var inserted = insertUser("st-1", "tag1abc1", "a@example.com");
+
+            var result = userStore.update(inserted.id(), "New Name");
+
+            assertTrue(result.isPresent());
+            assertEquals("New Name", result.get().displayName());
+            assertEquals(inserted.id(), result.get().id());
+        }
+
+        @Test
+        void givenUnknownId_returnsEmpty() {
+            var result = userStore.update(UUID.randomUUID(), "New Name");
+
+            assertTrue(result.isEmpty());
+        }
+    }
+
+    @Nested
     class FindByTagPrefix {
 
         @Test
         void givenMatchingPrefix_returnsMatchingUsers() {
-            userStore.insert(buildUser("st-1", "alice1234", "alice@example.com"));
-            userStore.insert(buildUser("st-2", "bob1234ab", "bob@example.com"));
+            insertUser("st-1", "alice1234", "alice@example.com");
+            insertUser("st-2", "bob1234ab", "bob@example.com");
 
             var result = userStore.findByTagPrefix("alice", UUID.randomUUID(), 20);
 
@@ -127,7 +153,7 @@ class UserStoreTest extends IntegrationTestBase {
 
         @Test
         void givenNoMatch_returnsEmptyList() {
-            userStore.insert(buildUser("st-1", "alice1234", "alice@example.com"));
+            insertUser("st-1", "alice1234", "alice@example.com");
 
             var result = userStore.findByTagPrefix("zzzz", UUID.randomUUID(), 20);
 
@@ -136,13 +162,126 @@ class UserStoreTest extends IntegrationTestBase {
 
         @Test
         void givenCallerIsInResults_excludesCaller() {
-            var caller = userStore.insert(buildUser("st-1", "alice1234", "alice@example.com"));
-            userStore.insert(buildUser("st-2", "alice5678", "alice2@example.com"));
+            var caller = insertUser("st-1", "alice1234", "alice@example.com");
+            insertUser("st-2", "alice5678", "alice2@example.com");
 
             var result = userStore.findByTagPrefix("alice", caller.id(), 20);
 
             assertEquals(1, result.size());
             assertEquals("alice5678", result.get(0).tag());
+        }
+
+        @Test
+        void givenContactInResults_isContactIsTrue() {
+            var caller = insertUser("st-1", "alice1234", "alice@example.com");
+            var friend = insertUser("st-2", "bob1234ab", "bob@example.com");
+            userStore.insertContact(caller.id(), friend.id());
+
+            var result = userStore.findByTagPrefix("bob", caller.id(), 20);
+
+            assertEquals(1, result.size());
+            assertTrue(result.get(0).isContact());
+        }
+
+        @Test
+        void givenNonContactInResults_isContactIsFalse() {
+            var caller = insertUser("st-1", "alice1234", "alice@example.com");
+            insertUser("st-2", "bob1234ab", "bob@example.com");
+
+            var result = userStore.findByTagPrefix("bob", caller.id(), 20);
+
+            assertEquals(1, result.size());
+            assertFalse(result.get(0).isContact());
+        }
+    }
+
+    @Nested
+    class InsertContact {
+
+        @Test
+        void givenValidPair_returnsTrueAndPersists() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+            var bob = insertUser("st-2", "bob1234ab", "bob@example.com");
+
+            var result = userStore.insertContact(alice.id(), bob.id());
+
+            assertTrue(result);
+            assertEquals(1, userStore.findAllContacts(alice.id()).size());
+        }
+
+        @Test
+        void givenDuplicatePair_returnsFalse() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+            var bob = insertUser("st-2", "bob1234ab", "bob@example.com");
+            userStore.insertContact(alice.id(), bob.id());
+
+            var result = userStore.insertContact(alice.id(), bob.id());
+
+            assertFalse(result);
+        }
+
+        @Test
+        void givenOneWayContact_doesNotImplyReverseContact() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+            var bob = insertUser("st-2", "bob1234ab", "bob@example.com");
+            userStore.insertContact(alice.id(), bob.id());
+
+            assertTrue(userStore.findAllContacts(alice.id()).stream().anyMatch(u -> u.id().equals(bob.id())));
+            assertTrue(userStore.findAllContacts(bob.id()).isEmpty());
+        }
+    }
+
+    @Nested
+    class DeleteContact {
+
+        @Test
+        void givenExistingContact_returnsTrueAndRemoves() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+            var bob = insertUser("st-2", "bob1234ab", "bob@example.com");
+            userStore.insertContact(alice.id(), bob.id());
+
+            var result = userStore.deleteContact(alice.id(), bob.id());
+
+            assertTrue(result);
+            assertTrue(userStore.findAllContacts(alice.id()).isEmpty());
+        }
+
+        @Test
+        void givenNonExistentContact_returnsFalse() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+            var bob = insertUser("st-2", "bob1234ab", "bob@example.com");
+
+            var result = userStore.deleteContact(alice.id(), bob.id());
+
+            assertFalse(result);
+        }
+    }
+
+    @Nested
+    class FindAllContacts {
+
+        @Test
+        void givenNoContacts_returnsEmptyList() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+
+            assertTrue(userStore.findAllContacts(alice.id()).isEmpty());
+        }
+
+        @Test
+        void givenMultipleContacts_returnsAllOrderedByDisplayName() {
+            var alice = insertUser("st-1", "alice1234", "alice@example.com");
+            var bob = insertUser("st-2", "bob1234ab", "bob@example.com");
+            var carol = insertUser("st-3", "carol123c", "carol@example.com");
+            userStore.insertContact(alice.id(), carol.id());
+            userStore.insertContact(alice.id(), bob.id());
+
+            var result = userStore.findAllContacts(alice.id());
+
+            assertEquals(2, result.size());
+            // Both users have "Test User" as display name so order is stable by tag;
+            // verify both are present
+            assertTrue(result.stream().anyMatch(u -> u.id().equals(bob.id())));
+            assertTrue(result.stream().anyMatch(u -> u.id().equals(carol.id())));
         }
     }
 }

@@ -27,7 +27,9 @@ public class SuperTokensCoreClient {
         body.put("email", email);
         body.put("password", password);
 
-        var json = post("/recipe/emailpassword/signup", body);
+        // CDI 3.0+ (Core 8+) uses /recipe/signup without tenant prefix;
+        // earlier versions used /public/recipe/emailpassword/signup.
+        var json = post("/recipe/signup", body);
         return switch (json.get("status").asText()) {
             case "OK" -> json.get("user").get("id").asText();
             case "EMAIL_ALREADY_EXISTS_ERROR" -> throw new ConflictException("Email already registered");
@@ -52,6 +54,14 @@ public class SuperTokensCoreClient {
 
         var json = post("/recipe/session", body);
         return json.get("accessToken").get("token").asText();
+    }
+
+    public void deleteUser(String userId) {
+        var body = mapper.createObjectNode();
+        body.put("userId", userId);
+        body.put("removeAllLinkedAccounts", false);
+
+        post("/user/remove", body);
     }
 
     private JsonNode post(String path, ObjectNode body) {

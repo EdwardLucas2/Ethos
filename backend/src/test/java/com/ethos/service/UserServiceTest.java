@@ -2,13 +2,17 @@ package com.ethos.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.ethos.exception.BadRequestException;
 import com.ethos.exception.ConflictException;
 import com.ethos.exception.DuplicateTagException;
+import com.ethos.exception.NotFoundException;
 import com.ethos.model.User;
 import com.ethos.store.UserStore;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +28,10 @@ class UserServiceTest {
     void setUp() {
         userStore = mock(UserStore.class);
         userService = new UserService(userStore);
+    }
+
+    private User user(String supertokensUserId, String displayName, String tag, String email) {
+        return new User(UUID.randomUUID(), supertokensUserId, displayName, tag, email, null, Instant.now());
     }
 
     @Nested
@@ -70,7 +78,6 @@ class UserServiceTest {
         @Test
         void givenDisplayNameWithSpecialChars_stripsToAlphanumeric() {
             when(userStore.findBySupertokensUserId(any())).thenReturn(Optional.empty());
-            // Return the User that was passed to insert (the DB hasn't assigned an id yet)
             when(userStore.insert(any())).thenAnswer(inv -> inv.getArgument(0, User.class));
 
             var result = userService.registerUser("st-id", "e@test.com", "El!ias Smith");
@@ -85,14 +92,138 @@ class UserServiceTest {
 
             var result = userService.registerUser("st-id", "e@test.com", "Bartholomew Jones");
 
-            // prefix truncated to 8 chars + 4 random suffix = 12 total
             assertEquals(12, result.tag().length());
             assertTrue(
                     result.tag().startsWith("bartholo"), "tag should start with 'bartholo' but was: " + result.tag());
         }
+    }
 
-        private User user(String supertokensUserId, String displayName, String tag, String email) {
-            return new User(UUID.randomUUID(), supertokensUserId, displayName, tag, email, null, Instant.now());
+    @Nested
+    class GetUser {
+
+        @Test
+        void givenExistingUser_returnsUserResponse() {
+            var id = UUID.randomUUID();
+            var u = user("st-1", "Alice", "alice1234", "alice@example.com");
+            when(userStore.findById(id)).thenReturn(Optional.of(u));
+
+            var result = userService.getUser(id);
+
+            assertEquals(u.displayName(), result.displayName());
+            assertEquals(u.email(), result.email());
+        }
+
+        @Test
+        void givenUnknownId_throwsNotFoundException() {
+            when(userStore.findById(any())).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundException.class, () -> userService.getUser(UUID.randomUUID()));
+        }
+    }
+
+    @Nested
+    class UpdateUser {
+
+        @Test
+        void givenValidDisplayName_returnsUpdatedResponse() {
+            var id = UUID.randomUUID();
+            var updated = user("st-1", "New Name", "alice1234", "alice@example.com");
+            when(userStore.update(id, "New Name")).thenReturn(Optional.of(updated));
+
+            var result = userService.updateUser(id, "New Name");
+
+            assertEquals("New Name", result.displayName());
+        }
+
+        @Test
+        void givenUnknownId_throwsNotFoundException() {
+            when(userStore.update(any(), any())).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundException.class, () -> userService.updateUser(UUID.randomUUID(), "Name"));
+        }
+    }
+
+    @Nested
+    class SearchUsers {
+
+        @Test
+        void givenResults_mapsToSearchResponse() {
+            var callerId = UUID.randomUUID();
+            when(userStore.findByTagPrefix(eq("ali"), eq(callerId), eq(20))).thenReturn(List.of());
+
+            var result = userService.searchUsers(callerId, "ali");
+
+            assertTrue(result.isEmpty());
+            verify(userStore).findByTagPrefix("ali", callerId, 20);
+        }
+    }
+
+    @Nested
+    class AddContact {
+
+        @Test
+        void givenValidTarget_returnsContactResponse() {
+            var callerId = UUID.randomUUID();
+            var targetId = UUID.randomUUID();
+            var target = user("st-2", "Bob", "bob1234ab", "bob@example.com");
+            when(userStore.findById(targetId)).thenReturn(Optional.of(target));
+            when(userStore.insertContact(callerId, targetId)).thenReturn(true);
+
+            var result = userService.addContact(callerId, targetId);
+
+            assertEquals(target.displayName(), result.displayName());
+            assertEquals(target.tag(), result.tag());
+        }
+
+        @Test
+        void givenSelfAdd_throwsBadRequest() {
+            var id = UUID.randomUUID();
+
+            assertThrows(BadRequestException.class, () -> userService.addContact(id, id));
+
+            verify(userStore, never()).insertContact(any(), any());
+        }
+
+        @Test
+        void givenUnknownTarget_throwsNotFoundException() {
+            var callerId = UUID.randomUUID();
+            var targetId = UUID.randomUUID();
+            when(userStore.findById(targetId)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundException.class, () -> userService.addContact(callerId, targetId));
+        }
+
+        @Test
+        void givenAlreadyContact_throwsConflict() {
+            var callerId = UUID.randomUUID();
+            var targetId = UUID.randomUUID();
+            var target = user("st-2", "Bob", "bob1234ab", "bob@example.com");
+            when(userStore.findById(targetId)).thenReturn(Optional.of(target));
+            when(userStore.insertContact(callerId, targetId)).thenReturn(false);
+
+            assertThrows(ConflictException.class, () -> userService.addContact(callerId, targetId));
+        }
+    }
+
+    @Nested
+    class RemoveContact {
+
+        @Test
+        void givenExistingContact_completes() {
+            var callerId = UUID.randomUUID();
+            var targetId = UUID.randomUUID();
+            when(userStore.deleteContact(callerId, targetId)).thenReturn(true);
+
+            assertDoesNotThrow(() -> userService.removeContact(callerId, targetId));
+        }
+
+        @Test
+        void givenNonExistentContact_throwsNotFoundException() {
+            var callerId = UUID.randomUUID();
+            var targetId = UUID.randomUUID();
+            when(userStore.deleteContact(callerId, targetId)).thenReturn(false);
+
+            assertThrows(NotFoundException.class, () -> userService.removeContact(callerId, targetId));
         }
     }
 }

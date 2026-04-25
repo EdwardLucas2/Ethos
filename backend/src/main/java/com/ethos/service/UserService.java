@@ -1,11 +1,17 @@
 package com.ethos.service;
 
+import com.ethos.dto.ContactResponse;
 import com.ethos.dto.UserResponse;
+import com.ethos.dto.UserSearchResponse;
+import com.ethos.exception.BadRequestException;
 import com.ethos.exception.ConflictException;
 import com.ethos.exception.DuplicateTagException;
+import com.ethos.exception.NotFoundException;
 import com.ethos.model.User;
 import com.ethos.store.UserStore;
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +48,48 @@ public class UserService {
         throw new ConflictException("Could not generate a unique tag — please try again");
     }
 
+    public UserResponse getUser(UUID userId) {
+        return userStore.findById(userId).map(UserService::toResponse).orElseThrow(NotFoundException::new);
+    }
+
+    public UserResponse updateUser(UUID userId, String displayName) {
+        return userStore
+                .update(userId, displayName)
+                .map(UserService::toResponse)
+                .orElseThrow(NotFoundException::new);
+    }
+
+    public List<UserSearchResponse> searchUsers(UUID callerUserId, String tagPrefix) {
+        return userStore.findByTagPrefix(tagPrefix, callerUserId, 20).stream()
+                .map(r -> new UserSearchResponse(r.id(), r.displayName(), r.tag(), null, r.isContact()))
+                .toList();
+    }
+
+    public List<ContactResponse> listContacts(UUID callerUserId) {
+        return userStore.findAllContacts(callerUserId).stream()
+                .map(UserService::toContactResponse)
+                .toList();
+    }
+
+    public ContactResponse addContact(UUID callerUserId, UUID targetUserId) {
+        if (callerUserId.equals(targetUserId)) {
+            throw new BadRequestException("Cannot add yourself as a contact");
+        }
+        var target = userStore.findById(targetUserId).orElseThrow(NotFoundException::new);
+        if (!userStore.insertContact(callerUserId, targetUserId)) {
+            throw new ConflictException("Already a contact");
+        }
+        log.info("contact.added userId={} contactUserId={}", callerUserId, targetUserId);
+        return toContactResponse(target);
+    }
+
+    public void removeContact(UUID callerUserId, UUID targetUserId) {
+        if (!userStore.deleteContact(callerUserId, targetUserId)) {
+            throw new NotFoundException();
+        }
+        log.info("contact.removed userId={} contactUserId={}", callerUserId, targetUserId);
+    }
+
     private static String buildTagPrefix(String displayName) {
         var firstWord = displayName.trim().split("\\s+")[0];
         var stripped = firstWord.toLowerCase().replaceAll("[^a-z0-9]", "");
@@ -58,5 +106,9 @@ public class UserService {
 
     private static UserResponse toResponse(User user) {
         return new UserResponse(user.id(), user.displayName(), user.tag(), user.email(), null);
+    }
+
+    private static ContactResponse toContactResponse(User user) {
+        return new ContactResponse(user.id(), user.displayName(), user.tag(), null);
     }
 }

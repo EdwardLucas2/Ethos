@@ -7,7 +7,6 @@ import com.ethos.exception.ConflictException;
 import com.ethos.exception.ForbiddenException;
 import com.ethos.exception.NotFoundException;
 import com.ethos.exception.RegistrationIncompleteException;
-import com.ethos.handler.AuthHandler;
 import com.ethos.handler.UserHandler;
 import com.ethos.router.Role;
 import com.ethos.store.UserStore;
@@ -22,13 +21,11 @@ public class AppRouter {
     private final JwtVerifier jwtVerifier;
     private final UserStore userStore;
     private final UserHandler userHandler;
-    private final AuthHandler authHandler;
 
-    public AppRouter(JwtVerifier jwtVerifier, UserStore userStore, UserHandler userHandler, AuthHandler authHandler) {
+    public AppRouter(JwtVerifier jwtVerifier, UserStore userStore, UserHandler userHandler) {
         this.jwtVerifier = jwtVerifier;
         this.userStore = userStore;
         this.userHandler = userHandler;
-        this.authHandler = authHandler;
     }
 
     public void configure(JavalinDefaultRoutingApi routes) {
@@ -53,8 +50,15 @@ public class AppRouter {
 
     private void registerRoutes(JavalinDefaultRoutingApi routes) {
         routes.get("/health", ctx -> ctx.result("OK"), Role.ANYONE);
-        routes.post("/auth/signup", authHandler::signup, Role.ANYONE);
+
         routes.post("/users", userHandler::register, Role.JWT_ONLY);
+        routes.get("/users/me", userHandler::getMe);
+        routes.patch("/users/me", userHandler::updateMe);
+        routes.get("/users/search", userHandler::searchUsers);
+
+        routes.get("/contacts", userHandler::listContacts);
+        routes.post("/contacts", userHandler::addContact);
+        routes.delete("/contacts/{contactUserId}", userHandler::removeContact);
     }
 
     private void registerBeforeHandlers(JavalinDefaultRoutingApi routes) {

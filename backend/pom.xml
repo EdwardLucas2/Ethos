@@ -22,7 +22,8 @@
         <mockito.version>5.23.0</mockito.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <postgres.image>postgres:17</postgres.image>
-        <supertokens.image>supertokens/supertokens-postgresql:9.3</supertokens.image>
+        <supertokens.image>registry.supertokens.io/supertokens/supertokens-postgresql:11.4.4</supertokens.image>
+        <auth.image>ethos-auth:test</auth.image>
         <spotless.version>2.44.0</spotless.version>
         <google-java-format.version>1.35.0</google-java-format.version>
         <javalin-openapi.version>7.1.0</javalin-openapi.version>
@@ -160,8 +161,34 @@
                     <systemPropertyVariables>
                         <postgres.image>${postgres.image}</postgres.image>
                         <supertokens.image>${supertokens.image}</supertokens.image>
+                        <auth.image>${auth.image}</auth.image>
                     </systemPropertyVariables>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>build-auth-server-image</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-f</argument>
+                                <argument>${project.basedir}/../auth/Dockerfile</argument>
+                                <argument>-t</argument>
+                                <argument>${auth.image}</argument>
+                                <argument>${project.basedir}/../auth</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Formatting: mvn spotless:apply (fix), mvn spotless:check (verify) -->
             <plugin>

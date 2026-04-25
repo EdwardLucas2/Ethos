@@ -5,27 +5,40 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class UserApiE2ETest extends E2ETestBase {
 
-    private HttpResponse<String> get(String path) throws Exception {
-        var req = HttpRequest.newBuilder().uri(URI.create(APP_URL + path)).GET().build();
-        return HTTP.send(req, HttpResponse.BodyHandlers.ofString());
+    private HttpResponse<String> get(String path, String jwt) throws Exception {
+        var builder = HttpRequest.newBuilder().uri(URI.create(APP_URL + path)).GET();
+        if (jwt != null) builder.header("Authorization", "Bearer " + jwt);
+        return HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> post(String path, String body, String authHeader) throws Exception {
+    private HttpResponse<String> post(String path, String body, String jwt) throws Exception {
         var builder = HttpRequest.newBuilder()
                 .uri(URI.create(APP_URL + path))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body));
-        if (authHeader != null) builder.header("Authorization", authHeader);
+        if (jwt != null) builder.header("Authorization", "Bearer " + jwt);
         return HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    private String registerBody(String displayName) throws Exception {
-        return MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", displayName));
+    private HttpResponse<String> patch(String path, String body, String jwt) throws Exception {
+        var builder = HttpRequest.newBuilder()
+                .uri(URI.create(APP_URL + path))
+                .header("Content-Type", "application/json")
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(body));
+        if (jwt != null) builder.header("Authorization", "Bearer " + jwt);
+        return HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> delete(String path, String jwt) throws Exception {
+        var builder = HttpRequest.newBuilder().uri(URI.create(APP_URL + path)).DELETE();
+        if (jwt != null) builder.header("Authorization", "Bearer " + jwt);
+        return HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
 
     @Nested
@@ -33,7 +46,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenNoAuth_returns200() throws Exception {
-            var response = get("/health");
+            var response = get("/health", null);
 
             assertEquals(200, response.statusCode());
             assertEquals("OK", response.body());
@@ -47,24 +60,26 @@ class UserApiE2ETest extends E2ETestBase {
         void givenValidJwt_returns201WithCorrectBody() throws Exception {
             var email = "alice@example.com";
             var jwt = signupAndGetJwt(email);
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Alice"));
 
-            var response = post("/users", registerBody("Alice"), "Bearer " + jwt);
+            var response = post("/users", body, jwt);
 
             assertEquals(201, response.statusCode());
-            var body = MAPPER.readTree(response.body());
-            assertEquals("Alice", body.get("displayName").asText());
-            assertEquals(email, body.get("email").asText());
-            assertNotNull(body.get("id").asText());
-            assertTrue(body.get("tag").asText().startsWith("alice"));
-            assertFalse(body.has("avatarUrl"));
+            var parsed = MAPPER.readTree(response.body());
+            assertEquals("Alice", parsed.get("displayName").asText());
+            assertEquals(email, parsed.get("email").asText());
+            assertNotNull(parsed.get("id").asText());
+            assertTrue(parsed.get("tag").asText().startsWith("alice"));
+            assertFalse(parsed.has("avatarUrl"));
         }
 
         @Test
         void givenValidJwt_persistsUserToDatabase() throws Exception {
             var email = "bob@example.com";
             var jwt = signupAndGetJwt(email);
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Bob"));
 
-            post("/users", registerBody("Bob"), "Bearer " + jwt);
+            post("/users", body, jwt);
 
             var count = JDBI.withHandle(h -> h.createQuery("SELECT COUNT(*) FROM users WHERE email = :email")
                     .bind("email", email)
@@ -75,14 +90,18 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenNoAuthorizationHeader_returns401() throws Exception {
-            var response = post("/users", registerBody("Alice"), null);
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Alice"));
+
+            var response = post("/users", body, null);
 
             assertEquals(401, response.statusCode());
         }
 
         @Test
         void givenMalformedJwt_returns401() throws Exception {
-            var response = post("/users", registerBody("Alice"), "Bearer not.a.real.token");
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Alice"));
+
+            var response = post("/users", body, "not.a.real.token");
 
             assertEquals(401, response.statusCode());
         }
@@ -92,7 +111,7 @@ class UserApiE2ETest extends E2ETestBase {
             var jwt = signupAndGetJwt("carol@example.com");
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode());
 
-            var response = post("/users", body, "Bearer " + jwt);
+            var response = post("/users", body, jwt);
 
             assertEquals(400, response.statusCode());
         }
@@ -100,20 +119,295 @@ class UserApiE2ETest extends E2ETestBase {
         @Test
         void givenBlankDisplayName_returns400() throws Exception {
             var jwt = signupAndGetJwt("dave@example.com");
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "   "));
 
-            var response = post("/users", registerBody("   "), "Bearer " + jwt);
+            var response = post("/users", body, jwt);
 
             assertEquals(400, response.statusCode());
         }
 
         @Test
         void givenAlreadyRegistered_returns409() throws Exception {
-            var jwt = signupAndGetJwt("eve@example.com");
+            var jwt = registerAndGetJwt("eve@example.com", "Eve");
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Eve"));
 
-            post("/users", registerBody("Eve"), "Bearer " + jwt);
-            var secondResponse = post("/users", registerBody("Eve"), "Bearer " + jwt);
+            var response = post("/users", body, jwt);
 
-            assertEquals(409, secondResponse.statusCode());
+            assertEquals(409, response.statusCode());
+        }
+    }
+
+    @Nested
+    class GetMe {
+
+        @Test
+        void givenRegisteredUser_returns200WithProfile() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+
+            var response = get("/users/me", jwt);
+
+            assertEquals(200, response.statusCode());
+            var parsed = MAPPER.readTree(response.body());
+            assertEquals("Alice", parsed.get("displayName").asText());
+            assertEquals("alice@example.com", parsed.get("email").asText());
+            assertNotNull(parsed.get("id").asText());
+        }
+
+        @Test
+        void givenNoAuth_returns401() throws Exception {
+            var response = get("/users/me", null);
+
+            assertEquals(401, response.statusCode());
+        }
+
+        @Test
+        void givenJwtWithNoUsersRow_returns401WithRegistrationIncomplete() throws Exception {
+            var jwt = signupAndGetJwt("ghost@example.com");
+
+            var response = get("/users/me", jwt);
+
+            assertEquals(401, response.statusCode());
+            assertTrue(response.body().contains("registration_incomplete"));
+        }
+    }
+
+    @Nested
+    class UpdateMe {
+
+        @Test
+        void givenValidDisplayName_returns200WithUpdatedProfile() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Alice Updated"));
+
+            var response = patch("/users/me", body, jwt);
+
+            assertEquals(200, response.statusCode());
+            assertEquals(
+                    "Alice Updated",
+                    MAPPER.readTree(response.body()).get("displayName").asText());
+        }
+
+        @Test
+        void givenBlankDisplayName_returns400() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "  "));
+
+            var response = patch("/users/me", body, jwt);
+
+            assertEquals(400, response.statusCode());
+        }
+
+        @Test
+        void givenNoAuth_returns401() throws Exception {
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "X"));
+
+            var response = patch("/users/me", body, null);
+
+            assertEquals(401, response.statusCode());
+        }
+    }
+
+    @Nested
+    class SearchUsers {
+
+        @Test
+        void givenMatchingPrefix_returnsResults() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+
+            var response = get("/users/search?tag=bob", jwt);
+
+            assertEquals(200, response.statusCode());
+            var parsed = MAPPER.readTree(response.body());
+            assertEquals(1, parsed.size());
+            assertTrue(parsed.get(0).get("tag").asText().startsWith("bob"));
+        }
+
+        @Test
+        void givenContactInResults_isContactIsTrue() throws Exception {
+            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+            post(
+                    "/contacts",
+                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString())),
+                    aliceJwt);
+
+            var response = get("/users/search?tag=bob", aliceJwt);
+
+            assertEquals(200, response.statusCode());
+            assertTrue(MAPPER.readTree(response.body()).get(0).get("isContact").asBoolean());
+        }
+
+        @Test
+        void givenCallerInResults_excludesSelf() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+
+            var response = get("/users/search?tag=alice", jwt);
+
+            assertEquals(200, response.statusCode());
+            assertEquals(0, MAPPER.readTree(response.body()).size());
+        }
+
+        @Test
+        void givenTagParamTooShort_returns400() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+
+            assertEquals(400, get("/users/search?tag=a", jwt).statusCode());
+        }
+
+        @Test
+        void givenMissingTagParam_returns400() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+
+            assertEquals(400, get("/users/search", jwt).statusCode());
+        }
+
+        @Test
+        void givenNoAuth_returns401() throws Exception {
+            assertEquals(401, get("/users/search?tag=bo", null).statusCode());
+        }
+    }
+
+    @Nested
+    class ListContacts {
+
+        @Test
+        void givenNoContacts_returnsEmptyList() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+
+            var response = get("/contacts", jwt);
+
+            assertEquals(200, response.statusCode());
+            assertEquals(0, MAPPER.readTree(response.body()).size());
+        }
+
+        @Test
+        void givenContacts_returnsListWithoutEmail() throws Exception {
+            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+            post(
+                    "/contacts",
+                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString())),
+                    aliceJwt);
+
+            var response = get("/contacts", aliceJwt);
+
+            assertEquals(200, response.statusCode());
+            var parsed = MAPPER.readTree(response.body());
+            assertEquals(1, parsed.size());
+            assertEquals("Bob", parsed.get(0).get("displayName").asText());
+            assertFalse(parsed.get(0).has("email"));
+        }
+
+        @Test
+        void givenNoAuth_returns401() throws Exception {
+            assertEquals(401, get("/contacts", null).statusCode());
+        }
+    }
+
+    @Nested
+    class AddContact {
+
+        @Test
+        void givenValidUser_returns201WithContactData() throws Exception {
+            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString()));
+
+            var response = post("/contacts", body, aliceJwt);
+
+            assertEquals(201, response.statusCode());
+            var parsed = MAPPER.readTree(response.body());
+            assertEquals("Bob", parsed.get("displayName").asText());
+            assertFalse(parsed.has("email"));
+        }
+
+        @Test
+        void givenSelfAdd_returns400() throws Exception {
+            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
+            var aliceId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'alice@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", aliceId.toString()));
+
+            assertEquals(400, post("/contacts", body, aliceJwt).statusCode());
+        }
+
+        @Test
+        void givenUnknownUser_returns404() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var body = MAPPER.writeValueAsString(
+                    MAPPER.createObjectNode().put("userId", UUID.randomUUID().toString()));
+
+            assertEquals(404, post("/contacts", body, jwt).statusCode());
+        }
+
+        @Test
+        void givenAlreadyContact_returns409() throws Exception {
+            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString()));
+            post("/contacts", body, aliceJwt);
+
+            assertEquals(409, post("/contacts", body, aliceJwt).statusCode());
+        }
+
+        @Test
+        void givenNoAuth_returns401() throws Exception {
+            var body = MAPPER.writeValueAsString(
+                    MAPPER.createObjectNode().put("userId", UUID.randomUUID().toString()));
+
+            assertEquals(401, post("/contacts", body, null).statusCode());
+        }
+    }
+
+    @Nested
+    class RemoveContact {
+
+        @Test
+        void givenExistingContact_returns204AndContactIsGone() throws Exception {
+            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+            post(
+                    "/contacts",
+                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString())),
+                    aliceJwt);
+
+            var response = delete("/contacts/" + bobId, aliceJwt);
+
+            assertEquals(204, response.statusCode());
+            assertEquals(0, MAPPER.readTree(get("/contacts", aliceJwt).body()).size());
+        }
+
+        @Test
+        void givenNotInContacts_returns404() throws Exception {
+            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            registerAndGetJwt("bob@example.com", "Bob");
+            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
+                    .mapTo(UUID.class)
+                    .one());
+
+            assertEquals(404, delete("/contacts/" + bobId, jwt).statusCode());
+        }
+
+        @Test
+        void givenNoAuth_returns401() throws Exception {
+            assertEquals(401, delete("/contacts/" + UUID.randomUUID(), null).statusCode());
         }
     }
 }
