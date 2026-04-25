@@ -58,8 +58,8 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenValidJwt_returns201WithCorrectBody() throws Exception {
-            var email = "alice@example.com";
-            var jwt = signupAndGetJwt(email);
+            var jwt = signupAndGetJwt();
+            var email = extractEmailFromJwt(jwt);
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Alice"));
 
             var response = post("/users", body, jwt);
@@ -75,8 +75,8 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenValidJwt_persistsUserToDatabase() throws Exception {
-            var email = "bob@example.com";
-            var jwt = signupAndGetJwt(email);
+            var jwt = signupAndGetJwt();
+            var email = extractEmailFromJwt(jwt);
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Bob"));
 
             post("/users", body, jwt);
@@ -108,7 +108,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenMissingDisplayName_returns400() throws Exception {
-            var jwt = signupAndGetJwt("carol@example.com");
+            var jwt = signupAndGetJwt();
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode());
 
             var response = post("/users", body, jwt);
@@ -118,7 +118,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenBlankDisplayName_returns400() throws Exception {
-            var jwt = signupAndGetJwt("dave@example.com");
+            var jwt = signupAndGetJwt();
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "   "));
 
             var response = post("/users", body, jwt);
@@ -128,7 +128,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenAlreadyRegistered_returns409() throws Exception {
-            var jwt = registerAndGetJwt("eve@example.com", "Eve");
+            var jwt = registerAndGetJwt("Eve");
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Eve"));
 
             var response = post("/users", body, jwt);
@@ -142,14 +142,15 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenRegisteredUser_returns200WithProfile() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
+            var email = extractEmailFromJwt(jwt);
 
             var response = get("/users/me", jwt);
 
             assertEquals(200, response.statusCode());
             var parsed = MAPPER.readTree(response.body());
             assertEquals("Alice", parsed.get("displayName").asText());
-            assertEquals("alice@example.com", parsed.get("email").asText());
+            assertEquals(email, parsed.get("email").asText());
             assertNotNull(parsed.get("id").asText());
         }
 
@@ -162,7 +163,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenJwtWithNoUsersRow_returns401WithRegistrationIncomplete() throws Exception {
-            var jwt = signupAndGetJwt("ghost@example.com");
+            var jwt = signupAndGetJwt();
 
             var response = get("/users/me", jwt);
 
@@ -176,7 +177,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenValidDisplayName_returns200WithUpdatedProfile() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "Alice Updated"));
 
             var response = patch("/users/me", body, jwt);
@@ -189,7 +190,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenBlankDisplayName_returns400() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
             var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", "  "));
 
             var response = patch("/users/me", body, jwt);
@@ -212,8 +213,8 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenMatchingPrefix_returnsResults() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
+            var jwt = registerAndGetJwt("Alice");
+            registerAndGetJwt("Bob");
 
             var response = get("/users/search?tag=bob", jwt);
 
@@ -225,14 +226,12 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenContactInResults_isContactIsTrue() throws Exception {
-            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
-            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
+            var aliceJwt = registerAndGetJwt("Alice");
+            var bobJwt = registerAndGetJwt("Bob");
+            var bobId = getUserIdFromJwt(bobJwt);
             post(
                     "/contacts",
-                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString())),
+                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("targetUserId", bobId.toString())),
                     aliceJwt);
 
             var response = get("/users/search?tag=bob", aliceJwt);
@@ -243,7 +242,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenCallerInResults_excludesSelf() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
 
             var response = get("/users/search?tag=alice", jwt);
 
@@ -253,14 +252,14 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenTagParamTooShort_returns400() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
 
             assertEquals(400, get("/users/search?tag=a", jwt).statusCode());
         }
 
         @Test
         void givenMissingTagParam_returns400() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
 
             assertEquals(400, get("/users/search", jwt).statusCode());
         }
@@ -276,7 +275,7 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenNoContacts_returnsEmptyList() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
 
             var response = get("/contacts", jwt);
 
@@ -286,14 +285,12 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenContacts_returnsListWithoutEmail() throws Exception {
-            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
-            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
+            var aliceJwt = registerAndGetJwt("Alice");
+            var bobJwt = registerAndGetJwt("Bob");
+            var bobId = getUserIdFromJwt(bobJwt);
             post(
                     "/contacts",
-                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString())),
+                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("targetUserId", bobId.toString())),
                     aliceJwt);
 
             var response = get("/contacts", aliceJwt);
@@ -316,12 +313,10 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenValidUser_returns201WithContactData() throws Exception {
-            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
-            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
-            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString()));
+            var aliceJwt = registerAndGetJwt("Alice");
+            var bobJwt = registerAndGetJwt("Bob");
+            var bobId = getUserIdFromJwt(bobJwt);
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("targetUserId", bobId.toString()));
 
             var response = post("/contacts", body, aliceJwt);
 
@@ -333,32 +328,28 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenSelfAdd_returns400() throws Exception {
-            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
-            var aliceId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'alice@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
-            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", aliceId.toString()));
+            var aliceJwt = registerAndGetJwt("Alice");
+            var aliceId = getUserIdFromJwt(aliceJwt);
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("targetUserId", aliceId.toString()));
 
             assertEquals(400, post("/contacts", body, aliceJwt).statusCode());
         }
 
         @Test
         void givenUnknownUser_returns404() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
+            var jwt = registerAndGetJwt("Alice");
             var body = MAPPER.writeValueAsString(
-                    MAPPER.createObjectNode().put("userId", UUID.randomUUID().toString()));
+                    MAPPER.createObjectNode().put("targetUserId", UUID.randomUUID().toString()));
 
             assertEquals(404, post("/contacts", body, jwt).statusCode());
         }
 
         @Test
         void givenAlreadyContact_returns409() throws Exception {
-            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
-            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
-            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString()));
+            var aliceJwt = registerAndGetJwt("Alice");
+            var bobJwt = registerAndGetJwt("Bob");
+            var bobId = getUserIdFromJwt(bobJwt);
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("targetUserId", bobId.toString()));
             post("/contacts", body, aliceJwt);
 
             assertEquals(409, post("/contacts", body, aliceJwt).statusCode());
@@ -367,7 +358,7 @@ class UserApiE2ETest extends E2ETestBase {
         @Test
         void givenNoAuth_returns401() throws Exception {
             var body = MAPPER.writeValueAsString(
-                    MAPPER.createObjectNode().put("userId", UUID.randomUUID().toString()));
+                    MAPPER.createObjectNode().put("targetUserId", UUID.randomUUID().toString()));
 
             assertEquals(401, post("/contacts", body, null).statusCode());
         }
@@ -378,14 +369,12 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenExistingContact_returns204AndContactIsGone() throws Exception {
-            var aliceJwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
-            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
+            var aliceJwt = registerAndGetJwt("Alice");
+            var bobJwt = registerAndGetJwt("Bob");
+            var bobId = getUserIdFromJwt(bobJwt);
             post(
                     "/contacts",
-                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("userId", bobId.toString())),
+                    MAPPER.writeValueAsString(MAPPER.createObjectNode().put("targetUserId", bobId.toString())),
                     aliceJwt);
 
             var response = delete("/contacts/" + bobId, aliceJwt);
@@ -396,11 +385,9 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenNotInContacts_returns404() throws Exception {
-            var jwt = registerAndGetJwt("alice@example.com", "Alice");
-            registerAndGetJwt("bob@example.com", "Bob");
-            var bobId = JDBI.withHandle(h -> h.createQuery("SELECT id FROM users WHERE email = 'bob@example.com'")
-                    .mapTo(UUID.class)
-                    .one());
+            var jwt = registerAndGetJwt("Alice");
+            var bobJwt = registerAndGetJwt("Bob");
+            var bobId = getUserIdFromJwt(bobJwt);
 
             assertEquals(404, delete("/contacts/" + bobId, jwt).statusCode());
         }

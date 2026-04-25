@@ -3,7 +3,6 @@ package com.ethos.e2e;
 import com.ethos.AppRouter;
 import com.ethos.Main;
 import com.ethos.auth.JwtVerifier;
-import com.ethos.auth.SuperTokensCoreClient;
 import com.ethos.handler.UserHandler;
 import com.ethos.service.UserService;
 import com.ethos.store.UserStore;
@@ -18,8 +17,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -32,8 +29,11 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 /**
  * Base class for all E2E tests. Starts three containers once per JVM — PostgreSQL (app DB +
- * SuperTokens DB), SuperTokens Core — and a Javalin server wired against them. Each test gets a
- * clean database via @BeforeEach truncation.
+ * SuperTokens DB), SuperTokens Core, and the auth server — and a Javalin server wired against
+ * them. Each test gets a clean database via @BeforeEach truncation.
+ *
+ * <p>All helpers that create auth accounts use random emails, so SuperTokens state never collides
+ * across tests and no per-test SuperTokens cleanup is needed.
  */
 @Tag("e2e")
 public abstract class E2ETestBase {
@@ -58,19 +58,15 @@ public abstract class E2ETestBase {
     private static final GenericContainer<?> AUTH_SERVER;
     private static final String SUPERTOKENS_ALIAS = "supertokens";
 
-    protected static final SuperTokensCoreClient SUPERTOKENS_CLIENT;
     protected static final Jdbi JDBI;
     protected static final HttpClient HTTP = HttpClient.newHttpClient();
     protected static final ObjectMapper MAPPER = new ObjectMapper();
     protected static final String APP_URL;
     protected static final String AUTH_URL;
 
-    private static final ThreadLocal<Set<String>> SUPERTOKENS_USER_IDS = ThreadLocal.withInitial(HashSet::new);
-
     static {
         POSTGRES.start();
 
-        // Create a second database in the same PG instance for SuperTokens' internal tables
         try {
             POSTGRES.execInContainer("psql", "-U", DB_USER, "-d", DB_NAME, "-c", "CREATE DATABASE supertokens");
         } catch (Exception e) {
@@ -97,7 +93,6 @@ public abstract class E2ETestBase {
         var supertokensUrl = "http://localhost:" + SUPERTOKENS.getMappedPort(3567);
         var authServerUrl = "http://localhost:" + AUTH_SERVER.getMappedPort(3568);
         AUTH_URL = authServerUrl;
-        SUPERTOKENS_CLIENT = new SuperTokensCoreClient(supertokensUrl);
         var jwtVerifier = JwtVerifier.fromJwksUrl(supertokensUrl + "/.well-known/jwks.json");
         var userStore = new UserStore(JDBI);
         var appRouter = new AppRouter(jwtVerifier, userStore, new UserHandler(new UserService(userStore)));
@@ -124,10 +119,55 @@ public abstract class E2ETestBase {
         return new GenericContainer<>(System.getProperty("auth.image"))
                 .withNetwork(NETWORK)
                 .withExposedPorts(3568)
-                .withEnv("SUPERTOKENS_CORE_URL", supertokensUrl)
-                .withEnv("API_DOMAIN", "http://localhost:8080")
-                .withEnv("WEBSITE_DOMAIN", "http://localhost:8080")
+                .withEnv("SUPERTOKENS_URL", supertokensUrl)
+                .withEnv("API_URL", "http://localhost:8080")
+                .withEnv("AUTH_URL", "http://localhost:3568")
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
+    }
+
+    /**
+     * Signs up a new user via the auth server and returns the access token. Each call uses a
+     * random email so accounts never collide across tests.
+     */
+    protected static String signupAndGetJwt() throws Exception {
+        return signUpViaAuthServer(UUID.randomUUID() + "@test.com", "Test1234!");
+    }
+
+    /** Signs up, creates the users row via POST /users, and returns the access token. */
+    protected static String registerAndGetJwt(String displayName) throws Exception {
+        var jwt = signupAndGetJwt();
+        var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", displayName));
+        var response = HTTP.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(APP_URL + "/users"))
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", "Bearer " + jwt)
+                        .POST(HttpRequest.BodyPublishers.ofString(body))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 201) {
+            throw new RuntimeException("registerAndGetJwt failed: " + response.statusCode() + " " + response.body());
+        }
+        return jwt;
+    }
+
+    /** Returns the app-level user UUID for the given registered user's JWT. */
+    protected static UUID getUserIdFromJwt(String jwt) throws Exception {
+        var response = HTTP.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(APP_URL + "/users/me"))
+                        .header("Authorization", "Bearer " + jwt)
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
+        return UUID.fromString(MAPPER.readTree(response.body()).get("id").asText());
+    }
+
+    /** Extracts the email claim from the JWT access token payload. */
+    protected static String extractEmailFromJwt(String jwt) throws Exception {
+        var payload = jwt.split("\\.")[1];
+        var decoded = new String(Base64.getUrlDecoder().decode(payload));
+        return MAPPER.readTree(decoded).get("email").asText();
     }
 
     /**
@@ -152,10 +192,7 @@ public abstract class E2ETestBase {
             throw new RuntimeException("Auth server signup failed: " + response.statusCode() + " " + response.body());
         }
 
-        var jwt = response.headers().firstValue("st-access-token").orElseThrow();
-        var userId = extractSub(jwt);
-        SUPERTOKENS_USER_IDS.get().add(userId);
-        return jwt;
+        return response.headers().firstValue("st-access-token").orElseThrow();
     }
 
     protected static String signInViaAuthServer(String email, String password) throws Exception {
@@ -176,21 +213,9 @@ public abstract class E2ETestBase {
             throw new RuntimeException("Auth server signin failed: " + response.statusCode() + " " + response.body());
         }
 
-        var jwt = response.headers().firstValue("st-access-token").orElseThrow();
-        var userId = extractSub(jwt);
-        SUPERTOKENS_USER_IDS.get().add(userId);
-        return jwt;
+        return response.headers().firstValue("st-access-token").orElseThrow();
     }
 
-    private static String extractSub(String jwt) throws Exception {
-        var payload = jwt.split("\\.")[1];
-        var decoded = new String(Base64.getUrlDecoder().decode(payload));
-        return MAPPER.readTree(decoded).get("sub").asText();
-    }
-
-    /**
-     * Verifies the session via the auth server /me endpoint and returns the SuperTokens userId.
-     */
     protected static String getUserIdViaAuthServer(String jwt) throws Exception {
         var response = HTTP.send(
                 HttpRequest.newBuilder()
@@ -214,39 +239,6 @@ public abstract class E2ETestBase {
         return node;
     }
 
-    /**
-     * Signs up a new user with a random email and returns the access token. Use this in tests that
-     * need a valid JWT but don't care about the specific email.
-     */
-    protected static String signupAndGetJwt() throws Exception {
-        return signupAndGetJwt(UUID.randomUUID() + "@test.com");
-    }
-
-    /**
-     * Signs up a new user with the given email and returns the access token. Calls SuperTokens Core
-     * directly — no HTTP route on the Java backend is required for auth.
-     */
-    protected static String signupAndGetJwt(String email) throws Exception {
-        var userId = SUPERTOKENS_CLIENT.signUp(email, "Test1234!");
-        SUPERTOKENS_USER_IDS.get().add(userId);
-        return SUPERTOKENS_CLIENT.createSession(userId, email);
-    }
-
-    /** Signs up, creates the users row via POST /users, and returns the access token. */
-    protected static String registerAndGetJwt(String email, String displayName) throws Exception {
-        var jwt = signupAndGetJwt(email);
-        var body = MAPPER.writeValueAsString(MAPPER.createObjectNode().put("displayName", displayName));
-        HTTP.send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create(APP_URL + "/users"))
-                        .header("Content-Type", "application/json")
-                        .header("Authorization", "Bearer " + jwt)
-                        .POST(HttpRequest.BodyPublishers.ofString(body))
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
-        return jwt;
-    }
-
     @BeforeEach
     void resetDatabase() {
         JDBI.useHandle(h -> {
@@ -262,14 +254,5 @@ public abstract class E2ETestBase {
                 h.execute("TRUNCATE " + String.join(", ", tables) + " CASCADE");
             }
         });
-
-        var userIds = SUPERTOKENS_USER_IDS.get();
-        for (var userId : userIds) {
-            try {
-                SUPERTOKENS_CLIENT.deleteUser(userId);
-            } catch (Exception ignored) {
-            }
-        }
-        userIds.clear();
     }
 }

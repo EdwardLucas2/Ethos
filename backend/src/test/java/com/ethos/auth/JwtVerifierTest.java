@@ -26,7 +26,7 @@ class JwtVerifierTest {
         var kp = kpg.generateKeyPair();
         publicKey = (RSAPublicKey) kp.getPublic();
         privateKey = (RSAPrivateKey) kp.getPrivate();
-        verifier = new JwtVerifier(List.of(publicKey));
+        verifier = new JwtVerifier("", List.of(publicKey));
     }
 
     private static String buildToken(String subject, String email, Date expiration) {

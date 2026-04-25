@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.ethos.exception.BadRequestException;
 import com.ethos.exception.ConflictException;
+import com.ethos.exception.DuplicateAccountException;
 import com.ethos.exception.DuplicateTagException;
 import com.ethos.exception.NotFoundException;
 import com.ethos.model.User;
@@ -39,7 +40,6 @@ class UserServiceTest {
 
         @Test
         void givenValidInput_returnsCreatedUser() {
-            when(userStore.findBySupertokensUserId("st-id-1")).thenReturn(Optional.empty());
             var savedUser = user("st-id-1", "Edward", "edward4f2a", "edward@example.com");
             when(userStore.insert(any())).thenReturn(savedUser);
 
@@ -54,18 +54,14 @@ class UserServiceTest {
 
         @Test
         void givenExistingSupertokensAccount_throwsConflict() {
-            when(userStore.findBySupertokensUserId("st-id-1"))
-                    .thenReturn(Optional.of(user("st-id-1", "Edward", "edward4f2a", "edward@example.com")));
+            when(userStore.insert(any())).thenThrow(new DuplicateAccountException("Account already registered"));
 
             assertThrows(
                     ConflictException.class, () -> userService.registerUser("st-id-1", "edward@example.com", "Edward"));
-
-            verify(userStore, never()).insert(any());
         }
 
         @Test
         void givenTagCollision_retriesWithNewSuffix() {
-            when(userStore.findBySupertokensUserId("st-id-1")).thenReturn(Optional.empty());
             var savedUser = user("st-id-1", "Edward", "edward9z8y", "edward@example.com");
             when(userStore.insert(any())).thenThrow(new DuplicateTagException()).thenReturn(savedUser);
 
@@ -77,7 +73,6 @@ class UserServiceTest {
 
         @Test
         void givenDisplayNameWithSpecialChars_stripsToAlphanumeric() {
-            when(userStore.findBySupertokensUserId(any())).thenReturn(Optional.empty());
             when(userStore.insert(any())).thenAnswer(inv -> inv.getArgument(0, User.class));
 
             var result = userService.registerUser("st-id", "e@test.com", "El!ias Smith");
@@ -87,7 +82,6 @@ class UserServiceTest {
 
         @Test
         void givenFirstWordExceedsEightChars_truncatesPrefix() {
-            when(userStore.findBySupertokensUserId(any())).thenReturn(Optional.empty());
             when(userStore.insert(any())).thenAnswer(inv -> inv.getArgument(0, User.class));
 
             var result = userService.registerUser("st-id", "e@test.com", "Bartholomew Jones");

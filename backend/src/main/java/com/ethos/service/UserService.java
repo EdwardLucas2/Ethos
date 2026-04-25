@@ -5,6 +5,7 @@ import com.ethos.dto.UserResponse;
 import com.ethos.dto.UserSearchResponse;
 import com.ethos.exception.BadRequestException;
 import com.ethos.exception.ConflictException;
+import com.ethos.exception.DuplicateAccountException;
 import com.ethos.exception.DuplicateTagException;
 import com.ethos.exception.NotFoundException;
 import com.ethos.model.User;
@@ -29,10 +30,6 @@ public class UserService {
     }
 
     public UserResponse registerUser(String supertokensUserId, String email, String displayName) {
-        if (userStore.findBySupertokensUserId(supertokensUserId).isPresent()) {
-            throw new ConflictException("Account already registered");
-        }
-
         var prefix = buildTagPrefix(displayName);
 
         for (int attempt = 0; attempt < MAX_TAG_ATTEMPTS; attempt++) {
@@ -43,6 +40,8 @@ public class UserService {
                 return toResponse(inserted);
             } catch (DuplicateTagException ignored) {
                 // retry with a new random suffix
+            } catch (DuplicateAccountException e) {
+                throw new ConflictException(e.getMessage());
             }
         }
         throw new ConflictException("Could not generate a unique tag — please try again");
