@@ -44,7 +44,10 @@ export function createApp(websiteDomain: string): express.Application {
     app.use(
         cors({
             origin: websiteDomain,
-            allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
+            allowedHeaders: [
+                "content-type",
+                ...supertokens.getAllCORSHeaders(),
+            ],
             credentials: true,
         })
     );
