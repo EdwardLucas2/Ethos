@@ -36,16 +36,13 @@ services:
     auth:
         build:
             context: ../auth
+        env_file:
+            - ../auth/.env
         depends_on:
             supertokens:
                 condition: service_healthy
         ports:
             - "3568:3568"
-        environment:
-            SUPERTOKENS_CORE_URL: "http://supertokens:3567"
-            API_DOMAIN: "http://localhost:8080"
-            WEBSITE_DOMAIN: "http://localhost:8080"
-            PORT: "3568"
         healthcheck:
             test:
                 [
