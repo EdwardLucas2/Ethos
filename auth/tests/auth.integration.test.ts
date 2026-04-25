@@ -1,11 +1,15 @@
 import request from "supertest";
-import { createApp } from "../src/app";
+import { initSupertokens, createApp } from "../src/app";
 
-const app = createApp({
+const websiteDomain = "http://localhost:3568";
+
+initSupertokens({
     connectionURI: process.env.SUPERTOKENS_CORE_URL!,
-    apiDomain: "http://localhost:3568",
-    websiteDomain: "http://localhost:3568",
+    apiDomain: websiteDomain,
+    websiteDomain,
 });
+
+const app = createApp(websiteDomain);
 
 const uniqueEmail = () =>
     `test-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
@@ -59,9 +63,7 @@ describe("POST /auth/signup", () => {
         expect(res.status).toBe(200);
         expect(res.body.status).toBe("FIELD_ERROR");
         expect(res.body.formFields).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({ id: "email" }),
-            ])
+            expect.arrayContaining([expect.objectContaining({ id: "email" })])
         );
     });
 });
