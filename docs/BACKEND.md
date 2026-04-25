@@ -24,17 +24,19 @@ Dependencies flow downward across layers: handlers → services → stores. With
 
 ## Authentication & Middleware
 
+JWT verification is handled in `auth/AuthMiddleware` using JJWT. On startup, `AuthMiddleware` fetches the RSA public keys from SuperTokens Core's JWKS endpoint (`{SUPERTOKENS_URL}/.well-known/jwks.json`) and caches them. Each request is verified against those cached keys — no call to SuperTokens Core per request. The `sub` claim contains the `supertokens_user_id`.
+
 Two before-handlers registered in `AppRouter`, applied per-route:
 
-**`requireAuth`** — verifies the SuperTokens JWT and loads the `users` row by `supertokens_user_id`. Attaches the `users.id` UUID to the context as `userId`. Used on all protected routes.
+**`requireAuth`** — verifies the JWT and loads the `users` row by `supertokens_user_id`. Attaches the `users.id` UUID to the context as `userId`. Used on all protected routes.
 
 If the JWT is valid but no `users` row exists (e.g. registration was interrupted by a crash or re-install), throws `RegistrationIncompleteException` → `401` with body `{ "error": "registration_incomplete" }`. The client deletes its local session token and routes to the registration screen.
 
-**`requireJwt`** — verifies the SuperTokens JWT only. Does not load the `users` row. Used only on `POST /users` (the user row does not exist yet at registration time).
+**`requireJwt`** — verifies the JWT only. Does not load the `users` row. Used only on `POST /users` (the user row does not exist yet at registration time).
 
 The `userId` attached to context is always our `users.id` UUID — never the SuperTokens user ID and never a caller-supplied value. Handlers read it from context; they never trust the request body for identity.
 
-If the JWT is missing or invalid, SuperTokens returns `401` before any handler or service code runs.
+If the JWT is missing or invalid, the before-handler returns `401` before any handler or service code runs.
 
 ---
 
