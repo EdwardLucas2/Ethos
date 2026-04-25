@@ -1,37 +1,57 @@
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: ethos
-      POSTGRES_USER: ethos
-      POSTGRES_PASSWORD: secret
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ethos"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+    postgres:
+        image: postgres:18.3
+        environment:
+            POSTGRES_DB: ethos
+            POSTGRES_USER: ethos
+            POSTGRES_PASSWORD: secret
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ethos"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
 
-  supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:latest
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "3567:3567"
-    environment:
-      POSTGRESQL_CONNECTION_URI: "postgresql://ethos:secret@postgres:5432/ethos"
-    healthcheck:
-      test: >
-        bash -c 'exec 3<>/dev/tcp/127.0.0.1/3567 &&
-        echo -e "GET /hello HTTP/1.1\r\nhost: 127.0.0.1:3567\r\nConnection: close\r\n\r\n" >&3 &&
-        cat <&3 | grep "Hello"'
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    supertokens:
+        image: registry.supertokens.io/supertokens/supertokens-postgresql:11.4.4
+        depends_on:
+            postgres:
+                condition: service_healthy
+        ports:
+            - "3567:3567"
+        environment:
+            POSTGRESQL_CONNECTION_URI: "postgresql://ethos:secret@postgres:5432/ethos"
+        healthcheck:
+            test: >
+                bash -c 'exec 3<>/dev/tcp/127.0.0.1/3567 &&
+                echo -e "GET /hello HTTP/1.1\r\nhost: 127.0.0.1:3567\r\nConnection: close\r\n\r\n" >&3 &&
+                cat <&3 | grep "Hello"'
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    auth:
+        build:
+            context: ../auth
+        env_file:
+            - ../auth/.env
+        depends_on:
+            supertokens:
+                condition: service_healthy
+        ports:
+            - "3568:3568"
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "wget -qO- http://localhost:3568/health || exit 1",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
 volumes:
-  postgres_data:
+    postgres_data:
