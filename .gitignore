@@ -15,7 +15,11 @@ docker/volumes/
 # Environment files (never commit)
 .env
 .env.local
+.env.dev
+.env.prod
+.env.ci
 backend/.env
+auth/.env
 
 # IDE
 .idea/

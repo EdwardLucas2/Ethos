@@ -12,6 +12,7 @@
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <docker.skip>false</docker.skip>
 
         <javalin.version>7.1.0</javalin.version>
         <logback.version>1.5.32</logback.version>
@@ -186,6 +187,8 @@
                                 <argument>${auth.image}</argument>
                                 <argument>${project.basedir}/../auth</argument>
                             </arguments>
+                            <!-- Skip in Docker build (where docker command isn't available) -->
+                            <skip>${docker.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>

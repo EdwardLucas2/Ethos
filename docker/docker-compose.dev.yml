@@ -1,10 +1,12 @@
 services:
     postgres:
         image: postgres:18.3
+        env_file:
+            - ../.env.local
         environment:
             POSTGRES_DB: ethos
-            POSTGRES_USER: ethos
-            POSTGRES_PASSWORD: secret
+            POSTGRES_USER: ${DATABASE_USER}
+            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
         ports:
             - "5432:5432"
         volumes:
@@ -17,13 +19,15 @@ services:
 
     supertokens:
         image: registry.supertokens.io/supertokens/supertokens-postgresql:11.4.4
+        env_file:
+            - ../.env.local
         depends_on:
             postgres:
                 condition: service_healthy
         ports:
             - "3567:3567"
         environment:
-            POSTGRESQL_CONNECTION_URI: "postgresql://ethos:secret@postgres:5432/ethos"
+            POSTGRESQL_CONNECTION_URI: ${DBMATE_URL}
         healthcheck:
             test: >
                 bash -c 'exec 3<>/dev/tcp/127.0.0.1/3567 &&
@@ -37,6 +41,7 @@ services:
         build:
             context: ../auth
         env_file:
+            - ../.env.local
             - ../auth/.env
         depends_on:
             supertokens:
@@ -48,6 +53,30 @@ services:
                 [
                     "CMD-SHELL",
                     "wget -qO- http://localhost:3568/health || exit 1",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    backend:
+        build:
+            context: ../backend
+            dockerfile: Dockerfile
+        env_file:
+            - ../.env.local
+            - ../backend/.env
+        depends_on:
+            postgres:
+                condition: service_healthy
+            supertokens:
+                condition: service_healthy
+        ports:
+            - "8080:8080"
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "wget -qO- http://localhost:8080/health || exit 1",
                 ]
             interval: 10s
             timeout: 5s

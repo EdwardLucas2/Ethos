@@ -72,20 +72,49 @@
 - Runs `npm run lint` and `prettier --check` if any `.ts`/`.tsx` files are staged
 - Runs `mvn spotless:check` if any `.java` files are staged
 
-## Local Environment Variables
+## Local Development
 
-**Java backend** (`backend/.env`):
+### Starting the Backend
 
-- `DATABASE_URL` — `jdbc:postgresql://localhost:5432/ethos`
-- `DATABASE_USER` — `ethos`
-- `DATABASE_PASSWORD` — `secret`
-- `DBMATE_URL` — `postgres://ethos:secret@localhost:5432/ethos`
-- `SUPERTOKENS_URL` — `http://localhost:3567` — used to fetch the JWKS for JWT verification
-- `STORAGE_BACKEND` — `local`
-- `UPLOAD_DIR` — `./data/uploads`
+```bash
+# Option 1: Start docker separately (your preference for fast iteration)
+docker compose -f docker/docker-compose.dev.yml --env-file .env.local up -d
+cd backend && ./run-dev.sh
 
-**Node.js auth server** (`auth/.env`):
+# Option 2: Let run-dev.sh start docker for you
+cd backend && ./run-dev.sh --docker
+```
 
-- `SUPERTOKENS_CORE_URL` — `http://localhost:3567`
-- `API_DOMAIN` — `http://localhost:8080` — the domain Nginx exposes to the outside world
-- `WEBSITE_DOMAIN` — `http://localhost:8080` — required by SuperTokens; set to the API domain for mobile
+### Starting the Frontend
+
+```bash
+cd app && npx expo start
+```
+
+## Environment Variables
+
+Environment variables are consolidated at the monorepo root:
+
+- `.env.local`: Local dev `localhost` URLs, dev DB credentials
+- `.env.ci`: GitHub Actions Container URLs (service names)
+- `.env.dev`: Dev server Same as local initially
+- `.env.prod`: Production Real credentials
+
+Shared variables in `.env.*`:
+
+```
+DATABASE_URL=jdbc:postgresql://localhost:5432/ethos
+DATABASE_USER=ethos
+DATABASE_PASSWORD=secret
+DBMATE_URL=postgres://ethos:secret@localhost:5432/ethos
+SUPERTOKENS_URL=http://localhost:3567
+API_URL=http://localhost:8080
+AUTH_URL=http://localhost:3568
+STORAGE_BACKEND=local
+UPLOAD_DIR=./data/uploads
+```
+
+Service-specific files (just `PORT`):
+
+- `auth/.env` — `PORT=3568`
+- `backend/.env` — `PORT=8080`
