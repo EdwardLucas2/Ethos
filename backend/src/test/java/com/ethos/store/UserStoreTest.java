@@ -48,9 +48,10 @@ class UserStoreTest extends IntegrationTestBase {
         void givenDuplicateSupertokensUserId_throwsDuplicateAccountException() {
             userStore.insert(buildUser("st-dup", "tag1abc1", "a@example.com"));
 
-            assertThrows(
+            var ex = assertThrows(
                     DuplicateAccountException.class,
                     () -> userStore.insert(buildUser("st-dup", "tag2abc2", "b@example.com")));
+            assertEquals("Account already registered", ex.getMessage());
         }
 
         @Test
@@ -66,9 +67,10 @@ class UserStoreTest extends IntegrationTestBase {
         void givenDuplicateEmail_throwsDuplicateAccountException() {
             userStore.insert(buildUser("st-1", "tag1abc1", "same@example.com"));
 
-            assertThrows(
+            var ex = assertThrows(
                     DuplicateAccountException.class,
                     () -> userStore.insert(buildUser("st-2", "tag2abc2", "same@example.com")));
+            assertEquals("An account with this email already exists", ex.getMessage());
         }
     }
 

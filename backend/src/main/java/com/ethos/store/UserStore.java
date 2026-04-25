@@ -160,10 +160,19 @@ public class UserStore {
     private static void rethrowIfUniqueViolation(UnableToExecuteStatementException e) {
         if (e.getCause() instanceof PSQLException psql && "23505".equals(psql.getSQLState())) {
             var msg = psql.getServerErrorMessage();
-            if (msg != null && "users_tag_key".equals(msg.getConstraint())) {
-                throw new DuplicateTagException();
+            if (msg != null) {
+                var constraint = msg.getConstraint();
+                if ("users_tag_key".equals(constraint)) {
+                    throw new DuplicateTagException();
+                }
+                if ("users_email_key".equals(constraint)) {
+                    throw new DuplicateAccountException("An account with this email already exists");
+                }
+                if ("users_supertokens_user_id_key".equals(constraint)) {
+                    throw new DuplicateAccountException("Account already registered");
+                }
             }
-            throw new DuplicateAccountException();
+            throw new DuplicateAccountException("Account already exists");
         }
     }
 }

@@ -213,22 +213,22 @@ public class UserHandler {
             })
     public void addContact(Context ctx) {
         var body = ctx.bodyAsClass(AddContactRequest.class);
-        if (body.userId() == null) {
-            throw new BadRequestException("userId is required");
+        if (body.targetUserId() == null) {
+            throw new BadRequestException("targetUserId is required");
         }
         UUID callerId = ctx.attribute("userId");
-        ctx.status(201).json(userService.addContact(callerId, body.userId()));
+        ctx.status(201).json(userService.addContact(callerId, body.targetUserId()));
     }
 
     @OpenApi(
-            path = "/contacts/{contactUserId}",
+            path = "/contacts/{targetUserId}",
             methods = {HttpMethod.DELETE},
             summary = "Remove a contact",
             description =
                     "Removes a user from the caller's contacts. Path param is the target user's ID, not the contact row ID."
                             + " Returns 404 if the user is not in the caller's contacts.",
             tags = {"users"},
-            pathParams = {@OpenApiParam(name = "contactUserId", description = "The target user's ID", required = true)},
+            pathParams = {@OpenApiParam(name = "targetUserId", description = "The target user's ID", required = true)},
             responses = {
                 @OpenApiResponse(status = "204", description = "Contact removed"),
                 @OpenApiResponse(
@@ -241,9 +241,9 @@ public class UserHandler {
                         description = "Not in contacts")
             })
     public void removeContact(Context ctx) {
-        var contactUserId = UUID.fromString(ctx.pathParam("contactUserId"));
+        var targetUserId = UUID.fromString(ctx.pathParam("targetUserId"));
         UUID callerId = ctx.attribute("userId");
-        userService.removeContact(callerId, contactUserId);
+        userService.removeContact(callerId, targetUserId);
         ctx.status(204);
     }
 }

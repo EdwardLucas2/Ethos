@@ -58,7 +58,7 @@ public class AppRouter {
 
         routes.get("/contacts", userHandler::listContacts);
         routes.post("/contacts", userHandler::addContact);
-        routes.delete("/contacts/{contactUserId}", userHandler::removeContact);
+        routes.delete("/contacts/{targetUserId}", userHandler::removeContact);
     }
 
     private void registerBeforeHandlers(JavalinDefaultRoutingApi routes) {
