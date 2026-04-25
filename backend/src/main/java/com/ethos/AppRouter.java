@@ -46,7 +46,8 @@ public class AppRouter {
         routes.exception(ForbiddenException.class, (e, ctx) -> ctx.status(403).json(new ErrorResponse(e.getMessage())));
         routes.exception(NotFoundException.class, (e, ctx) -> ctx.status(404).json(new ErrorResponse(e.getMessage())));
         routes.exception(ConflictException.class, (e, ctx) -> ctx.status(409).json(new ErrorResponse(e.getMessage())));
-        routes.exception(DuplicateAccountException.class, (e, ctx) -> ctx.status(409).json(new ErrorResponse(e.getMessage())));
+        routes.exception(
+                DuplicateAccountException.class, (e, ctx) -> ctx.status(409).json(new ErrorResponse(e.getMessage())));
         routes.exception(Exception.class, (e, ctx) -> ctx.status(500).json(new ErrorResponse("Internal server error")));
     }
 

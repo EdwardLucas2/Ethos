@@ -338,8 +338,8 @@ class UserApiE2ETest extends E2ETestBase {
         @Test
         void givenUnknownUser_returns404() throws Exception {
             var jwt = registerAndGetJwt("Alice");
-            var body = MAPPER.writeValueAsString(
-                    MAPPER.createObjectNode().put("targetUserId", UUID.randomUUID().toString()));
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode()
+                    .put("targetUserId", UUID.randomUUID().toString()));
 
             assertEquals(404, post("/contacts", body, jwt).statusCode());
         }
@@ -357,8 +357,8 @@ class UserApiE2ETest extends E2ETestBase {
 
         @Test
         void givenNoAuth_returns401() throws Exception {
-            var body = MAPPER.writeValueAsString(
-                    MAPPER.createObjectNode().put("targetUserId", UUID.randomUUID().toString()));
+            var body = MAPPER.writeValueAsString(MAPPER.createObjectNode()
+                    .put("targetUserId", UUID.randomUUID().toString()));
 
             assertEquals(401, post("/contacts", body, null).statusCode());
         }
