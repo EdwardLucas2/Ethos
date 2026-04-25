@@ -1,62 +1,85 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+    push:
+        branches: [main]
+    pull_request:
 
 jobs:
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    backend:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-          cache: 'maven'
+            - uses: actions/setup-java@v4
+              with:
+                  java-version: "25"
+                  distribution: "temurin"
+                  cache: "maven"
 
-      - name: Install dbmate
-        run: |
-          curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
-          chmod +x /usr/local/bin/dbmate
+            - name: Install dbmate
+              run: |
+                  curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+                  chmod +x /usr/local/bin/dbmate
 
-      - name: Format check
-        working-directory: backend
-        run: mvn spotless:check
+            - name: Format check
+              working-directory: backend
+              run: mvn spotless:check
 
-      - name: Test
-        working-directory: backend
-        run: mvn test
+            - name: Test
+              working-directory: backend
+              run: mvn test
 
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    auth:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6.0.2
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: app/package-lock.json
+            - uses: actions/setup-node@v6.4.0
+              with:
+                  node-version: "22"
+                  cache: "npm"
+                  cache-dependency-path: auth/package-lock.json
 
-      - name: Install dependencies
-        working-directory: app
-        run: npm ci
+            - name: Install dependencies
+              working-directory: auth
+              run: npm ci
 
-      - name: Lint
-        working-directory: app
-        run: npm run lint
+            - name: TypeScript check
+              working-directory: auth
+              run: npx tsc --noEmit
 
-      - name: Format check
-        working-directory: app
-        run: npx prettier --check .
+            - name: Test
+              working-directory: auth
+              run: npm test
 
-      - name: TypeScript check
-        working-directory: app
-        run: npx tsc --noEmit
+    frontend:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6.0.2
 
-      - name: Test
-        working-directory: app
-        run: npx jest
+            - uses: actions/setup-node@v6.4.0
+              with:
+                  node-version: "22"
+                  cache: "npm"
+                  cache-dependency-path: app/package-lock.json
+
+            - name: Install dependencies
+              working-directory: app
+              run: npm ci
+
+            - name: Lint
+              working-directory: app
+              run: npm run lint
+
+            - name: Format check
+              working-directory: app
+              run: npx prettier --check .
+
+            - name: TypeScript check
+              working-directory: app
+              run: npx tsc --noEmit
+
+            - name: Test
+              working-directory: app
+              run: npx jest
