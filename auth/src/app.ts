@@ -44,7 +44,9 @@ export function initSupertokens(config: AppConfig): void {
                                 ...input.accessTokenPayload,
                                 email: user?.emails[0] ?? null,
                             };
-                            return originalImplementation.createNewSession(input);
+                            return originalImplementation.createNewSession(
+                                input
+                            );
                         },
                     }),
                 },
