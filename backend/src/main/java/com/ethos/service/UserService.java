@@ -35,7 +35,8 @@ public class UserService {
         for (int attempt = 0; attempt < MAX_TAG_ATTEMPTS; attempt++) {
             String tag = prefix + randomSuffix(4);
             try {
-                User inserted = userStore.insert(new User(null, supertokensUserId, displayName, tag, email, null, null));
+                User inserted =
+                        userStore.insert(new User(null, supertokensUserId, displayName, tag, email, null, null));
                 log.info("user.registered userId={}", inserted.id());
                 return toResponse(inserted);
             } catch (DuplicateTagException ignored) {
