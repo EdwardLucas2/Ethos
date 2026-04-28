@@ -1,5 +1,6 @@
 package com.ethos.handler;
 
+import com.ethos.RequestAttributes;
 import com.ethos.dto.AddContactRequest;
 import com.ethos.dto.ContactResponse;
 import com.ethos.dto.CreateUserRequest;
@@ -56,15 +57,15 @@ public class UserHandler {
                         description = "A users row already exists for this SuperTokens account")
             })
     public void register(Context ctx) {
-        var body = ctx.bodyAsClass(CreateUserRequest.class);
+        CreateUserRequest body = ctx.bodyAsClass(CreateUserRequest.class);
         if (body.displayName() == null || body.displayName().isBlank()) {
             throw new BadRequestException("displayName is required");
         }
 
-        String supertokensUserId = ctx.attribute("supertokensUserId");
-        String email = ctx.attribute("email");
+        String supertokensUserId = ctx.attribute(RequestAttributes.SUPERTOKENS_USER_ID);
+        String email = ctx.attribute(RequestAttributes.EMAIL);
 
-        var response = userService.registerUser(supertokensUserId, email, body.displayName());
+        UserResponse response = userService.registerUser(supertokensUserId, email, body.displayName());
         ctx.status(201).json(response);
     }
 
@@ -85,7 +86,7 @@ public class UserHandler {
                         description = "JWT missing or invalid")
             })
     public void getMe(Context ctx) {
-        UUID userId = ctx.attribute("userId");
+        UUID userId = ctx.attribute(RequestAttributes.USER_ID);
         ctx.json(userService.getUser(userId));
     }
 
@@ -113,11 +114,11 @@ public class UserHandler {
                         description = "JWT missing or invalid")
             })
     public void updateMe(Context ctx) {
-        var body = ctx.bodyAsClass(UpdateUserRequest.class);
+        UpdateUserRequest body = ctx.bodyAsClass(UpdateUserRequest.class);
         if (body.displayName() == null || body.displayName().isBlank()) {
             throw new BadRequestException("displayName is required");
         }
-        UUID userId = ctx.attribute("userId");
+        UUID userId = ctx.attribute(RequestAttributes.USER_ID);
         ctx.json(userService.updateUser(userId, body.displayName()));
     }
 
@@ -150,11 +151,11 @@ public class UserHandler {
                         description = "JWT missing or invalid")
             })
     public void searchUsers(Context ctx) {
-        var tag = ctx.queryParam("tag");
+        String tag = ctx.queryParam("tag");
         if (tag == null || tag.length() < 2) {
             throw new BadRequestException("tag param must be at least 2 characters");
         }
-        UUID userId = ctx.attribute("userId");
+        UUID userId = ctx.attribute(RequestAttributes.USER_ID);
         ctx.json(userService.searchUsers(userId, tag));
     }
 
@@ -175,7 +176,7 @@ public class UserHandler {
                         description = "JWT missing or invalid")
             })
     public void listContacts(Context ctx) {
-        UUID userId = ctx.attribute("userId");
+        UUID userId = ctx.attribute(RequestAttributes.USER_ID);
         ctx.json(userService.listContacts(userId));
     }
 
@@ -212,11 +213,11 @@ public class UserHandler {
                         description = "Already a contact")
             })
     public void addContact(Context ctx) {
-        var body = ctx.bodyAsClass(AddContactRequest.class);
+        AddContactRequest body = ctx.bodyAsClass(AddContactRequest.class);
         if (body.targetUserId() == null) {
             throw new BadRequestException("targetUserId is required");
         }
-        UUID callerId = ctx.attribute("userId");
+        UUID callerId = ctx.attribute(RequestAttributes.USER_ID);
         ctx.status(201).json(userService.addContact(callerId, body.targetUserId()));
     }
 
@@ -241,8 +242,8 @@ public class UserHandler {
                         description = "Not in contacts")
             })
     public void removeContact(Context ctx) {
-        var targetUserId = UUID.fromString(ctx.pathParam("targetUserId"));
-        UUID callerId = ctx.attribute("userId");
+        UUID targetUserId = UUID.fromString(ctx.pathParam("targetUserId"));
+        UUID callerId = ctx.attribute(RequestAttributes.USER_ID);
         userService.removeContact(callerId, targetUserId);
         ctx.status(204);
     }

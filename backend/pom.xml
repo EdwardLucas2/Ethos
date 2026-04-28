@@ -22,7 +22,7 @@
         <junit.version>6.0.3</junit.version>
         <mockito.version>5.23.0</mockito.version>
         <testcontainers.version>1.21.4</testcontainers.version>
-        <postgres.image>postgres:17</postgres.image>
+        <postgres.image>postgres:18.3</postgres.image>
         <supertokens.image>registry.supertokens.io/supertokens/supertokens-postgresql:11.4.4</supertokens.image>
         <auth.image>ethos-auth:test</auth.image>
         <spotless.version>2.44.0</spotless.version>

@@ -17,15 +17,15 @@ import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 public class Main {
 
     public static void main(String[] args) {
-        var config = AppConfig.fromEnv();
-        var ds = buildDataSource(config);
-        var jdbi = buildJdbi(ds);
-        var router = buildObjectGraph(config, jdbi);
+        AppConfig config = AppConfig.fromEnv();
+        HikariDataSource ds = buildDataSource(config);
+        Jdbi jdbi = buildJdbi(ds);
+        AppRouter router = buildObjectGraph(config, jdbi);
         startServer(config, router);
     }
 
     private static HikariDataSource buildDataSource(AppConfig config) {
-        var hikari = new HikariConfig();
+        HikariConfig hikari = new HikariConfig();
         hikari.setJdbcUrl(config.databaseUrl());
         hikari.setUsername(config.databaseUser());
         hikari.setPassword(config.databasePassword());
@@ -33,15 +33,15 @@ public class Main {
     }
 
     private static Jdbi buildJdbi(HikariDataSource ds) {
-        var jdbi = Jdbi.create(ds);
+        Jdbi jdbi = Jdbi.create(ds);
         jdbi.installPlugin(new SqlObjectPlugin());
         return jdbi;
     }
 
     private static AppRouter buildObjectGraph(AppConfig config, Jdbi jdbi) {
-        var jwtVerifier = JwtVerifier.fromJwksUrl(config.supertokensUrl() + "/.well-known/jwks.json");
-        var userStore = new UserStore(jdbi);
-        var userHandler = new UserHandler(new UserService(userStore));
+        JwtVerifier jwtVerifier = JwtVerifier.fromJwksUrl(config.supertokensUrl() + "/.well-known/jwks.json");
+        UserStore userStore = new UserStore(jdbi);
+        UserHandler userHandler = new UserHandler(new UserService(userStore));
         return new AppRouter(jwtVerifier, userStore, userHandler);
     }
 

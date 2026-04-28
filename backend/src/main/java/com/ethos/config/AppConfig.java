@@ -13,7 +13,7 @@ public record AppConfig(
     }
 
     private static String requireEnv(String name) {
-        var val = System.getenv(name);
+        String val = System.getenv(name);
         if (val == null || val.isBlank()) {
             throw new IllegalStateException("Missing required environment variable: " + name);
         }

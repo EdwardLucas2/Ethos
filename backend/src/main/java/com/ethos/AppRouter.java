@@ -1,5 +1,6 @@
 package com.ethos;
 
+import com.ethos.auth.JwtClaims;
 import com.ethos.auth.JwtVerifier;
 import com.ethos.dto.ErrorResponse;
 import com.ethos.exception.BadRequestException;
@@ -9,12 +10,15 @@ import com.ethos.exception.ForbiddenException;
 import com.ethos.exception.NotFoundException;
 import com.ethos.exception.RegistrationIncompleteException;
 import com.ethos.handler.UserHandler;
+import com.ethos.model.User;
 import com.ethos.router.Role;
 import com.ethos.store.UserStore;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.router.JavalinDefaultRoutingApi;
+import io.javalin.security.RouteRole;
 import io.jsonwebtoken.JwtException;
+import java.util.Set;
 import org.slf4j.MDC;
 
 public class AppRouter {
@@ -66,7 +70,7 @@ public class AppRouter {
 
     private void registerBeforeHandlers(JavalinDefaultRoutingApi routes) {
         routes.beforeMatched(ctx -> {
-            var roles = ctx.routeRoles();
+            Set<RouteRole> roles = ctx.routeRoles();
             if (roles.contains(Role.ANYONE)) return;
             if (roles.contains(Role.JWT_ONLY)) {
                 requireJwt(ctx);
@@ -81,19 +85,19 @@ public class AppRouter {
     }
 
     private void requireJwt(Context ctx) {
-        var claims = jwtVerifier.verify(ctx.header("Authorization"));
-        ctx.attribute("supertokensUserId", claims.supertokensUserId());
-        ctx.attribute("email", claims.email());
+        JwtClaims claims = jwtVerifier.verify(ctx.header("Authorization"));
+        ctx.attribute(RequestAttributes.SUPERTOKENS_USER_ID, claims.supertokensUserId());
+        ctx.attribute(RequestAttributes.EMAIL, claims.email());
     }
 
     private void requireAuth(Context ctx) {
-        var claims = jwtVerifier.verify(ctx.header("Authorization"));
-        var user = userStore
+        JwtClaims claims = jwtVerifier.verify(ctx.header("Authorization"));
+        User user = userStore
                 .findBySupertokensUserId(claims.supertokensUserId())
                 .orElseThrow(RegistrationIncompleteException::new);
-        ctx.attribute("supertokensUserId", claims.supertokensUserId());
-        ctx.attribute("email", claims.email());
-        ctx.attribute("userId", user.id());
+        ctx.attribute(RequestAttributes.SUPERTOKENS_USER_ID, claims.supertokensUserId());
+        ctx.attribute(RequestAttributes.EMAIL, claims.email());
+        ctx.attribute(RequestAttributes.USER_ID, user.id());
         MDC.put("userId", user.id().toString());
         MDC.put("path", ctx.path());
     }

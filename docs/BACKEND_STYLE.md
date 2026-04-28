@@ -91,6 +91,18 @@ Never use string concatenation in log calls.
 
 ---
 
+## Java Style
+
+### Type declarations
+
+Always use explicit types instead of `var`. This applies everywhere where the type can be named.
+
+### Request context attributes
+
+Javalin request attributes are keyed by string constants defined in `RequestAttributes`.
+
+---
+
 ## Comments
 
 - Do not add comments explaining what the code does — well-named methods and variables do that.

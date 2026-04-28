@@ -11,6 +11,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.postgresql.util.PSQLException;
+import org.postgresql.util.ServerErrorMessage;
 
 public class UserStore {
 
@@ -159,9 +160,9 @@ public class UserStore {
 
     private static void rethrowIfUniqueViolation(UnableToExecuteStatementException e) {
         if (e.getCause() instanceof PSQLException psql && "23505".equals(psql.getSQLState())) {
-            var msg = psql.getServerErrorMessage();
+            ServerErrorMessage msg = psql.getServerErrorMessage();
             if (msg != null) {
-                var constraint = msg.getConstraint();
+                String constraint = msg.getConstraint();
                 if ("users_tag_key".equals(constraint)) {
                     throw new DuplicateTagException();
                 }

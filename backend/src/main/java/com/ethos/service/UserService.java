@@ -30,12 +30,12 @@ public class UserService {
     }
 
     public UserResponse registerUser(String supertokensUserId, String email, String displayName) {
-        var prefix = buildTagPrefix(displayName);
+        String prefix = buildTagPrefix(displayName);
 
         for (int attempt = 0; attempt < MAX_TAG_ATTEMPTS; attempt++) {
-            var tag = prefix + randomSuffix(4);
+            String tag = prefix + randomSuffix(4);
             try {
-                var inserted = userStore.insert(new User(null, supertokensUserId, displayName, tag, email, null, null));
+                User inserted = userStore.insert(new User(null, supertokensUserId, displayName, tag, email, null, null));
                 log.info("user.registered userId={}", inserted.id());
                 return toResponse(inserted);
             } catch (DuplicateTagException ignored) {
@@ -74,7 +74,7 @@ public class UserService {
         if (callerUserId.equals(targetUserId)) {
             throw new BadRequestException("Cannot add yourself as a contact");
         }
-        var target = userStore.findById(targetUserId).orElseThrow(NotFoundException::new);
+        User target = userStore.findById(targetUserId).orElseThrow(NotFoundException::new);
         if (!userStore.insertContact(callerUserId, targetUserId)) {
             throw new ConflictException("Already a contact");
         }
@@ -90,13 +90,13 @@ public class UserService {
     }
 
     private static String buildTagPrefix(String displayName) {
-        var firstWord = displayName.trim().split("\\s+")[0];
-        var stripped = firstWord.toLowerCase().replaceAll("[^a-z0-9]", "");
+        String firstWord = displayName.trim().split("\\s+")[0];
+        String stripped = firstWord.toLowerCase().replaceAll("[^a-z0-9]", "");
         return stripped.length() > 8 ? stripped.substring(0, 8) : stripped;
     }
 
     private static String randomSuffix(int length) {
-        var sb = new StringBuilder(length);
+        StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             sb.append(ALPHANUMERIC.charAt(RANDOM.nextInt(ALPHANUMERIC.length())));
         }
