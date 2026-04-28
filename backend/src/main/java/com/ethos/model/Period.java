@@ -7,10 +7,10 @@ public enum Period {
 
     public static Period fromValue(String value) {
         return switch (value) {
-            case "weekly"   -> WEEKLY;
+            case "weekly" -> WEEKLY;
             case "biweekly" -> BIWEEKLY;
-            case "monthly"  -> MONTHLY;
-            default         -> throw new IllegalArgumentException("Unknown period: " + value);
+            case "monthly" -> MONTHLY;
+            default -> throw new IllegalArgumentException("Unknown period: " + value);
         };
     }
 }
