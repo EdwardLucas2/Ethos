@@ -14,9 +14,9 @@ public final class CycleDateCalculator {
     public static CycleDates compute(LocalDate startDate, Period period) {
         LocalDate endDate =
                 switch (period) {
-                    case WEEKLY -> startDate.plusDays(6);
-                    case BIWEEKLY -> startDate.plusDays(13);
-                    case MONTHLY -> startDate.plusMonths(1).minusDays(1);
+                    case weekly -> startDate.plusDays(6);
+                    case biweekly -> startDate.plusDays(13);
+                    case monthly -> startDate.plusMonths(1).minusDays(1);
                 };
         return new CycleDates(startDate, endDate, endDate.plusDays(VOTING_WINDOW_DAYS));
     }
