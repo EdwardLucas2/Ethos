@@ -24,7 +24,9 @@ public class ParticipantStore {
             rs.getString("sign_status"),
             rs.getBoolean("opted_out_of_next_cycle"),
             rs.getTimestamp("invited_at").toInstant(),
-            rs.getTimestamp("signed_at") == null ? null : rs.getTimestamp("signed_at").toInstant());
+            rs.getTimestamp("signed_at") == null
+                    ? null
+                    : rs.getTimestamp("signed_at").toInstant());
 
     public ParticipantStore(Jdbi jdbi) {
         this.jdbi = jdbi;

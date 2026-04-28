@@ -33,15 +33,23 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenSignedParticipant_returnsContract() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
-            Participant p2 = participantStore.insertParticipant(detail.contract().id(), user2);
+            Participant p2 =
+                    participantStore.insertParticipant(detail.contract().id(), user2);
             ContractStoreTestHelper.signParticipant(p2.id(), participantStore);
             ContractStoreTestHelper.setFrequency(p2.id(), 2, participantStore);
-            ContractStoreTestHelper.CycleDates dates = ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail.contract().id(), dates.startDate(), dates.endDate(), dates.votingDeadline(), List.of(detail.participants().get(0).id(), p2.id()));
+            ContractStoreTestHelper.CycleDates dates =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    dates.startDate(),
+                    dates.endDate(),
+                    dates.votingDeadline(),
+                    List.of(detail.participants().get(0).id(), p2.id()));
 
             List<ActiveContractRow> result = contractStore.getActiveContracts(creator);
 
@@ -53,7 +61,8 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenNonSignedParticipant_doesNotReturnContract() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             participantStore.insertParticipant(detail.contract().id(), user2);
 
@@ -65,17 +74,37 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenMultipleContracts_returnsAll() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail1 = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
-            ContractStoreTestHelper.signParticipant(detail1.participants().get(0).id(), participantStore);
+            ContractDetail detail1 =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractStoreTestHelper.signParticipant(
+                    detail1.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail1.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates dates1 = ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail1.contract().id(), dates1.startDate(), dates1.endDate(), dates1.votingDeadline(), List.of(detail1.participants().get(0).id()));
+            ContractStoreTestHelper.CycleDates dates1 =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail1.contract().id(),
+                    dates1.startDate(),
+                    dates1.endDate(),
+                    dates1.votingDeadline(),
+                    List.of(detail1.participants().get(0).id()));
 
-            ContractDetail detail2 = contractStore.insert(creator, "Contract 2", "Forfeit 2", com.ethos.model.Period.weekly, LocalDate.now().plusDays(1));
-            ContractStoreTestHelper.signParticipant(detail2.participants().get(0).id(), participantStore);
+            ContractDetail detail2 = contractStore.insert(
+                    creator,
+                    "Contract 2",
+                    "Forfeit 2",
+                    com.ethos.model.Period.weekly,
+                    LocalDate.now().plusDays(1));
+            ContractStoreTestHelper.signParticipant(
+                    detail2.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail2.participants().get(0).id(), 2, participantStore);
-            ContractStoreTestHelper.CycleDates dates2 = ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail2.contract().id(), dates2.startDate(), dates2.endDate(), dates2.votingDeadline(), List.of(detail2.participants().get(0).id()));
+            ContractStoreTestHelper.CycleDates dates2 =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail2.contract().id(),
+                    dates2.startDate(),
+                    dates2.endDate(),
+                    dates2.votingDeadline(),
+                    List.of(detail2.participants().get(0).id()));
 
             List<ActiveContractRow> result = contractStore.getActiveContracts(creator);
 
@@ -94,13 +123,20 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenActiveContract_participantsAreSignedOnly() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             participantStore.insertParticipant(detail.contract().id(), user2); // waiting, not signed
-            ContractStoreTestHelper.CycleDates dates = ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail.contract().id(), dates.startDate(), dates.endDate(), dates.votingDeadline(), List.of(detail.participants().get(0).id()));
+            ContractStoreTestHelper.CycleDates dates =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    dates.startDate(),
+                    dates.endDate(),
+                    dates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
 
             List<ActiveContractRow> result = contractStore.getActiveContracts(creator);
 
@@ -115,14 +151,31 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenPendingResolutionCycle_returnsContract() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail.contract().id(), activateDates.startDate(), activateDates.endDate(), activateDates.votingDeadline(), List.of(detail.participants().get(0).id()));
-            Cycle cycle = cycleStore.findCycleByContractAndNumber(detail.contract().id(), 1).orElseThrow();
-            ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.advanceCycleToResolution(cycle.id(), detail.contract().id(), 2, advanceDates.startDate(), advanceDates.endDate(), advanceDates.votingDeadline(), List.of(detail.participants().get(0).id()));
+            ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(
+                    LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    activateDates.startDate(),
+                    activateDates.endDate(),
+                    activateDates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
+            Cycle cycle = cycleStore
+                    .findCycleByContractAndNumber(detail.contract().id(), 1)
+                    .orElseThrow();
+            ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
+                    activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.advanceCycleToResolution(
+                    cycle.id(),
+                    detail.contract().id(),
+                    2,
+                    advanceDates.startDate(),
+                    advanceDates.endDate(),
+                    advanceDates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
 
             List<ActiveContractRow> result = contractStore.getPendingResolutionContracts(creator);
 
@@ -133,11 +186,18 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenNoPendingResolutionCycle_doesNotReturnContract() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates dates = ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail.contract().id(), dates.startDate(), dates.endDate(), dates.votingDeadline(), List.of(detail.participants().get(0).id()));
+            ContractStoreTestHelper.CycleDates dates =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    dates.startDate(),
+                    dates.endDate(),
+                    dates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
 
             List<ActiveContractRow> result = contractStore.getPendingResolutionContracts(creator);
 
@@ -147,14 +207,31 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         @Test
         void givenBothActiveAndPending_contractAppearsInBoth() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail = ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
-            contractStore.activateContract(detail.contract().id(), activateDates.startDate(), activateDates.endDate(), activateDates.votingDeadline(), List.of(detail.participants().get(0).id()));
-            Cycle cycle1 = cycleStore.findCycleByContractAndNumber(detail.contract().id(), 1).orElseThrow();
-            ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.advanceCycleToResolution(cycle1.id(), detail.contract().id(), 2, advanceDates.startDate(), advanceDates.endDate(), advanceDates.votingDeadline(), List.of(detail.participants().get(0).id()));
+            ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(
+                    LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    activateDates.startDate(),
+                    activateDates.endDate(),
+                    activateDates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
+            Cycle cycle1 = cycleStore
+                    .findCycleByContractAndNumber(detail.contract().id(), 1)
+                    .orElseThrow();
+            ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
+                    activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.advanceCycleToResolution(
+                    cycle1.id(),
+                    detail.contract().id(),
+                    2,
+                    advanceDates.startDate(),
+                    advanceDates.endDate(),
+                    advanceDates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
 
             List<ActiveContractRow> active = contractStore.getActiveContracts(creator);
             List<ActiveContractRow> pending = contractStore.getPendingResolutionContracts(creator);

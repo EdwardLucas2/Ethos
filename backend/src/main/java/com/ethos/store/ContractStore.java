@@ -7,7 +7,6 @@ import com.ethos.model.ContractDetail;
 import com.ethos.model.Cycle;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,42 +110,48 @@ public class ContractStore {
         });
     }
 
-    public Optional<Contract> updateFields(UUID contractId, String name, String forfeit, Period period, LocalDate startDate) {
+    public Optional<Contract> updateFields(
+            UUID contractId, String name, String forfeit, Period period, LocalDate startDate) {
         return jdbi.withHandle(handle -> handle.createQuery(
-                                """
+                        """
                                 UPDATE contracts
                                 SET name = :name, forfeit = :forfeit, period = :period, start_date = :startDate
                                 WHERE id = :contractId
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
-                        .bind("contractId", contractId)
-                        .bind("name", name)
-                        .bind("forfeit", forfeit)
-                        .bind("period", period.name())
-                        .bind("startDate", startDate)
-                        .map(CONTRACT_MAPPER)
-                        .findOne());
+                .bind("contractId", contractId)
+                .bind("name", name)
+                .bind("forfeit", forfeit)
+                .bind("period", period.name())
+                .bind("startDate", startDate)
+                .map(CONTRACT_MAPPER)
+                .findOne());
     }
 
     public Optional<Contract> updateStatus(UUID contractId, String status) {
         return jdbi.withHandle(handle -> handle.createQuery(
-                                """
+                        """
                                 UPDATE contracts
                                 SET status = :status
                                 WHERE id = :contractId
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
-                        .bind("contractId", contractId)
-                        .bind("status", status)
-                        .map(CONTRACT_MAPPER)
-                        .findOne());
+                .bind("contractId", contractId)
+                .bind("status", status)
+                .map(CONTRACT_MAPPER)
+                .findOne());
     }
 
     // -----------------------------------------------------------------------
     // Complex atomic methods
     // -----------------------------------------------------------------------
 
-    public boolean activateContract(UUID contractId, LocalDate cycleStart, LocalDate cycleEnd, LocalDate votingDeadline, List<UUID> signedParticipantIds) {
+    public boolean activateContract(
+            UUID contractId,
+            LocalDate cycleStart,
+            LocalDate cycleEnd,
+            LocalDate votingDeadline,
+            List<UUID> signedParticipantIds) {
         return jdbi.inTransaction(handle -> {
             int updated = handle.createUpdate(
                             """
@@ -179,7 +184,14 @@ public class ContractStore {
         });
     }
 
-    public Optional<Cycle> advanceCycleToResolution(UUID currentCycleId, UUID contractId, int nextCycleNumber, LocalDate nextStart, LocalDate nextEnd, LocalDate nextVotingDeadline, List<UUID> activeParticipantIds) {
+    public Optional<Cycle> advanceCycleToResolution(
+            UUID currentCycleId,
+            UUID contractId,
+            int nextCycleNumber,
+            LocalDate nextStart,
+            LocalDate nextEnd,
+            LocalDate nextVotingDeadline,
+            List<UUID> activeParticipantIds) {
         return jdbi.inTransaction(handle -> {
             int updated = handle.createUpdate(
                             """
@@ -259,10 +271,8 @@ public class ContractStore {
                         WHERE id = ANY(:participantIds)
                         """)
                 .bind("participantIds", participantIds.toArray(new UUID[0]))
-                .map((rs, ctx) -> new Object[] {
-                        rs.getObject("id", UUID.class),
-                        rs.getObject("frequency", Integer.class)
-                })
+                .map((rs, ctx) ->
+                        new Object[] {rs.getObject("id", UUID.class), rs.getObject("frequency", Integer.class)})
                 .list();
 
         PreparedBatch batch = handle.prepareBatch(
@@ -272,7 +282,8 @@ public class ContractStore {
             UUID participantId = (UUID) row[0];
             Integer frequency = (Integer) row[1];
             if (frequency == null) {
-                throw new ConflictException("Participant " + participantId + " has null frequency — cannot create habit actions");
+                throw new ConflictException(
+                        "Participant " + participantId + " has null frequency — cannot create habit actions");
             }
             for (int i = 1; i <= frequency; i++) {
                 batch.bind("cycleId", cycleId)
@@ -306,23 +317,23 @@ public class ContractStore {
                     .bind("userId", userId)
                     .bind("cycleStatus", cycleStatus)
                     .map((rs, ctx) -> new Object[] {
-                            new Contract(
-                                    rs.getObject("id", UUID.class),
-                                    rs.getObject("creator_id", UUID.class),
-                                    rs.getString("name"),
-                                    rs.getString("forfeit"),
-                                    Period.fromValue(rs.getString("period")),
-                                    rs.getObject("start_date", LocalDate.class),
-                                    rs.getString("status"),
-                                    rs.getTimestamp("created_at").toInstant()),
-                            new Cycle(
-                                    rs.getObject("cy_id", UUID.class),
-                                    rs.getObject("cy_contract_id", UUID.class),
-                                    rs.getInt("cycle_number"),
-                                    rs.getObject("cy_start_date", LocalDate.class),
-                                    rs.getObject("end_date", LocalDate.class),
-                                    rs.getObject("voting_deadline", LocalDate.class),
-                                    rs.getString("cy_status"))
+                        new Contract(
+                                rs.getObject("id", UUID.class),
+                                rs.getObject("creator_id", UUID.class),
+                                rs.getString("name"),
+                                rs.getString("forfeit"),
+                                Period.fromValue(rs.getString("period")),
+                                rs.getObject("start_date", LocalDate.class),
+                                rs.getString("status"),
+                                rs.getTimestamp("created_at").toInstant()),
+                        new Cycle(
+                                rs.getObject("cy_id", UUID.class),
+                                rs.getObject("cy_contract_id", UUID.class),
+                                rs.getInt("cycle_number"),
+                                rs.getObject("cy_start_date", LocalDate.class),
+                                rs.getObject("end_date", LocalDate.class),
+                                rs.getObject("voting_deadline", LocalDate.class),
+                                rs.getString("cy_status"))
                     })
                     .list();
 

@@ -42,8 +42,17 @@ class ContractStoreTestHelper {
     }
 
     /** Creates a contract and optionally adds extra participants beyond the creator. */
-    static ContractDetail insertContractWithParticipants(ContractStore contractStore, ParticipantStore participantStore, UUID creatorId, UUID... participantUserIds) {
-        ContractDetail detail = contractStore.insert(creatorId, "", "", com.ethos.model.Period.weekly, LocalDate.now().plusDays(1));
+    static ContractDetail insertContractWithParticipants(
+            ContractStore contractStore,
+            ParticipantStore participantStore,
+            UUID creatorId,
+            UUID... participantUserIds) {
+        ContractDetail detail = contractStore.insert(
+                creatorId,
+                "",
+                "",
+                com.ethos.model.Period.weekly,
+                LocalDate.now().plusDays(1));
         for (UUID userId : participantUserIds) {
             participantStore.insertParticipant(detail.contract().id(), userId);
         }
