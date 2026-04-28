@@ -1,0 +1,1 @@
+/Users/edwardlucas/Documents/Ethos/monorepo/AGENTS.md
