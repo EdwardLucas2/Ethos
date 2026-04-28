@@ -4,7 +4,7 @@ import { initSupertokens, createApp } from "../src/app";
 const websiteDomain = "http://localhost:3568";
 
 initSupertokens({
-    connectionURI: process.env.SUPERTOKENS_CORE_URL!,
+    connectionURI: process.env.SUPERTOKENS_URL!,
     apiDomain: websiteDomain,
     websiteDomain,
 });

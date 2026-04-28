@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import supertokens from "supertokens-node";
+import supertokens, { getUser } from "supertokens-node";
 import {
     middleware,
     errorHandler,
@@ -33,6 +33,23 @@ export function initSupertokens(config: AppConfig): void {
             EmailPassword.init(),
             Session.init({
                 getTokenTransferMethod: () => "header",
+                override: {
+                    functions: (originalImplementation) => ({
+                        ...originalImplementation,
+                        createNewSession: async (input) => {
+                            // Include email in the access token so the Java backend
+                            // can extract it during user registration (POST /users).
+                            const user = await getUser(input.userId);
+                            input.accessTokenPayload = {
+                                ...input.accessTokenPayload,
+                                email: user?.emails[0] ?? null,
+                            };
+                            return originalImplementation.createNewSession(
+                                input
+                            );
+                        },
+                    }),
+                },
             }),
         ],
     });
