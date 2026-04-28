@@ -17,7 +17,7 @@ class CycleDateCalculatorTest {
 
         @Test
         void givenWeeklyPeriod_returnsSevenDayCycle() {
-            CycleDates result = CycleDateCalculator.compute(START, Period.WEEKLY);
+            CycleDates result = CycleDateCalculator.compute(START, Period.weekly);
             assertEquals(START, result.startDate());
             assertEquals(LocalDate.of(2026, 5, 7), result.endDate());
             assertEquals(LocalDate.of(2026, 5, 10), result.votingDeadline());
@@ -25,14 +25,14 @@ class CycleDateCalculatorTest {
 
         @Test
         void givenBiweeklyPeriod_returnsFourteenDayCycle() {
-            CycleDates result = CycleDateCalculator.compute(START, Period.BIWEEKLY);
+            CycleDates result = CycleDateCalculator.compute(START, Period.biweekly);
             assertEquals(LocalDate.of(2026, 5, 14), result.endDate());
             assertEquals(LocalDate.of(2026, 5, 17), result.votingDeadline());
         }
 
         @Test
         void givenMonthlyPeriod_returnsCalendarMonthCycle() {
-            CycleDates result = CycleDateCalculator.compute(START, Period.MONTHLY);
+            CycleDates result = CycleDateCalculator.compute(START, Period.monthly);
             assertEquals(LocalDate.of(2026, 5, 31), result.endDate());
             assertEquals(LocalDate.of(2026, 6, 3), result.votingDeadline());
         }

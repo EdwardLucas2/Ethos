@@ -1,15 +1,15 @@
 package com.ethos.model;
 
 public enum Period {
-    WEEKLY,
-    BIWEEKLY,
-    MONTHLY;
+    weekly,
+    biweekly,
+    monthly;
 
     public static Period fromValue(String value) {
         return switch (value) {
-            case "weekly" -> WEEKLY;
-            case "biweekly" -> BIWEEKLY;
-            case "monthly" -> MONTHLY;
+            case "weekly" -> weekly;
+            case "biweekly" -> biweekly;
+            case "monthly" -> monthly;
             default -> throw new IllegalArgumentException("Unknown period: " + value);
         };
     }
