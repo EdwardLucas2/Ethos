@@ -31,7 +31,7 @@ jobs:
               run: mvn verify
 
             - name: Upload coverage to Codacy
-              uses: codacy/codacy-coverage-reporter-action@v1.3
+              uses: codacy/codacy-coverage-reporter-action@v1.3.0
               continue-on-error: true
               with:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -69,7 +69,7 @@ jobs:
               run: npm test -- --coverage
 
             - name: Upload coverage to Codacy
-              uses: codacy/codacy-coverage-reporter-action@v1.3
+              uses: codacy/codacy-coverage-reporter-action@v1.3.0
               continue-on-error: true
               with:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -108,7 +108,7 @@ jobs:
               run: npx jest --coverage --coverageDirectory=coverage --coverageReporters=lcov --coverageReporters=text-summary
 
             - name: Upload coverage to Codacy
-              uses: codacy/codacy-coverage-reporter-action@v1.3
+              uses: codacy/codacy-coverage-reporter-action@v1.3.0
               continue-on-error: true
               with:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
