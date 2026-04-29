@@ -28,7 +28,13 @@ jobs:
 
             - name: Test
               working-directory: backend
-              run: mvn test
+              run: mvn verify
+
+            - name: Upload coverage to Codacy
+              uses: codacy/codacy-coverage-reporter-action@v1.3
+              with:
+                  project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+                  coverage-reports: backend/target/site/jacoco/jacoco.xml
 
     auth:
         runs-on: ubuntu-latest
@@ -37,7 +43,7 @@ jobs:
 
             - uses: actions/setup-node@v6.4.0
               with:
-                  node-version: "22"
+                  node-version: "24"
                   cache: "npm"
                   cache-dependency-path: auth/package-lock.json
 
@@ -59,7 +65,14 @@ jobs:
 
             - name: Test
               working-directory: auth
-              run: npm test
+              run: npm test -- --coverage
+
+            - name: Upload coverage to Codacy
+              uses: codacy/codacy-coverage-reporter-action@v1.3
+              with:
+                  project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+                  coverage-reports: auth/coverage/lcov.info
+                  language: typescript
 
     frontend:
         runs-on: ubuntu-latest
@@ -68,7 +81,7 @@ jobs:
 
             - uses: actions/setup-node@v6.4.0
               with:
-                  node-version: "22"
+                  node-version: "24"
                   cache: "npm"
                   cache-dependency-path: app/package-lock.json
 
@@ -90,4 +103,11 @@ jobs:
 
             - name: Test
               working-directory: app
-              run: npx jest
+              run: npx jest --coverage --coverageDirectory=coverage --coverageReporters=lcov --coverageReporters=text-summary
+
+            - name: Upload coverage to Codacy
+              uses: codacy/codacy-coverage-reporter-action@v1.3
+              with:
+                  project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+                  coverage-reports: app/coverage/lcov.info
+                  language: typescript
