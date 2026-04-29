@@ -13,17 +13,22 @@ import com.ethos.store.UserStore;
 
 public class ApiFuzzer {
 
+    private static final UserService SERVICE;
+
+    static {
+        UserStore mockStore = mock(UserStore.class);
+        when(mockStore.insert(any())).thenThrow(new DuplicateTagException());
+        SERVICE = new UserService(mockStore);
+    }
+
     // Fuzz the tag-prefix generation logic in UserService with arbitrary display names.
     // Exercises the trim/split/replaceAll/substring chain with Unicode, nulls, and
     // pathological whitespace strings.
     @FuzzTest
     void fuzzTagPrefixGeneration(FuzzedDataProvider data) {
         String displayName = data.consumeRemainingAsString();
-        UserStore mockStore = mock(UserStore.class);
-        when(mockStore.insert(any())).thenThrow(new DuplicateTagException());
-        UserService service = new UserService(mockStore);
         try {
-            service.registerUser("supertokens-id", "test@example.com", displayName);
+            SERVICE.registerUser("supertokens-id", "test@example.com", displayName);
         } catch (ConflictException ignored) {
         }
     }
