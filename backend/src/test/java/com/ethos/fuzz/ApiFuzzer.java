@@ -11,7 +11,7 @@ import com.ethos.exception.DuplicateTagException;
 import com.ethos.service.UserService;
 import com.ethos.store.UserStore;
 
-public class ApiFuzzTest {
+public class ApiFuzzer {
 
     // Fuzz the tag-prefix generation logic in UserService with arbitrary display names.
     // Exercises the trim/split/replaceAll/substring chain with Unicode, nulls, and
