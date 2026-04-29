@@ -10,6 +10,9 @@ const config: Config = {
         "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.test.json" }],
     },
     testTimeout: 60000,
+    collectCoverage: false,
+    coverageDirectory: "coverage",
+    coverageReporters: ["lcov", "text-summary"],
 };
 
 export default config;

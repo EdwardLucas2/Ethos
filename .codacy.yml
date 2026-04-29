@@ -1,0 +1,21 @@
+---
+engines:
+    spotbugs:
+        enabled: true
+    pmd:
+        enabled: true
+    checkstyle:
+        enabled: false
+    eslint:
+        enabled: true
+    semgrep:
+        enabled: true
+    trivy:
+        enabled: true
+
+exclude_paths:
+    - "target/**"
+    - "node_modules/**"
+    - "**/generated/**"
+    - "backend/src/main/resources/META-INF/**"
+    - "product/**"
