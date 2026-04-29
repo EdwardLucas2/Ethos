@@ -1,15 +1,15 @@
 package com.ethos.fuzz;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.code_intelligence.jazzer.api.FuzzedDataProvider;
 import com.code_intelligence.jazzer.junit.FuzzTest;
 import com.ethos.exception.ConflictException;
 import com.ethos.exception.DuplicateTagException;
 import com.ethos.service.UserService;
 import com.ethos.store.UserStore;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ApiFuzzTest {
 
@@ -24,6 +24,7 @@ public class ApiFuzzTest {
         UserService service = new UserService(mockStore);
         try {
             service.registerUser("supertokens-id", "test@example.com", displayName);
-        } catch (ConflictException ignored) {}
+        } catch (ConflictException ignored) {
+        }
     }
 }
