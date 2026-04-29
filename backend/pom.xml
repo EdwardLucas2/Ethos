@@ -182,7 +182,7 @@
                 <version>3.5.2</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/*FuzzTest.java</exclude>
+                        <exclude>**/*ApiFuzzer.java</exclude>
                     </excludes>
                     <systemPropertyVariables>
                         <postgres.image>${postgres.image}</postgres.image>
@@ -270,7 +270,7 @@
                         <configuration>
                             <excludes/>
                             <includes>
-                                <include>**/*FuzzTest.java</include>
+                                <include>**/*ApiFuzzer.java</include>
                             </includes>
                             <systemPropertyVariables>
                                 <jazzer.timeout>60</jazzer.timeout>
