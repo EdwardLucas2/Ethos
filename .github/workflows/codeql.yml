@@ -37,6 +37,10 @@ jobs:
               working-directory: backend
               run: mvn compile -Ddocker.skip=true -DskipTests
 
+            - name: Autobuild (JavaScript/TypeScript)
+              if: matrix.language == 'javascript-typescript'
+              uses: github/codeql-action/autobuild@v4.31.6
+
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
               with:

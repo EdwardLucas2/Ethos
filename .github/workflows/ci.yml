@@ -32,6 +32,7 @@ jobs:
 
             - name: Upload coverage to Codacy
               uses: codacy/codacy-coverage-reporter-action@v1.3
+              continue-on-error: true
               with:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
                   coverage-reports: backend/target/site/jacoco/jacoco.xml
@@ -69,6 +70,7 @@ jobs:
 
             - name: Upload coverage to Codacy
               uses: codacy/codacy-coverage-reporter-action@v1.3
+              continue-on-error: true
               with:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
                   coverage-reports: auth/coverage/lcov.info
@@ -107,6 +109,7 @@ jobs:
 
             - name: Upload coverage to Codacy
               uses: codacy/codacy-coverage-reporter-action@v1.3
+              continue-on-error: true
               with:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
                   coverage-reports: app/coverage/lcov.info
