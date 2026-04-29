@@ -34,6 +34,18 @@
         <jackson.version>2.21.0</jackson.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Web Framework -->
         <dependency>
@@ -203,6 +215,10 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
+                <!-- Run locally: mvn exec:java -->
+                <configuration>
+                    <mainClass>com.ethos.Main</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <id>build-auth-server-image</id>
@@ -238,15 +254,6 @@
                             <style>PALANTIR</style>
                         </palantirJavaFormat>
                     </java>
-                </configuration>
-            </plugin>
-            <!-- Run locally: mvn exec:java -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <configuration>
-                    <mainClass>com.ethos.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
