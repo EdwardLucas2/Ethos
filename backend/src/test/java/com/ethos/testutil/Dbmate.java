@@ -1,9 +1,15 @@
 package com.ethos.testutil;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public class Dbmate {
 
     public static void migrate(String host, int port, String user, String password, String dbName) {
-        var url = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + dbName + "?sslmode=disable";
+        String encodedUser = URLEncoder.encode(user, StandardCharsets.UTF_8);
+        String encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8);
+        String url = String.format("postgresql://%s:%s@%s:%d/%s?sslmode=disable",
+                encodedUser, encodedPassword, host, port, dbName);
         try {
             var process = new ProcessBuilder(
                             "dbmate", "--url", url, "--migrations-dir", "db/migrations", "--no-dump-schema", "up")
