@@ -3,7 +3,7 @@ package com.ethos.testutil;
 public class Dbmate {
 
     public static void migrate(String host, int port, String user, String password, String dbName) {
-        var url = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + dbName;
+        var url = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + dbName + "?sslmode=disable";
         try {
             var process = new ProcessBuilder(
                             "dbmate", "--url", url, "--migrations-dir", "db/migrations", "--no-dump-schema", "up")
