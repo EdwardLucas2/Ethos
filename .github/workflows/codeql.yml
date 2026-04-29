@@ -37,11 +37,6 @@ jobs:
               working-directory: backend
               run: mvn compile -Ddocker.skip=true -DskipTests
 
-            - name: Install frontend dependencies (JavaScript/TypeScript)
-              if: matrix.language == 'javascript-typescript'
-              working-directory: app
-              run: npm ci
-
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
               with:
