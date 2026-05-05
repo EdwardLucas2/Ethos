@@ -139,7 +139,8 @@ public class UserStore {
                     .execute());
             return true;
         } catch (UnableToExecuteStatementException e) {
-            if (e.getCause() instanceof PSQLException psql && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
+            if (e.getCause() instanceof PSQLException psql
+                    && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
                 return false;
             }
             throw e;
@@ -160,7 +161,8 @@ public class UserStore {
     }
 
     private static void rethrowIfUniqueViolation(UnableToExecuteStatementException e) {
-        if (e.getCause() instanceof PSQLException psql && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
+        if (e.getCause() instanceof PSQLException psql
+                && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
             ServerErrorMessage msg = psql.getServerErrorMessage();
             if (msg != null) {
                 String constraint = msg.getConstraint();

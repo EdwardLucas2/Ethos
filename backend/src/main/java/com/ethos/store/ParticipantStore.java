@@ -48,7 +48,8 @@ public class ParticipantStore {
                     .map(PARTICIPANT_MAPPER)
                     .one());
         } catch (UnableToExecuteStatementException e) {
-            if (e.getCause() instanceof PSQLException psql && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
+            if (e.getCause() instanceof PSQLException psql
+                    && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
                 throw new ConflictException("User is already a participant in this contract");
             }
             throw e;

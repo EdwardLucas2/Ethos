@@ -327,8 +327,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         @Test
         void givenNonExistentParticipant_throws() {
             assertThrows(
-                    IllegalArgumentException.class,
-                    () -> participantStore.updateParticipantOptOut(UUID.randomUUID()));
+                    IllegalArgumentException.class, () -> participantStore.updateParticipantOptOut(UUID.randomUUID()));
         }
     }
 
