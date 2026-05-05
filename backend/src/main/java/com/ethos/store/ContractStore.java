@@ -327,15 +327,7 @@ public class ContractStore {
                     .bind("userId", userId)
                     .bind("cycleStatus", cycleStatus)
                     .map((rs, ctx) -> new ContractCyclePair(
-                            new Contract(
-                                    rs.getObject("id", UUID.class),
-                                    rs.getObject("creator_id", UUID.class),
-                                    rs.getString("name"),
-                                    rs.getString("forfeit"),
-                                    Period.fromValue(rs.getString("period")),
-                                    rs.getObject("start_date", LocalDate.class),
-                                    rs.getString("status"),
-                                    rs.getTimestamp("created_at").toInstant()),
+                            CONTRACT_MAPPER.map(rs, ctx),
                             new Cycle(
                                     rs.getObject("cy_id", UUID.class),
                                     rs.getObject("cy_contract_id", UUID.class),
