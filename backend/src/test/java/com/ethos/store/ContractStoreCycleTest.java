@@ -2,7 +2,6 @@ package com.ethos.store;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.ethos.exception.ConflictException;
 import com.ethos.integration.IntegrationTestBase;
 import com.ethos.model.ContractDetail;
 import com.ethos.model.ContractStatus;
