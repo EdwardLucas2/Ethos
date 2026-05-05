@@ -23,7 +23,9 @@ public class ParticipantStore {
             rs.getObject("frequency", Integer.class),
             rs.getString("sign_status"),
             rs.getBoolean("opted_out_of_next_cycle"),
-            rs.getTimestamp("invited_at").toInstant(),
+            rs.getTimestamp("invited_at") == null
+                    ? null
+                    : rs.getTimestamp("invited_at").toInstant(),
             rs.getTimestamp("signed_at") == null
                     ? null
                     : rs.getTimestamp("signed_at").toInstant());

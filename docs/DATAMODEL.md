@@ -90,7 +90,7 @@ Status transitions:
 
 - `draft` → `active`: creator starts contract, ≥2 participants signed, start date reached
 - `draft` → `cancelled`: start date reached with <2 signed participants
-- `active` → `ended`: all remaining participants opt out after a cycle settles
+- `active` → `ended`: all remaining participants opt out at a cycle boundary
 
 ---
 

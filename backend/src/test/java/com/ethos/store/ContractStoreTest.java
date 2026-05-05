@@ -8,6 +8,7 @@ import com.ethos.model.ContractDetail;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -213,6 +214,32 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenUnknownId_returnsEmpty() {
             Optional<Contract> result =
                     contractStore.updateFields(UUID.randomUUID(), "New", "Forfeit", Period.weekly, LocalDate.now());
+
+            assertTrue(result.isEmpty());
+        }
+
+        @Test
+        void givenNonDraftContract_returnsEmpty() {
+            UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
+            ContractDetail detail = contractStore.insert(
+                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
+            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
+            ContractStoreTestHelper.CycleDates dates =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    dates.startDate(),
+                    dates.endDate(),
+                    dates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
+
+            Optional<Contract> result = contractStore.updateFields(
+                    detail.contract().id(),
+                    "New",
+                    "New Forfeit",
+                    Period.monthly,
+                    LocalDate.now().plusDays(5));
 
             assertTrue(result.isEmpty());
         }

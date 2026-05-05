@@ -2,6 +2,7 @@ package com.ethos.store;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.ethos.exception.ConflictException;
 import com.ethos.integration.IntegrationTestBase;
 import com.ethos.model.ContractDetail;
 import com.ethos.model.Cycle;
@@ -183,6 +184,30 @@ class ContractStoreCycleTest extends IntegrationTestBase {
 
             assertFalse(result);
         }
+
+        @Test
+        void givenParticipantWithNullFrequency_throwsConflictException() {
+            UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
+            ContractDetail detail = contractStore.insert(
+                    creator,
+                    "Test",
+                    "Forfeit",
+                    com.ethos.model.Period.weekly,
+                    LocalDate.now().plusDays(1));
+            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
+
+            ContractStoreTestHelper.CycleDates dates =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+
+            assertThrows(
+                    ConflictException.class,
+                    () -> contractStore.activateContract(
+                            detail.contract().id(),
+                            dates.startDate(),
+                            dates.endDate(),
+                            dates.votingDeadline(),
+                            List.of(detail.participants().get(0).id())));
+        }
     }
 
     @Nested
@@ -307,6 +332,50 @@ class ContractStoreCycleTest extends IntegrationTestBase {
                             .mapTo(Integer.class)
                             .one());
             assertEquals(2, habitActionCount); // only creator's 2 actions
+        }
+
+        @Test
+        void givenEmptyParticipants_endsContract() {
+            UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
+            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
+            ContractStoreTestHelper.CycleDates dates =
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    dates.startDate(),
+                    dates.endDate(),
+                    dates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
+            Cycle cycle = cycleStore
+                    .findCycleByContractAndNumber(detail.contract().id(), 1)
+                    .orElseThrow();
+
+            participantStore.updateParticipantOptOut(
+                    detail.participants().get(0).id());
+
+            ContractStoreTestHelper.CycleDates advanceDates =
+                    ContractStoreTestHelper.validCycleDates(dates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+            Optional<Cycle> nextCycle = contractStore.advanceCycleToResolution(
+                    cycle.id(),
+                    detail.contract().id(),
+                    2,
+                    advanceDates.startDate(),
+                    advanceDates.endDate(),
+                    advanceDates.votingDeadline(),
+                    List.of());
+
+            assertTrue(nextCycle.isEmpty());
+
+            ContractDetail updated =
+                    contractStore.findById(detail.contract().id()).orElseThrow();
+            assertEquals("ended", updated.contract().status());
+
+            Optional<Cycle> maybeCycle2 =
+                    cycleStore.findCycleByContractAndNumber(detail.contract().id(), 2);
+            assertTrue(maybeCycle2.isEmpty());
         }
 
         @Test

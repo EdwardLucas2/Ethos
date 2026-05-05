@@ -116,7 +116,7 @@ public class ContractStore {
                         """
                                 UPDATE contracts
                                 SET name = :name, forfeit = :forfeit, period = :period, start_date = :startDate
-                                WHERE id = :contractId
+                                WHERE id = :contractId AND status = 'draft'
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
                 .bind("contractId", contractId)
@@ -207,6 +207,18 @@ public class ContractStore {
                 return Optional.empty();
             }
 
+            if (activeParticipantIds.isEmpty()) {
+                handle.createUpdate(
+                                """
+                                UPDATE contracts
+                                SET status = 'ended'
+                                WHERE id = :contractId AND status = 'active'
+                                """)
+                        .bind("contractId", contractId)
+                        .execute();
+                return Optional.empty();
+            }
+
             Cycle nextCycle = handle.createQuery(
                             """
                             INSERT INTO cycles (contract_id, cycle_number, start_date, end_date, voting_deadline, status)
@@ -221,9 +233,7 @@ public class ContractStore {
                     .map(CycleStore.CYCLE_MAPPER)
                     .one();
 
-            if (!activeParticipantIds.isEmpty()) {
-                batchInsertHabitActions(handle, nextCycle.id(), activeParticipantIds);
-            }
+            batchInsertHabitActions(handle, nextCycle.id(), activeParticipantIds);
 
             return Optional.of(nextCycle);
         });
