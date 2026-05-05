@@ -2,6 +2,7 @@ package com.ethos.store;
 
 import com.ethos.exception.ConflictException;
 import com.ethos.model.Participant;
+import com.ethos.model.SignStatus;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +95,7 @@ public class ParticipantStore {
                 .list());
     }
 
-    public Optional<Participant> updateParticipantSignStatus(UUID participantId, String signStatus, Instant signedAt) {
+    public Optional<Participant> updateParticipantSignStatus(UUID participantId, SignStatus signStatus, Instant signedAt) {
         return jdbi.withHandle(handle -> handle.createQuery(
                         """
                         UPDATE participants

@@ -8,6 +8,7 @@ import com.ethos.model.ContractDetail;
 import com.ethos.model.Cycle;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
+import com.ethos.model.SignStatus;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -211,7 +212,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
                     participantStore.insertParticipant(detail.contract().id(), user2);
 
             Optional<Participant> result =
-                    participantStore.updateParticipantSignStatus(participant.id(), "signed", Instant.now());
+                    participantStore.updateParticipantSignStatus(participant.id(), SignStatus.signed, Instant.now());
 
             assertTrue(result.isPresent());
             assertEquals("signed", result.get().signStatus());
@@ -228,7 +229,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
                     participantStore.insertParticipant(detail.contract().id(), user2);
 
             Optional<Participant> result =
-                    participantStore.updateParticipantSignStatus(participant.id(), "declined", null);
+                    participantStore.updateParticipantSignStatus(participant.id(), SignStatus.declined, null);
 
             assertTrue(result.isPresent());
             assertEquals("declined", result.get().signStatus());
@@ -238,7 +239,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         @Test
         void givenUnknownParticipant_returnsEmpty() {
             Optional<Participant> result =
-                    participantStore.updateParticipantSignStatus(UUID.randomUUID(), "signed", Instant.now());
+                    participantStore.updateParticipantSignStatus(UUID.randomUUID(), SignStatus.signed, Instant.now());
 
             assertTrue(result.isEmpty());
         }

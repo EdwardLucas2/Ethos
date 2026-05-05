@@ -2,6 +2,7 @@ package com.ethos.store;
 
 import com.ethos.model.ContractDetail;
 import com.ethos.model.Participant;
+import com.ethos.model.SignStatus;
 import com.ethos.util.CycleDateCalculator;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ class ContractStoreTestHelper {
     }
 
     static void signParticipant(UUID participantId, ParticipantStore store) {
-        store.updateParticipantSignStatus(participantId, "signed", Instant.now());
+        store.updateParticipantSignStatus(participantId, SignStatus.signed, Instant.now());
     }
 
     static void setFrequency(UUID participantId, int frequency, ParticipantStore store) {

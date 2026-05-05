@@ -8,6 +8,7 @@ import com.ethos.model.ContractDetail;
 import com.ethos.model.ContractStatus;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
+import com.ethos.model.SignStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -104,7 +105,7 @@ class ContractStoreTest extends IntegrationTestBase {
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant2 =
                     participantStore.insertParticipant(detail.contract().id(), user2);
-            participantStore.updateParticipantSignStatus(participant2.id(), "removed", null);
+            participantStore.updateParticipantSignStatus(participant2.id(), SignStatus.removed, null);
 
             Optional<ContractDetail> result =
                     contractStore.findById(detail.contract().id());
@@ -121,7 +122,7 @@ class ContractStoreTest extends IntegrationTestBase {
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant2 =
                     participantStore.insertParticipant(detail.contract().id(), user2);
-            participantStore.updateParticipantSignStatus(participant2.id(), "declined", null);
+            participantStore.updateParticipantSignStatus(participant2.id(), SignStatus.declined, null);
 
             Optional<ContractDetail> result =
                     contractStore.findById(detail.contract().id());

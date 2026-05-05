@@ -210,6 +210,14 @@ public class ContractStore {
             if (activeParticipantIds.isEmpty()) {
                 handle.createUpdate(
                                 """
+                                UPDATE cycles
+                                SET status = 'settled'
+                                WHERE id = :currentCycleId
+                                """)
+                        .bind("currentCycleId", currentCycleId)
+                        .execute();
+                handle.createUpdate(
+                                """
                                 UPDATE contracts
                                 SET status = 'ended'
                                 WHERE id = :contractId AND status = 'active'
