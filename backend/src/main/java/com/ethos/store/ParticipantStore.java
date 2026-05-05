@@ -95,7 +95,8 @@ public class ParticipantStore {
                 .list());
     }
 
-    public Optional<Participant> updateParticipantSignStatus(UUID participantId, SignStatus signStatus, Instant signedAt) {
+    public Optional<Participant> updateParticipantSignStatus(
+            UUID participantId, SignStatus signStatus, Instant signedAt) {
         return jdbi.withHandle(handle -> handle.createQuery(
                         """
                         UPDATE participants
