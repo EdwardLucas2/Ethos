@@ -115,7 +115,7 @@ public class ParticipantStore {
         return jdbi.withHandle(handle -> handle.createQuery(
                         """
                         UPDATE participants
-                        SET habit = :habit, frequency = :frequency
+                        SET habit = COALESCE(:habit, habit), frequency = COALESCE(:frequency, frequency)
                         WHERE id = :participantId
                         RETURNING id, contract_id, user_id, habit, frequency, sign_status, opted_out_of_next_cycle, invited_at, signed_at
                         """)

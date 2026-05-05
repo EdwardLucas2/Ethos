@@ -1,7 +1,6 @@
 package com.ethos.store;
 
 import com.ethos.model.ContractDetail;
-import com.ethos.model.Participant;
 import com.ethos.model.SignStatus;
 import com.ethos.util.CycleDateCalculator;
 import java.time.Instant;
@@ -38,8 +37,7 @@ class ContractStoreTestHelper {
     }
 
     static void setFrequency(UUID participantId, int frequency, ParticipantStore store) {
-        Participant participant = store.findParticipantById(participantId).orElseThrow();
-        store.updateParticipantCommitment(participantId, participant.habit(), frequency);
+        store.updateParticipantCommitment(participantId, null, frequency);
     }
 
     /** Creates a contract and optionally adds extra participants beyond the creator. */
