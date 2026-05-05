@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.ethos.exception.ConflictException;
 import com.ethos.integration.IntegrationTestBase;
 import com.ethos.model.ContractDetail;
+import com.ethos.model.ContractStatus;
 import com.ethos.model.Cycle;
 import com.ethos.model.Participant;
 import java.time.LocalDate;
@@ -453,7 +454,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail =
                     ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
-            contractStore.updateStatus(detail.contract().id(), "ended");
+            contractStore.updateStatus(detail.contract().id(), ContractStatus.ended);
 
             contractStore.endContractIfEmpty(detail.contract().id());
 

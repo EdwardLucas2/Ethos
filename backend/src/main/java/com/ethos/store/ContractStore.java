@@ -1,9 +1,9 @@
 package com.ethos.store;
 
-import com.ethos.exception.ConflictException;
 import com.ethos.model.ActiveContractRow;
 import com.ethos.model.Contract;
 import com.ethos.model.ContractDetail;
+import com.ethos.model.ContractStatus;
 import com.ethos.model.Cycle;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
@@ -128,7 +128,7 @@ public class ContractStore {
                 .findOne());
     }
 
-    public Optional<Contract> updateStatus(UUID contractId, String status) {
+    public Optional<Contract> updateStatus(UUID contractId, ContractStatus status) {
         return jdbi.withHandle(handle -> handle.createQuery(
                         """
                                 UPDATE contracts
@@ -137,7 +137,7 @@ public class ContractStore {
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
                 .bind("contractId", contractId)
-                .bind("status", status)
+                .bind("status", status.name())
                 .map(CONTRACT_MAPPER)
                 .findOne());
     }
@@ -292,7 +292,7 @@ public class ContractStore {
             UUID participantId = (UUID) row[0];
             Integer frequency = (Integer) row[1];
             if (frequency == null) {
-                throw new ConflictException(
+                throw new IllegalStateException(
                         "Participant " + participantId + " has null frequency — cannot create habit actions");
             }
             for (int i = 1; i <= frequency; i++) {
@@ -314,7 +314,7 @@ public class ContractStore {
      */
     private List<ActiveContractRow> fetchContractRows(UUID userId, String cycleStatus) {
         return jdbi.withHandle(handle -> {
-            List<Object[]> contractsAndCycles = handle.createQuery(
+            List<ContractCyclePair> contractsAndCycles = handle.createQuery(
                             """
                             SELECT c.id, c.creator_id, c.name, c.forfeit, c.period, c.start_date, c.status, c.created_at,
                                    cy.id AS cy_id, cy.contract_id AS cy_contract_id, cy.cycle_number, cy.start_date AS cy_start_date, cy.end_date, cy.voting_deadline, cy.status AS cy_status
@@ -326,25 +326,24 @@ public class ContractStore {
                             """)
                     .bind("userId", userId)
                     .bind("cycleStatus", cycleStatus)
-                    .map((rs, ctx) -> new Object[] {
-                        new Contract(
-                                rs.getObject("id", UUID.class),
-                                rs.getObject("creator_id", UUID.class),
-                                rs.getString("name"),
-                                rs.getString("forfeit"),
-                                Period.fromValue(rs.getString("period")),
-                                rs.getObject("start_date", LocalDate.class),
-                                rs.getString("status"),
-                                rs.getTimestamp("created_at").toInstant()),
-                        new Cycle(
-                                rs.getObject("cy_id", UUID.class),
-                                rs.getObject("cy_contract_id", UUID.class),
-                                rs.getInt("cycle_number"),
-                                rs.getObject("cy_start_date", LocalDate.class),
-                                rs.getObject("end_date", LocalDate.class),
-                                rs.getObject("voting_deadline", LocalDate.class),
-                                rs.getString("cy_status"))
-                    })
+                    .map((rs, ctx) -> new ContractCyclePair(
+                            new Contract(
+                                    rs.getObject("id", UUID.class),
+                                    rs.getObject("creator_id", UUID.class),
+                                    rs.getString("name"),
+                                    rs.getString("forfeit"),
+                                    Period.fromValue(rs.getString("period")),
+                                    rs.getObject("start_date", LocalDate.class),
+                                    rs.getString("status"),
+                                    rs.getTimestamp("created_at").toInstant()),
+                            new Cycle(
+                                    rs.getObject("cy_id", UUID.class),
+                                    rs.getObject("cy_contract_id", UUID.class),
+                                    rs.getInt("cycle_number"),
+                                    rs.getObject("cy_start_date", LocalDate.class),
+                                    rs.getObject("end_date", LocalDate.class),
+                                    rs.getObject("voting_deadline", LocalDate.class),
+                                    rs.getString("cy_status"))))
                     .list();
 
             if (contractsAndCycles.isEmpty()) {
@@ -352,7 +351,7 @@ public class ContractStore {
             }
 
             List<UUID> contractIds = contractsAndCycles.stream()
-                    .map(row -> ((Contract) row[0]).id())
+                    .map(pair -> pair.contract().id())
                     .distinct()
                     .toList();
 
@@ -367,16 +366,16 @@ public class ContractStore {
                     .list();
 
             List<ActiveContractRow> result = new ArrayList<>();
-            for (Object[] row : contractsAndCycles) {
-                Contract contract = (Contract) row[0];
-                Cycle cycle = (Cycle) row[1];
+            for (ContractCyclePair pair : contractsAndCycles) {
                 List<Participant> contractParticipants = participants.stream()
-                        .filter(p -> p.contractId().equals(contract.id()))
+                        .filter(p -> p.contractId().equals(pair.contract().id()))
                         .toList();
-                result.add(new ActiveContractRow(contract, cycle, contractParticipants));
+                result.add(new ActiveContractRow(pair.contract(), pair.cycle(), contractParticipants));
             }
 
             return result;
         });
     }
+
+    private record ContractCyclePair(Contract contract, Cycle cycle) {}
 }

@@ -323,6 +323,13 @@ class ParticipantStoreTest extends IntegrationTestBase {
                     .orElseThrow();
             assertTrue(result.optedOutOfNextCycle());
         }
+
+        @Test
+        void givenNonExistentParticipant_throws() {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> participantStore.updateParticipantOptOut(UUID.randomUUID()));
+        }
     }
 
     @Nested

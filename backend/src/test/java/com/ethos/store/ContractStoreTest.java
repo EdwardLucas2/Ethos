@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.ethos.integration.IntegrationTestBase;
 import com.ethos.model.Contract;
 import com.ethos.model.ContractDetail;
+import com.ethos.model.ContractStatus;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
 import java.time.LocalDate;
@@ -255,7 +256,7 @@ class ContractStoreTest extends IntegrationTestBase {
                     creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
 
             Optional<Contract> result =
-                    contractStore.updateStatus(detail.contract().id(), "cancelled");
+                    contractStore.updateStatus(detail.contract().id(), ContractStatus.cancelled);
 
             assertTrue(result.isPresent());
             assertEquals("cancelled", result.get().status());
@@ -263,7 +264,7 @@ class ContractStoreTest extends IntegrationTestBase {
 
         @Test
         void givenUnknownId_returnsEmpty() {
-            Optional<Contract> result = contractStore.updateStatus(UUID.randomUUID(), "cancelled");
+            Optional<Contract> result = contractStore.updateStatus(UUID.randomUUID(), ContractStatus.cancelled);
 
             assertTrue(result.isEmpty());
         }

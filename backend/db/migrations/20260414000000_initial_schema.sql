@@ -80,6 +80,11 @@ CREATE TABLE cycles (
     CHECK (voting_deadline > end_date)
 );
 
+CREATE INDEX idx_cycles_contract_id ON cycles (contract_id);
+-- Scheduler queries filter by status + date columns; composite indexes avoid full scans
+CREATE INDEX idx_cycles_status_end_date ON cycles (status, end_date);
+CREATE INDEX idx_cycles_status_voting_deadline ON cycles (status, voting_deadline);
+
 -- Habit actions (one slot per participant per frequency unit per cycle)
 CREATE TABLE habit_actions (
     id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),

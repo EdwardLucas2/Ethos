@@ -10,6 +10,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 
 public class ParticipantStore {
 
@@ -47,7 +48,7 @@ public class ParticipantStore {
                     .map(PARTICIPANT_MAPPER)
                     .one());
         } catch (UnableToExecuteStatementException e) {
-            if (e.getCause() instanceof PSQLException psql && "23505".equals(psql.getSQLState())) {
+            if (e.getCause() instanceof PSQLException psql && PSQLState.UNIQUE_VIOLATION.getState().equals(psql.getSQLState())) {
                 throw new ConflictException("User is already a participant in this contract");
             }
             throw e;
@@ -123,14 +124,19 @@ public class ParticipantStore {
     }
 
     public void updateParticipantOptOut(UUID participantId) {
-        jdbi.useHandle(handle -> handle.createUpdate(
-                        """
-                        UPDATE participants
-                        SET opted_out_of_next_cycle = true
-                        WHERE id = :participantId
-                        """)
-                .bind("participantId", participantId)
-                .execute());
+        jdbi.useHandle(handle -> {
+            int updated = handle.createUpdate(
+                            """
+                            UPDATE participants
+                            SET opted_out_of_next_cycle = true
+                            WHERE id = :participantId
+                            """)
+                    .bind("participantId", participantId)
+                    .execute();
+            if (updated == 0) {
+                throw new IllegalArgumentException("Participant not found: " + participantId);
+            }
+        });
     }
 
     public int countSignedParticipants(UUID contractId) {

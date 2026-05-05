@@ -205,6 +205,41 @@ class ContractStoreDashboardTest extends IntegrationTestBase {
         }
 
         @Test
+        void givenNonSignedParticipant_doesNotReturnContract() {
+            UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
+            ContractDetail detail =
+                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
+            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
+            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
+            ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(
+                    LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
+            contractStore.activateContract(
+                    detail.contract().id(),
+                    activateDates.startDate(),
+                    activateDates.endDate(),
+                    activateDates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
+            Cycle cycle = cycleStore
+                    .findCycleByContractAndNumber(detail.contract().id(), 1)
+                    .orElseThrow();
+            ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
+                    activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+            contractStore.advanceCycleToResolution(
+                    cycle.id(),
+                    detail.contract().id(),
+                    2,
+                    advanceDates.startDate(),
+                    advanceDates.endDate(),
+                    advanceDates.votingDeadline(),
+                    List.of(detail.participants().get(0).id()));
+            UUID outsider = ContractStoreTestHelper.insertUserRaw(JDBI, "outsider", "outsider@example.com");
+
+            List<ActiveContractRow> result = contractStore.getPendingResolutionContracts(outsider);
+
+            assertTrue(result.isEmpty());
+        }
+
+        @Test
         void givenBothActiveAndPending_contractAppearsInBoth() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail =
