@@ -201,7 +201,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
                     ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
 
             assertThrows(
-                    ConflictException.class,
+                    IllegalStateException.class,
                     () -> contractStore.activateContract(
                             detail.contract().id(),
                             dates.startDate(),
