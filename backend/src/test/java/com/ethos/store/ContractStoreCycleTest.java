@@ -218,7 +218,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenActiveCycle_setsToPendingResolution() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
 
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
                     fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.WEEKLY);
@@ -241,7 +241,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenActiveCycle_createsNextCycle() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
 
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
                     fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.WEEKLY);
@@ -313,7 +313,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenEmptyParticipants_endsContract() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
             participantStore.updateParticipantOptOut(
                     fixture.detail().participants().get(0).id());
 
@@ -369,7 +369,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenSignedParticipantsRemain_noOp() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
 
             contractStore.endContractIfEmpty(fixture.detail().contract().id());
 
@@ -382,7 +382,7 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenAllSignedOptedOut_transitionsToEnded() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
             participantStore.updateParticipantOptOut(
                     fixture.detail().participants().get(0).id());
 

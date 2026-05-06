@@ -2,6 +2,7 @@ package com.ethos.store;
 
 import com.ethos.model.ContractDetail;
 import com.ethos.model.Cycle;
+import com.ethos.model.Period;
 import com.ethos.model.SignStatus;
 import com.ethos.util.CycleDateCalculator;
 import java.time.Instant;
@@ -54,7 +55,7 @@ class ContractStoreTestHelper {
                 creatorId,
                 "",
                 "",
-                com.ethos.model.Period.WEEKLY,
+                Period.WEEKLY,
                 LocalDate.now().plusDays(1));
         for (UUID userId : participantUserIds) {
             participantStore.insertParticipant(detail.contract().id(), userId);
@@ -67,18 +68,18 @@ class ContractStoreTestHelper {
      * tomorrow) and returns the detail and first cycle.
      */
     static ActiveContractFixture givenActiveContract(
-            ContractStore contractStore, ParticipantStore participantStore, Jdbi jdbi, UUID creatorId) {
+            ContractStore contractStore, ParticipantStore participantStore, CycleStore cycleStore, UUID creatorId) {
         ContractDetail detail = insertContractWithParticipants(contractStore, participantStore, creatorId);
         signParticipant(detail.participants().get(0).id(), participantStore);
         setFrequency(detail.participants().get(0).id(), 3, participantStore);
-        CycleDates dates = validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.WEEKLY);
+        CycleDates dates = validCycleDates(LocalDate.now().plusDays(1), Period.WEEKLY);
         contractStore.activateContract(
                 detail.contract().id(),
                 dates.startDate(),
                 dates.endDate(),
                 dates.votingDeadline(),
                 List.of(detail.participants().get(0).id()));
-        Cycle cycle = new CycleStore(jdbi)
+        Cycle cycle = cycleStore
                 .findCycleByContractAndNumber(detail.contract().id(), 1)
                 .orElseThrow();
         return new ActiveContractFixture(detail, cycle);

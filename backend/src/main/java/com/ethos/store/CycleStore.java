@@ -59,7 +59,7 @@ public class CycleStore {
                         WHERE id = :cycleId
                         """)
                 .bind("cycleId", cycleId)
-                .bind("status", status.name())
+                .bind("status", status)
                 .execute());
     }
 }

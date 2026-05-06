@@ -34,7 +34,7 @@ class CycleStoreTest extends IntegrationTestBase {
         void givenExistingCycle_returnsCycle() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
 
             Optional<Cycle> result = cycleStore.findCycleByContractAndNumber(
                     fixture.detail().contract().id(), 1);
@@ -59,7 +59,7 @@ class CycleStoreTest extends IntegrationTestBase {
         void givenMultipleCycles_returnsCorrectCycle() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
                     fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.advanceCycleToResolution(
@@ -110,7 +110,7 @@ class CycleStoreTest extends IntegrationTestBase {
         @Test
         void givenActiveCycleWithFutureEndDate_excluded() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+            ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
 
             List<Cycle> due = cycleStore.findCyclesDueForTransition();
 
@@ -194,7 +194,7 @@ class CycleStoreTest extends IntegrationTestBase {
         void givenCycle_updatesStatus() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
-                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, cycleStore, creator);
 
             cycleStore.updateCycleStatus(fixture.cycle().id(), CycleStatus.PENDING_RESOLUTION);
 

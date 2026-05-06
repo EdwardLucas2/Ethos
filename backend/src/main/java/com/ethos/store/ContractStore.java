@@ -53,7 +53,7 @@ public class ContractStore {
                     .bind("creatorId", creatorId)
                     .bind("name", name)
                     .bind("forfeit", forfeit)
-                    .bind("period", period.name())
+                    .bind("period", period)
                     .bind("startDate", startDate)
                     .map(CONTRACT_MAPPER)
                     .one();
@@ -127,7 +127,7 @@ public class ContractStore {
                 .bind("contractId", contractId)
                 .bind("name", name)
                 .bind("forfeit", forfeit)
-                .bind("period", period.name())
+                .bind("period", period)
                 .bind("startDate", startDate)
                 .map(CONTRACT_MAPPER)
                 .findOne());
@@ -142,8 +142,8 @@ public class ContractStore {
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
                 .bind("contractId", contractId)
-                .bind("expectedFrom", expectedFrom.name())
-                .bind("newStatus", newStatus.name())
+                .bind("expectedFrom", expectedFrom)
+                .bind("newStatus", newStatus)
                 .map(CONTRACT_MAPPER)
                 .findOne());
     }
@@ -203,7 +203,7 @@ public class ContractStore {
                             """
                             UPDATE cycles
                             SET status = 'PENDING_RESOLUTION'
-                            WHERE id = :currentCycleId AND contract_id = :contractId
+                            WHERE id = :currentCycleId AND contract_id = :contractId AND status = 'ACTIVE'
                             """)
                     .bind("currentCycleId", currentCycleId)
                     .bind("contractId", contractId)
@@ -219,7 +219,7 @@ public class ContractStore {
                                 """
                                 UPDATE cycles
                                 SET status = 'SETTLED'
-                                WHERE id = :currentCycleId
+                                WHERE id = :currentCycleId AND status = 'PENDING_RESOLUTION'
                                 """)
                         .bind("currentCycleId", currentCycleId)
                         .execute();
@@ -341,7 +341,7 @@ public class ContractStore {
                             WHERE c.status = 'ACTIVE'
                             """)
                     .bind("userId", userId)
-                    .bind("cycleStatus", cycleStatus.name())
+                    .bind("cycleStatus", cycleStatus)
                     .map((rs, ctx) -> new ContractCyclePair(
                             CONTRACT_MAPPER.map(rs, ctx),
                             new Cycle(
