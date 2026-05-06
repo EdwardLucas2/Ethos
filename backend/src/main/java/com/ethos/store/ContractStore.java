@@ -288,8 +288,7 @@ public class ContractStore {
     // -----------------------------------------------------------------------
 
     /** Fetches each participant's frequency then batch-inserts one habit_action per slot. */
-    private void batchInsertHabitActions(
-            Handle handle, UUID contractId, UUID cycleId, List<UUID> participantIds) {
+    private void batchInsertHabitActions(Handle handle, UUID contractId, UUID cycleId, List<UUID> participantIds) {
         record FrequencyRow(UUID participantId, Integer frequency) {}
 
         List<FrequencyRow> frequencies = handle.createQuery(
