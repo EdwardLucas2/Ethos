@@ -1,9 +1,9 @@
 package com.ethos.model;
 
 public enum SignStatus {
-    waiting,
-    drafting,
-    signed,
-    declined,
-    removed
+    WAITING,
+    DRAFTING,
+    SIGNED,
+    DECLINED,
+    REMOVED
 }

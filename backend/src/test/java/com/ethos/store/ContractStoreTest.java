@@ -42,11 +42,11 @@ class ContractStoreTest extends IntegrationTestBase {
             assertEquals("", detail.contract().name());
             assertEquals("", detail.contract().forfeit());
             assertEquals(Period.weekly, detail.contract().period());
-            assertEquals("draft", detail.contract().status());
+            assertEquals(ContractStatus.DRAFT, detail.contract().status());
             assertNotNull(detail.contract().createdAt());
             assertEquals(1, detail.participants().size());
             assertEquals(user, detail.participants().get(0).userId());
-            assertEquals("drafting", detail.participants().get(0).signStatus());
+            assertEquals(SignStatus.DRAFTING, detail.participants().get(0).signStatus());
             assertNull(detail.participants().get(0).habit());
             assertNull(detail.participants().get(0).frequency());
             assertFalse(detail.participants().get(0).optedOutOfNextCycle());
@@ -105,7 +105,7 @@ class ContractStoreTest extends IntegrationTestBase {
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant2 =
                     participantStore.insertParticipant(detail.contract().id(), user2);
-            participantStore.updateParticipantSignStatus(participant2.id(), SignStatus.removed, null);
+            participantStore.updateParticipantSignStatus(participant2.id(), SignStatus.REMOVED, null);
 
             Optional<ContractDetail> result =
                     contractStore.findById(detail.contract().id());
@@ -122,7 +122,7 @@ class ContractStoreTest extends IntegrationTestBase {
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant2 =
                     participantStore.insertParticipant(detail.contract().id(), user2);
-            participantStore.updateParticipantSignStatus(participant2.id(), SignStatus.declined, null);
+            participantStore.updateParticipantSignStatus(participant2.id(), SignStatus.DECLINED, null);
 
             Optional<ContractDetail> result =
                     contractStore.findById(detail.contract().id());
@@ -257,15 +257,16 @@ class ContractStoreTest extends IntegrationTestBase {
                     creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
 
             Optional<Contract> result =
-                    contractStore.updateStatus(detail.contract().id(), ContractStatus.cancelled);
+                    contractStore.updateStatus(detail.contract().id(), ContractStatus.DRAFT, ContractStatus.CANCELLED);
 
             assertTrue(result.isPresent());
-            assertEquals("cancelled", result.get().status());
+            assertEquals(ContractStatus.CANCELLED, result.get().status());
         }
 
         @Test
         void givenUnknownId_returnsEmpty() {
-            Optional<Contract> result = contractStore.updateStatus(UUID.randomUUID(), ContractStatus.cancelled);
+            Optional<Contract> result =
+                    contractStore.updateStatus(UUID.randomUUID(), ContractStatus.DRAFT, ContractStatus.CANCELLED);
 
             assertTrue(result.isEmpty());
         }

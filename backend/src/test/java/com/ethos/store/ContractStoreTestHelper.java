@@ -1,16 +1,20 @@
 package com.ethos.store;
 
 import com.ethos.model.ContractDetail;
+import com.ethos.model.Cycle;
 import com.ethos.model.SignStatus;
 import com.ethos.util.CycleDateCalculator;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.jdbi.v3.core.Jdbi;
 
 class ContractStoreTestHelper {
 
     record CycleDates(LocalDate startDate, LocalDate endDate, LocalDate votingDeadline) {}
+
+    record ActiveContractFixture(ContractDetail detail, Cycle cycle) {}
 
     static CycleDates validCycleDates(LocalDate startDate, com.ethos.model.Period period) {
         CycleDateCalculator.CycleDates dates = CycleDateCalculator.compute(startDate, period);
@@ -33,7 +37,7 @@ class ContractStoreTestHelper {
     }
 
     static void signParticipant(UUID participantId, ParticipantStore store) {
-        store.updateParticipantSignStatus(participantId, SignStatus.signed, Instant.now());
+        store.updateParticipantSignStatus(participantId, SignStatus.SIGNED, Instant.now());
     }
 
     static void setFrequency(UUID participantId, int frequency, ParticipantStore store) {
@@ -56,5 +60,27 @@ class ContractStoreTestHelper {
             participantStore.insertParticipant(detail.contract().id(), userId);
         }
         return detail;
+    }
+
+    /**
+     * Creates an active contract with a single signed participant (frequency=3, weekly, starting
+     * tomorrow) and returns the detail and first cycle.
+     */
+    static ActiveContractFixture givenActiveContract(
+            ContractStore contractStore, ParticipantStore participantStore, Jdbi jdbi, UUID creatorId) {
+        ContractDetail detail = insertContractWithParticipants(contractStore, participantStore, creatorId);
+        signParticipant(detail.participants().get(0).id(), participantStore);
+        setFrequency(detail.participants().get(0).id(), 3, participantStore);
+        CycleDates dates = validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+        contractStore.activateContract(
+                detail.contract().id(),
+                dates.startDate(),
+                dates.endDate(),
+                dates.votingDeadline(),
+                List.of(detail.participants().get(0).id()));
+        Cycle cycle = new CycleStore(jdbi)
+                .findCycleByContractAndNumber(detail.contract().id(), 1)
+                .orElseThrow();
+        return new ActiveContractFixture(detail, cycle);
     }
 }

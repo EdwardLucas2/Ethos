@@ -45,7 +45,7 @@ CREATE TABLE contracts (
     forfeit    TEXT        NOT NULL,
     period     TEXT        NOT NULL CHECK (period IN ('weekly', 'biweekly', 'monthly')),
     start_date DATE        NOT NULL,
-    status     TEXT        NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'ended', 'cancelled')),
+    status     TEXT        NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'ACTIVE', 'ENDED', 'CANCELLED')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -56,7 +56,7 @@ CREATE TABLE participants (
     user_id                  UUID        NOT NULL REFERENCES users (id),
     habit                    TEXT,
     frequency                INTEGER CHECK (frequency > 0),
-    sign_status              TEXT        NOT NULL DEFAULT 'waiting' CHECK (sign_status IN ('waiting', 'drafting', 'signed', 'declined', 'removed')),
+    sign_status              TEXT        NOT NULL DEFAULT 'WAITING' CHECK (sign_status IN ('WAITING', 'DRAFTING', 'SIGNED', 'DECLINED', 'REMOVED')),
     opted_out_of_next_cycle  BOOLEAN     NOT NULL DEFAULT false,
     invited_at               TIMESTAMPTZ NOT NULL DEFAULT now(),
     signed_at                TIMESTAMPTZ,
@@ -74,13 +74,13 @@ CREATE TABLE cycles (
     start_date      DATE    NOT NULL,
     end_date        DATE    NOT NULL,
     voting_deadline DATE    NOT NULL,
-    status          TEXT    NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_resolution', 'settled')),
+    status          TEXT    NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'PENDING_RESOLUTION', 'SETTLED')),
     UNIQUE (contract_id, cycle_number),
     CHECK (end_date > start_date),
     CHECK (voting_deadline > end_date)
 );
 
-CREATE INDEX idx_cycles_contract_id ON cycles (contract_id);
+CREATE UNIQUE INDEX uq_cycles_one_active_per_contract ON cycles (contract_id) WHERE status = 'ACTIVE';
 -- Scheduler queries filter by status + date columns; composite indexes avoid full scans
 CREATE INDEX idx_cycles_status_end_date ON cycles (status, end_date);
 CREATE INDEX idx_cycles_status_voting_deadline ON cycles (status, voting_deadline);

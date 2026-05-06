@@ -1,6 +1,7 @@
 package com.ethos.store;
 
 import com.ethos.model.Cycle;
+import com.ethos.model.CycleStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class CycleStore {
             rs.getObject("start_date", LocalDate.class),
             rs.getObject("end_date", LocalDate.class),
             rs.getObject("voting_deadline", LocalDate.class),
-            rs.getString("status"));
+            CycleStatus.valueOf(rs.getString("status")));
 
     public CycleStore(Jdbi jdbi) {
         this.jdbi = jdbi;
@@ -43,14 +44,14 @@ public class CycleStore {
                         """
                         SELECT id, contract_id, cycle_number, start_date, end_date, voting_deadline, status
                         FROM cycles
-                        WHERE (status = 'active' AND end_date < CURRENT_DATE)
-                           OR (status = 'pending_resolution' AND voting_deadline <= CURRENT_DATE)
+                        WHERE (status = 'ACTIVE' AND end_date < CURRENT_DATE)
+                           OR (status = 'PENDING_RESOLUTION' AND voting_deadline <= CURRENT_DATE)
                         """)
                 .map(CYCLE_MAPPER)
                 .list());
     }
 
-    public void updateCycleStatus(UUID cycleId, String status) {
+    public void updateCycleStatus(UUID cycleId, CycleStatus status) {
         jdbi.useHandle(handle -> handle.createUpdate(
                         """
                         UPDATE cycles
@@ -58,7 +59,7 @@ public class CycleStore {
                         WHERE id = :cycleId
                         """)
                 .bind("cycleId", cycleId)
-                .bind("status", status)
+                .bind("status", status.name())
                 .execute());
     }
 }

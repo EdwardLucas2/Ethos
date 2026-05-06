@@ -43,7 +43,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
                     participantStore.insertParticipant(detail.contract().id(), user2);
 
             assertEquals(user2, participant.userId());
-            assertEquals("waiting", participant.signStatus());
+            assertEquals(SignStatus.WAITING, participant.signStatus());
             assertNull(participant.habit());
             assertNull(participant.frequency());
             assertFalse(participant.optedOutOfNextCycle());
@@ -212,10 +212,10 @@ class ParticipantStoreTest extends IntegrationTestBase {
                     participantStore.insertParticipant(detail.contract().id(), user2);
 
             Optional<Participant> result =
-                    participantStore.updateParticipantSignStatus(participant.id(), SignStatus.signed, Instant.now());
+                    participantStore.updateParticipantSignStatus(participant.id(), SignStatus.SIGNED, Instant.now());
 
             assertTrue(result.isPresent());
-            assertEquals("signed", result.get().signStatus());
+            assertEquals(SignStatus.SIGNED, result.get().signStatus());
             assertNotNull(result.get().signedAt());
         }
 
@@ -229,17 +229,17 @@ class ParticipantStoreTest extends IntegrationTestBase {
                     participantStore.insertParticipant(detail.contract().id(), user2);
 
             Optional<Participant> result =
-                    participantStore.updateParticipantSignStatus(participant.id(), SignStatus.declined, null);
+                    participantStore.updateParticipantSignStatus(participant.id(), SignStatus.DECLINED, null);
 
             assertTrue(result.isPresent());
-            assertEquals("declined", result.get().signStatus());
+            assertEquals(SignStatus.DECLINED, result.get().signStatus());
             assertNull(result.get().signedAt());
         }
 
         @Test
         void givenUnknownParticipant_returnsEmpty() {
             Optional<Participant> result =
-                    participantStore.updateParticipantSignStatus(UUID.randomUUID(), SignStatus.signed, Instant.now());
+                    participantStore.updateParticipantSignStatus(UUID.randomUUID(), SignStatus.SIGNED, Instant.now());
 
             assertTrue(result.isEmpty());
         }

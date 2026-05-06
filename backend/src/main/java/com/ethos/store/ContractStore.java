@@ -5,8 +5,10 @@ import com.ethos.model.Contract;
 import com.ethos.model.ContractDetail;
 import com.ethos.model.ContractStatus;
 import com.ethos.model.Cycle;
+import com.ethos.model.CycleStatus;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
+import com.ethos.model.SignStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,7 @@ public class ContractStore {
             rs.getString("forfeit"),
             Period.fromValue(rs.getString("period")),
             rs.getObject("start_date", LocalDate.class),
-            rs.getString("status"),
+            ContractStatus.valueOf(rs.getString("status")),
             rs.getTimestamp("created_at").toInstant());
 
     public ContractStore(Jdbi jdbi) {
@@ -44,7 +46,7 @@ public class ContractStore {
             Contract contract = handle.createQuery(
                             """
                             INSERT INTO contracts (creator_id, name, forfeit, period, start_date, status)
-                            VALUES (:creatorId, :name, :forfeit, :period, :startDate, 'draft')
+                            VALUES (:creatorId, :name, :forfeit, :period, :startDate, 'DRAFT')
                             RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                             """)
                     .bind("creatorId", creatorId)
@@ -58,7 +60,7 @@ public class ContractStore {
             Participant participant = handle.createQuery(
                             """
                             INSERT INTO participants (contract_id, user_id, sign_status, habit, frequency)
-                            VALUES (:contractId, :userId, 'drafting', NULL, NULL)
+                            VALUES (:contractId, :userId, 'DRAFTING', NULL, NULL)
                             RETURNING id, contract_id, user_id, habit, frequency, sign_status, opted_out_of_next_cycle, invited_at, signed_at
                             """)
                     .bind("contractId", contract.id())
@@ -90,7 +92,7 @@ public class ContractStore {
                             """
                             SELECT id, contract_id, user_id, habit, frequency, sign_status, opted_out_of_next_cycle, invited_at, signed_at
                             FROM participants
-                            WHERE contract_id = :contractId AND sign_status != 'removed'
+                            WHERE contract_id = :contractId AND sign_status != 'REMOVED'
                             """)
                     .bind("contractId", contractId)
                     .map(ParticipantStore.PARTICIPANT_MAPPER)
@@ -100,11 +102,13 @@ public class ContractStore {
                             """
                             SELECT cycle_number
                             FROM cycles
-                            WHERE contract_id = :contractId AND status = 'active'
+                            WHERE contract_id = :contractId AND status = 'ACTIVE'
+                            ORDER BY cycle_number DESC
+                            LIMIT 1
                             """)
                     .bind("contractId", contractId)
                     .mapTo(Integer.class)
-                    .findOne();
+                    .findFirst();
 
             return Optional.of(new ContractDetail(contract.get(), participants, currentCycleNumber.orElse(null)));
         });
@@ -116,7 +120,7 @@ public class ContractStore {
                         """
                                 UPDATE contracts
                                 SET name = :name, forfeit = :forfeit, period = :period, start_date = :startDate
-                                WHERE id = :contractId AND status = 'draft'
+                                WHERE id = :contractId AND status = 'DRAFT'
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
                 .bind("contractId", contractId)
@@ -128,16 +132,17 @@ public class ContractStore {
                 .findOne());
     }
 
-    public Optional<Contract> updateStatus(UUID contractId, ContractStatus status) {
+    public Optional<Contract> updateStatus(UUID contractId, ContractStatus expectedFrom, ContractStatus newStatus) {
         return jdbi.withHandle(handle -> handle.createQuery(
                         """
                                 UPDATE contracts
-                                SET status = :status
-                                WHERE id = :contractId
+                                SET status = :newStatus
+                                WHERE id = :contractId AND status = :expectedFrom
                                 RETURNING id, creator_id, name, forfeit, period, start_date, status, created_at
                                 """)
                 .bind("contractId", contractId)
-                .bind("status", status.name())
+                .bind("expectedFrom", expectedFrom.name())
+                .bind("newStatus", newStatus.name())
                 .map(CONTRACT_MAPPER)
                 .findOne());
     }
@@ -156,8 +161,8 @@ public class ContractStore {
             int updated = handle.createUpdate(
                             """
                             UPDATE contracts
-                            SET status = 'active'
-                            WHERE id = :contractId AND status = 'draft'
+                            SET status = 'ACTIVE'
+                            WHERE id = :contractId AND status = 'DRAFT'
                             """)
                     .bind("contractId", contractId)
                     .execute();
@@ -169,7 +174,7 @@ public class ContractStore {
             Cycle cycle = handle.createQuery(
                             """
                             INSERT INTO cycles (contract_id, cycle_number, start_date, end_date, voting_deadline, status)
-                            VALUES (:contractId, 1, :startDate, :endDate, :votingDeadline, 'active')
+                            VALUES (:contractId, 1, :startDate, :endDate, :votingDeadline, 'ACTIVE')
                             RETURNING id, contract_id, cycle_number, start_date, end_date, voting_deadline, status
                             """)
                     .bind("contractId", contractId)
@@ -196,7 +201,7 @@ public class ContractStore {
             int updated = handle.createUpdate(
                             """
                             UPDATE cycles
-                            SET status = 'pending_resolution'
+                            SET status = 'PENDING_RESOLUTION'
                             WHERE id = :currentCycleId AND contract_id = :contractId
                             """)
                     .bind("currentCycleId", currentCycleId)
@@ -204,14 +209,15 @@ public class ContractStore {
                     .execute();
 
             if (updated == 0) {
-                return Optional.empty();
+                throw new IllegalStateException("Cycle not found or already transitioned: " + currentCycleId);
             }
 
             if (activeParticipantIds.isEmpty()) {
+                // No participants opted in — nothing to resolve, end immediately
                 handle.createUpdate(
                                 """
                                 UPDATE cycles
-                                SET status = 'settled'
+                                SET status = 'SETTLED'
                                 WHERE id = :currentCycleId
                                 """)
                         .bind("currentCycleId", currentCycleId)
@@ -219,8 +225,8 @@ public class ContractStore {
                 handle.createUpdate(
                                 """
                                 UPDATE contracts
-                                SET status = 'ended'
-                                WHERE id = :contractId AND status = 'active'
+                                SET status = 'ENDED'
+                                WHERE id = :contractId AND status = 'ACTIVE'
                                 """)
                         .bind("contractId", contractId)
                         .execute();
@@ -230,7 +236,7 @@ public class ContractStore {
             Cycle nextCycle = handle.createQuery(
                             """
                             INSERT INTO cycles (contract_id, cycle_number, start_date, end_date, voting_deadline, status)
-                            VALUES (:contractId, :cycleNumber, :startDate, :endDate, :votingDeadline, 'active')
+                            VALUES (:contractId, :cycleNumber, :startDate, :endDate, :votingDeadline, 'ACTIVE')
                             RETURNING id, contract_id, cycle_number, start_date, end_date, voting_deadline, status
                             """)
                     .bind("contractId", contractId)
@@ -251,12 +257,12 @@ public class ContractStore {
         jdbi.useHandle(handle -> handle.createUpdate(
                         """
                         UPDATE contracts
-                        SET status = 'ended'
-                        WHERE id = :contractId AND status = 'active'
+                        SET status = 'ENDED'
+                        WHERE id = :contractId AND status = 'ACTIVE'
                           AND NOT EXISTS (
                             SELECT 1 FROM participants
                             WHERE contract_id = :contractId
-                              AND sign_status = 'signed'
+                              AND sign_status = 'SIGNED'
                               AND opted_out_of_next_cycle = false
                           )
                         """)
@@ -269,11 +275,11 @@ public class ContractStore {
     // -----------------------------------------------------------------------
 
     public List<ActiveContractRow> getActiveContracts(UUID userId) {
-        return fetchContractRows(userId, "active");
+        return fetchContractRows(userId, CycleStatus.ACTIVE);
     }
 
     public List<ActiveContractRow> getPendingResolutionContracts(UUID userId) {
-        return fetchContractRows(userId, "pending_resolution");
+        return fetchContractRows(userId, CycleStatus.PENDING_RESOLUTION);
     }
 
     // -----------------------------------------------------------------------
@@ -282,30 +288,30 @@ public class ContractStore {
 
     /** Fetches each participant's frequency then batch-inserts one habit_action per slot. */
     private void batchInsertHabitActions(Handle handle, UUID cycleId, List<UUID> participantIds) {
-        List<Object[]> frequencies = handle.createQuery(
+        record FrequencyRow(UUID participantId, Integer frequency) {}
+
+        List<FrequencyRow> frequencies = handle.createQuery(
                         """
                         SELECT id, frequency
                         FROM participants
                         WHERE id = ANY(:participantIds)
                         """)
                 .bind("participantIds", participantIds.toArray(new UUID[0]))
-                .map((rs, ctx) ->
-                        new Object[] {rs.getObject("id", UUID.class), rs.getObject("frequency", Integer.class)})
+                .map((rs, ctx) -> new FrequencyRow(
+                        rs.getObject("id", UUID.class), rs.getObject("frequency", Integer.class)))
                 .list();
 
         PreparedBatch batch = handle.prepareBatch(
                 "INSERT INTO habit_actions (cycle_id, participant_id, action_number) VALUES (:cycleId, :participantId, :actionNumber)");
 
-        for (Object[] row : frequencies) {
-            UUID participantId = (UUID) row[0];
-            Integer frequency = (Integer) row[1];
-            if (frequency == null) {
+        for (FrequencyRow row : frequencies) {
+            if (row.frequency() == null) {
                 throw new IllegalStateException(
-                        "Participant " + participantId + " has null frequency — cannot create habit actions");
+                        "Participant " + row.participantId() + " has null frequency — cannot create habit actions");
             }
-            for (int i = 1; i <= frequency; i++) {
+            for (int i = 1; i <= row.frequency(); i++) {
                 batch.bind("cycleId", cycleId)
-                        .bind("participantId", participantId)
+                        .bind("participantId", row.participantId())
                         .bind("actionNumber", i)
                         .add();
             }
@@ -317,10 +323,10 @@ public class ContractStore {
     }
 
     /**
-     * Shared query for both dashboard list methods — cycleStatus ('active' or 'pending_resolution')
-     * determines which cycle is joined per contract.
+     * Shared query for both dashboard list methods — cycleStatus determines which cycle is joined
+     * per contract.
      */
-    private List<ActiveContractRow> fetchContractRows(UUID userId, String cycleStatus) {
+    private List<ActiveContractRow> fetchContractRows(UUID userId, CycleStatus cycleStatus) {
         return jdbi.withHandle(handle -> {
             List<ContractCyclePair> contractsAndCycles = handle.createQuery(
                             """
@@ -329,11 +335,11 @@ public class ContractStore {
                             FROM contracts c
                             JOIN cycles cy ON cy.contract_id = c.id AND cy.status = :cycleStatus
                             JOIN participants me ON me.contract_id = c.id
-                              AND me.user_id = :userId AND me.sign_status = 'signed'
-                            WHERE c.status = 'active'
+                              AND me.user_id = :userId AND me.sign_status = 'SIGNED'
+                            WHERE c.status = 'ACTIVE'
                             """)
                     .bind("userId", userId)
-                    .bind("cycleStatus", cycleStatus)
+                    .bind("cycleStatus", cycleStatus.name())
                     .map((rs, ctx) -> new ContractCyclePair(
                             CONTRACT_MAPPER.map(rs, ctx),
                             new Cycle(
@@ -343,7 +349,7 @@ public class ContractStore {
                                     rs.getObject("cy_start_date", LocalDate.class),
                                     rs.getObject("end_date", LocalDate.class),
                                     rs.getObject("voting_deadline", LocalDate.class),
-                                    rs.getString("cy_status"))))
+                                    CycleStatus.valueOf(rs.getString("cy_status")))))
                     .list();
 
             if (contractsAndCycles.isEmpty()) {
@@ -359,7 +365,7 @@ public class ContractStore {
                             """
                             SELECT id, contract_id, user_id, habit, frequency, sign_status, opted_out_of_next_cycle, invited_at, signed_at
                             FROM participants
-                            WHERE contract_id = ANY(:contractIds) AND sign_status = 'signed'
+                            WHERE contract_id = ANY(:contractIds) AND sign_status = 'SIGNED'
                             """)
                     .bind("contractIds", contractIds.toArray(new UUID[0]))
                     .map(ParticipantStore.PARTICIPANT_MAPPER)

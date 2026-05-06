@@ -23,7 +23,7 @@ public class ParticipantStore {
             rs.getObject("user_id", UUID.class),
             rs.getString("habit"),
             rs.getObject("frequency", Integer.class),
-            rs.getString("sign_status"),
+            SignStatus.valueOf(rs.getString("sign_status")),
             rs.getBoolean("opted_out_of_next_cycle"),
             rs.getTimestamp("invited_at") == null
                     ? null
@@ -41,7 +41,7 @@ public class ParticipantStore {
             return jdbi.withHandle(handle -> handle.createQuery(
                             """
                             INSERT INTO participants (contract_id, user_id, sign_status)
-                            VALUES (:contractId, :userId, 'waiting')
+                            VALUES (:contractId, :userId, 'WAITING')
                             RETURNING id, contract_id, user_id, habit, frequency, sign_status, opted_out_of_next_cycle, invited_at, signed_at
                             """)
                     .bind("contractId", contractId)
@@ -147,7 +147,7 @@ public class ParticipantStore {
                         """
                         SELECT COUNT(*)
                         FROM participants
-                        WHERE contract_id = :contractId AND sign_status = 'signed'
+                        WHERE contract_id = :contractId AND sign_status = 'SIGNED'
                         """)
                 .bind("contractId", contractId)
                 .mapTo(Integer.class)

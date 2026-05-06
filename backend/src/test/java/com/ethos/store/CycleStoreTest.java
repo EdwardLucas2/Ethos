@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.ethos.integration.IntegrationTestBase;
 import com.ethos.model.ContractDetail;
 import com.ethos.model.Cycle;
+import com.ethos.model.CycleStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -32,21 +33,11 @@ class CycleStoreTest extends IntegrationTestBase {
         @Test
         void givenExistingCycle_returnsCycle() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail =
-                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
-            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
-            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(
-                    detail.contract().id(),
-                    dates.startDate(),
-                    dates.endDate(),
-                    dates.votingDeadline(),
-                    List.of(detail.participants().get(0).id()));
+            ContractStoreTestHelper.ActiveContractFixture fixture =
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
 
             Optional<Cycle> result =
-                    cycleStore.findCycleByContractAndNumber(detail.contract().id(), 1);
+                    cycleStore.findCycleByContractAndNumber(fixture.detail().contract().id(), 1);
 
             assertTrue(result.isPresent());
             assertEquals(1, result.get().cycleNumber());
@@ -67,34 +58,21 @@ class CycleStoreTest extends IntegrationTestBase {
         @Test
         void givenMultipleCycles_returnsCorrectCycle() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail =
-                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
-            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
-            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(
-                    detail.contract().id(),
-                    dates.startDate(),
-                    dates.endDate(),
-                    dates.votingDeadline(),
-                    List.of(detail.participants().get(0).id()));
-            Cycle cycle1 = cycleStore
-                    .findCycleByContractAndNumber(detail.contract().id(), 1)
-                    .orElseThrow();
-            ContractStoreTestHelper.CycleDates advanceDates =
-                    ContractStoreTestHelper.validCycleDates(dates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+            ContractStoreTestHelper.ActiveContractFixture fixture =
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
+            ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
+                    fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.weekly);
             contractStore.advanceCycleToResolution(
-                    cycle1.id(),
-                    detail.contract().id(),
+                    fixture.cycle().id(),
+                    fixture.detail().contract().id(),
                     2,
                     advanceDates.startDate(),
                     advanceDates.endDate(),
                     advanceDates.votingDeadline(),
-                    List.of(detail.participants().get(0).id()));
+                    List.of(fixture.detail().participants().get(0).id()));
 
             Optional<Cycle> result =
-                    cycleStore.findCycleByContractAndNumber(detail.contract().id(), 2);
+                    cycleStore.findCycleByContractAndNumber(fixture.detail().contract().id(), 2);
 
             assertTrue(result.isPresent());
             assertEquals(2, result.get().cycleNumber());
@@ -132,18 +110,7 @@ class CycleStoreTest extends IntegrationTestBase {
         @Test
         void givenActiveCycleWithFutureEndDate_excluded() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail =
-                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
-            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
-            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(
-                    detail.contract().id(),
-                    dates.startDate(),
-                    dates.endDate(),
-                    dates.votingDeadline(),
-                    List.of(detail.participants().get(0).id()));
+            ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
 
             List<Cycle> due = cycleStore.findCyclesDueForTransition();
 
@@ -182,7 +149,7 @@ class CycleStoreTest extends IntegrationTestBase {
 
             List<Cycle> due = cycleStore.findCyclesDueForTransition();
 
-            assertTrue(due.stream().anyMatch(c -> c.status().equals("pending_resolution")));
+            assertTrue(due.stream().anyMatch(c -> c.status() == CycleStatus.PENDING_RESOLUTION));
         }
 
         @Test
@@ -216,7 +183,7 @@ class CycleStoreTest extends IntegrationTestBase {
 
             List<Cycle> due = cycleStore.findCyclesDueForTransition();
 
-            assertTrue(due.stream().noneMatch(c -> c.status().equals("pending_resolution")));
+            assertTrue(due.stream().noneMatch(c -> c.status() == CycleStatus.PENDING_RESOLUTION));
         }
     }
 
@@ -226,28 +193,15 @@ class CycleStoreTest extends IntegrationTestBase {
         @Test
         void givenCycle_updatesStatus() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
-            ContractDetail detail =
-                    ContractStoreTestHelper.insertContractWithParticipants(contractStore, participantStore, creator);
-            ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
-            ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
-            ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
-            contractStore.activateContract(
-                    detail.contract().id(),
-                    dates.startDate(),
-                    dates.endDate(),
-                    dates.votingDeadline(),
-                    List.of(detail.participants().get(0).id()));
-            Cycle cycle = cycleStore
-                    .findCycleByContractAndNumber(detail.contract().id(), 1)
-                    .orElseThrow();
+            ContractStoreTestHelper.ActiveContractFixture fixture =
+                    ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
 
-            cycleStore.updateCycleStatus(cycle.id(), "pending_resolution");
+            cycleStore.updateCycleStatus(fixture.cycle().id(), CycleStatus.PENDING_RESOLUTION);
 
             Cycle updated = cycleStore
-                    .findCycleByContractAndNumber(detail.contract().id(), 1)
+                    .findCycleByContractAndNumber(fixture.detail().contract().id(), 1)
                     .orElseThrow();
-            assertEquals("pending_resolution", updated.status());
+            assertEquals(CycleStatus.PENDING_RESOLUTION, updated.status());
         }
     }
 }
