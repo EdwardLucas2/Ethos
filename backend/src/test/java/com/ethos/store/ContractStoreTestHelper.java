@@ -52,11 +52,7 @@ class ContractStoreTestHelper {
             UUID creatorId,
             UUID... participantUserIds) {
         ContractDetail detail = contractStore.insert(
-                creatorId,
-                "",
-                "",
-                Period.WEEKLY,
-                LocalDate.now().plusDays(1));
+                creatorId, "", "", Period.WEEKLY, LocalDate.now().plusDays(1));
         for (UUID userId : participantUserIds) {
             participantStore.insertParticipant(detail.contract().id(), userId);
         }
