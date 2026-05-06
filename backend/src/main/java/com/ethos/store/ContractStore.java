@@ -8,7 +8,6 @@ import com.ethos.model.Cycle;
 import com.ethos.model.CycleStatus;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
-import com.ethos.model.SignStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -297,8 +296,8 @@ public class ContractStore {
                         WHERE id = ANY(:participantIds)
                         """)
                 .bind("participantIds", participantIds.toArray(new UUID[0]))
-                .map((rs, ctx) -> new FrequencyRow(
-                        rs.getObject("id", UUID.class), rs.getObject("frequency", Integer.class)))
+                .map((rs, ctx) ->
+                        new FrequencyRow(rs.getObject("id", UUID.class), rs.getObject("frequency", Integer.class)))
                 .list();
 
         PreparedBatch batch = handle.prepareBatch(

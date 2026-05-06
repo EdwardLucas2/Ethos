@@ -36,8 +36,8 @@ class CycleStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.ActiveContractFixture fixture =
                     ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
 
-            Optional<Cycle> result =
-                    cycleStore.findCycleByContractAndNumber(fixture.detail().contract().id(), 1);
+            Optional<Cycle> result = cycleStore.findCycleByContractAndNumber(
+                    fixture.detail().contract().id(), 1);
 
             assertTrue(result.isPresent());
             assertEquals(1, result.get().cycleNumber());
@@ -71,8 +71,8 @@ class CycleStoreTest extends IntegrationTestBase {
                     advanceDates.votingDeadline(),
                     List.of(fixture.detail().participants().get(0).id()));
 
-            Optional<Cycle> result =
-                    cycleStore.findCycleByContractAndNumber(fixture.detail().contract().id(), 2);
+            Optional<Cycle> result = cycleStore.findCycleByContractAndNumber(
+                    fixture.detail().contract().id(), 2);
 
             assertTrue(result.isPresent());
             assertEquals(2, result.get().cycleNumber());

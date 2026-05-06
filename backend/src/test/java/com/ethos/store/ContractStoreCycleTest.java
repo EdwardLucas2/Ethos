@@ -314,7 +314,8 @@ class ContractStoreCycleTest extends IntegrationTestBase {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
                     ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
-            participantStore.updateParticipantOptOut(fixture.detail().participants().get(0).id());
+            participantStore.updateParticipantOptOut(
+                    fixture.detail().participants().get(0).id());
 
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
                     fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.weekly);
@@ -333,8 +334,8 @@ class ContractStoreCycleTest extends IntegrationTestBase {
                     contractStore.findById(fixture.detail().contract().id()).orElseThrow();
             assertEquals(ContractStatus.ENDED, updated.contract().status());
 
-            Optional<Cycle> maybeCycle2 =
-                    cycleStore.findCycleByContractAndNumber(fixture.detail().contract().id(), 2);
+            Optional<Cycle> maybeCycle2 = cycleStore.findCycleByContractAndNumber(
+                    fixture.detail().contract().id(), 2);
             assertTrue(maybeCycle2.isEmpty());
         }
 
@@ -342,7 +343,11 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenWrongCycleId_throwsIllegalStateException() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", com.ethos.model.Period.weekly, LocalDate.now().plusDays(1));
+                    creator,
+                    "Test",
+                    "Forfeit",
+                    com.ethos.model.Period.weekly,
+                    LocalDate.now().plusDays(1));
 
             assertThrows(
                     IllegalStateException.class,
@@ -378,7 +383,8 @@ class ContractStoreCycleTest extends IntegrationTestBase {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractStoreTestHelper.ActiveContractFixture fixture =
                     ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
-            participantStore.updateParticipantOptOut(fixture.detail().participants().get(0).id());
+            participantStore.updateParticipantOptOut(
+                    fixture.detail().participants().get(0).id());
 
             contractStore.endContractIfEmpty(fixture.detail().contract().id());
 
@@ -391,7 +397,11 @@ class ContractStoreCycleTest extends IntegrationTestBase {
         void givenAlreadyEnded_noOp() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", com.ethos.model.Period.weekly, LocalDate.now().plusDays(1));
+                    creator,
+                    "Test",
+                    "Forfeit",
+                    com.ethos.model.Period.weekly,
+                    LocalDate.now().plusDays(1));
             contractStore.updateStatus(detail.contract().id(), ContractStatus.DRAFT, ContractStatus.ENDED);
 
             contractStore.endContractIfEmpty(detail.contract().id());
