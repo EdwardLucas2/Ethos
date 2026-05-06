@@ -43,7 +43,7 @@ CREATE TABLE contracts (
     creator_id UUID        NOT NULL REFERENCES users (id),
     name       TEXT        NOT NULL,
     forfeit    TEXT        NOT NULL,
-    period     TEXT        NOT NULL CHECK (period IN ('weekly', 'biweekly', 'monthly')),
+    period     TEXT        NOT NULL CHECK (period IN ('WEEKLY', 'BIWEEKLY', 'MONTHLY')),
     start_date DATE        NOT NULL,
     status     TEXT        NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'ACTIVE', 'ENDED', 'CANCELLED')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -103,7 +103,7 @@ CREATE TABLE evidence (
     habit_action_id UUID        NOT NULL REFERENCES habit_actions (id),
     photo_id        UUID,
     note            TEXT,
-    status          TEXT        NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'auto_approved')),
+    status          TEXT        NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'VERIFIED', 'REJECTED', 'AUTO_APPROVED')),
     submitted_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (photo_id IS NOT NULL OR note IS NOT NULL)
 );
@@ -115,7 +115,7 @@ CREATE TABLE votes (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     evidence_id          UUID        NOT NULL REFERENCES evidence (id),
     voter_participant_id UUID        NOT NULL REFERENCES participants (id),
-    decision             TEXT        NOT NULL CHECK (decision IN ('approve', 'reject')),
+    decision             TEXT        NOT NULL CHECK (decision IN ('APPROVE', 'REJECT')),
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (evidence_id, voter_participant_id)

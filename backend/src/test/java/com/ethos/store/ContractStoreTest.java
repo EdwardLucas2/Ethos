@@ -36,12 +36,12 @@ class ContractStoreTest extends IntegrationTestBase {
             UUID user = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
 
             ContractDetail detail = contractStore.insert(
-                    user, "", "", Period.weekly, LocalDate.now().plusDays(1));
+                    user, "", "", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             assertNotNull(detail.contract().id());
             assertEquals("", detail.contract().name());
             assertEquals("", detail.contract().forfeit());
-            assertEquals(Period.weekly, detail.contract().period());
+            assertEquals(Period.WEEKLY, detail.contract().period());
             assertEquals(ContractStatus.DRAFT, detail.contract().status());
             assertNotNull(detail.contract().createdAt());
             assertEquals(1, detail.participants().size());
@@ -62,13 +62,13 @@ class ContractStoreTest extends IntegrationTestBase {
                     user1,
                     "Contract 1",
                     "Forfeit 1",
-                    Period.monthly,
+                    Period.MONTHLY,
                     LocalDate.now().plusDays(1));
             ContractDetail detail2 = contractStore.insert(
                     user2,
                     "Contract 2",
                     "Forfeit 2",
-                    Period.biweekly,
+                    Period.BIWEEKLY,
                     LocalDate.now().plusDays(2));
 
             assertNotEquals(detail1.contract().id(), detail2.contract().id());
@@ -84,7 +84,7 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenExistingContract_returnsContractAndParticipants() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             participantStore.insertParticipant(detail.contract().id(), user2);
 
@@ -101,7 +101,7 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenContractWithRemovedParticipant_excludesRemoved() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant2 =
                     participantStore.insertParticipant(detail.contract().id(), user2);
@@ -118,7 +118,7 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenContractWithDeclinedParticipant_includesDeclined() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant2 =
                     participantStore.insertParticipant(detail.contract().id(), user2);
@@ -134,7 +134,7 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenContractWithActiveCycle_setsCurrentCycleNumber() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
@@ -173,20 +173,20 @@ class ContractStoreTest extends IntegrationTestBase {
                     creator,
                     "Old",
                     "Old Forfeit",
-                    Period.weekly,
+                    Period.WEEKLY,
                     LocalDate.now().plusDays(1));
 
             Optional<Contract> result = contractStore.updateFields(
                     detail.contract().id(),
                     "New",
                     "New Forfeit",
-                    Period.monthly,
+                    Period.MONTHLY,
                     LocalDate.now().plusDays(5));
 
             assertTrue(result.isPresent());
             assertEquals("New", result.get().name());
             assertEquals("New Forfeit", result.get().forfeit());
-            assertEquals(Period.monthly, result.get().period());
+            assertEquals(Period.MONTHLY, result.get().period());
             assertEquals(LocalDate.now().plusDays(5), result.get().startDate());
         }
 
@@ -197,7 +197,7 @@ class ContractStoreTest extends IntegrationTestBase {
                     creator,
                     "Old",
                     "Old Forfeit",
-                    Period.weekly,
+                    Period.WEEKLY,
                     LocalDate.now().plusDays(1));
 
             Optional<Contract> result = contractStore.updateFields(
@@ -215,7 +215,7 @@ class ContractStoreTest extends IntegrationTestBase {
         @Test
         void givenUnknownId_returnsEmpty() {
             Optional<Contract> result =
-                    contractStore.updateFields(UUID.randomUUID(), "New", "Forfeit", Period.weekly, LocalDate.now());
+                    contractStore.updateFields(UUID.randomUUID(), "New", "Forfeit", Period.WEEKLY, LocalDate.now());
 
             assertTrue(result.isEmpty());
         }
@@ -224,11 +224,11 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenNonDraftContract_returnsEmpty() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), Period.weekly);
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     dates.startDate(),
@@ -240,7 +240,7 @@ class ContractStoreTest extends IntegrationTestBase {
                     detail.contract().id(),
                     "New",
                     "New Forfeit",
-                    Period.monthly,
+                    Period.MONTHLY,
                     LocalDate.now().plusDays(5));
 
             assertTrue(result.isEmpty());
@@ -254,7 +254,7 @@ class ContractStoreTest extends IntegrationTestBase {
         void givenDraftContract_cancelsSuccessfully() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Contract> result =
                     contractStore.updateStatus(detail.contract().id(), ContractStatus.DRAFT, ContractStatus.CANCELLED);

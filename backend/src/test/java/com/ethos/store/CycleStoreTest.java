@@ -61,7 +61,7 @@ class CycleStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.ActiveContractFixture fixture =
                     ContractStoreTestHelper.givenActiveContract(contractStore, participantStore, JDBI, creator);
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
-                    fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.weekly);
+                    fixture.cycle().endDate().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.advanceCycleToResolution(
                     fixture.cycle().id(),
                     fixture.detail().contract().id(),
@@ -90,7 +90,7 @@ class CycleStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             ContractStoreTestHelper.CycleDates dates = ContractStoreTestHelper.validCycleDates(
-                    LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
+                    LocalDate.now().minusDays(8), com.ethos.model.Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     dates.startDate(),
@@ -126,7 +126,7 @@ class CycleStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             // Start 12 days ago → endDate = now−6, votingDeadline = now−3 (past ✓)
             ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(
-                    LocalDate.now().minusDays(12), com.ethos.model.Period.weekly);
+                    LocalDate.now().minusDays(12), com.ethos.model.Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     activateDates.startDate(),
@@ -137,7 +137,7 @@ class CycleStoreTest extends IntegrationTestBase {
                     .findCycleByContractAndNumber(detail.contract().id(), 1)
                     .orElseThrow();
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
-                    activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+                    activateDates.endDate().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.advanceCycleToResolution(
                     cycle1.id(),
                     detail.contract().id(),
@@ -160,7 +160,7 @@ class CycleStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             ContractStoreTestHelper.CycleDates activateDates = ContractStoreTestHelper.validCycleDates(
-                    LocalDate.now().minusDays(8), com.ethos.model.Period.weekly);
+                    LocalDate.now().minusDays(8), com.ethos.model.Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     activateDates.startDate(),
@@ -171,7 +171,7 @@ class CycleStoreTest extends IntegrationTestBase {
                     .findCycleByContractAndNumber(detail.contract().id(), 1)
                     .orElseThrow();
             ContractStoreTestHelper.CycleDates advanceDates = ContractStoreTestHelper.validCycleDates(
-                    activateDates.endDate().plusDays(1), com.ethos.model.Period.weekly);
+                    activateDates.endDate().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.advanceCycleToResolution(
                     cycle1.id(),
                     detail.contract().id(),

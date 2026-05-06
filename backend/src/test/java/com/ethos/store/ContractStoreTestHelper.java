@@ -54,7 +54,7 @@ class ContractStoreTestHelper {
                 creatorId,
                 "",
                 "",
-                com.ethos.model.Period.weekly,
+                com.ethos.model.Period.WEEKLY,
                 LocalDate.now().plusDays(1));
         for (UUID userId : participantUserIds) {
             participantStore.insertParticipant(detail.contract().id(), userId);
@@ -71,7 +71,7 @@ class ContractStoreTestHelper {
         ContractDetail detail = insertContractWithParticipants(contractStore, participantStore, creatorId);
         signParticipant(detail.participants().get(0).id(), participantStore);
         setFrequency(detail.participants().get(0).id(), 3, participantStore);
-        CycleDates dates = validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+        CycleDates dates = validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.WEEKLY);
         contractStore.activateContract(
                 detail.contract().id(),
                 dates.startDate(),

@@ -11,8 +11,10 @@ import com.ethos.model.Period;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapper;
@@ -27,7 +29,7 @@ public class ContractStore {
             rs.getObject("creator_id", UUID.class),
             rs.getString("name"),
             rs.getString("forfeit"),
-            Period.fromValue(rs.getString("period")),
+            Period.valueOf(rs.getString("period")),
             rs.getObject("start_date", LocalDate.class),
             ContractStatus.valueOf(rs.getString("status")),
             rs.getTimestamp("created_at").toInstant());
@@ -183,7 +185,7 @@ public class ContractStore {
                     .map(CycleStore.CYCLE_MAPPER)
                     .one();
 
-            batchInsertHabitActions(handle, cycle.id(), signedParticipantIds);
+            batchInsertHabitActions(handle, contractId, cycle.id(), signedParticipantIds);
             return true;
         });
     }
@@ -246,7 +248,7 @@ public class ContractStore {
                     .map(CycleStore.CYCLE_MAPPER)
                     .one();
 
-            batchInsertHabitActions(handle, nextCycle.id(), activeParticipantIds);
+            batchInsertHabitActions(handle, contractId, nextCycle.id(), activeParticipantIds);
 
             return Optional.of(nextCycle);
         });
@@ -286,16 +288,18 @@ public class ContractStore {
     // -----------------------------------------------------------------------
 
     /** Fetches each participant's frequency then batch-inserts one habit_action per slot. */
-    private void batchInsertHabitActions(Handle handle, UUID cycleId, List<UUID> participantIds) {
+    private void batchInsertHabitActions(
+            Handle handle, UUID contractId, UUID cycleId, List<UUID> participantIds) {
         record FrequencyRow(UUID participantId, Integer frequency) {}
 
         List<FrequencyRow> frequencies = handle.createQuery(
                         """
                         SELECT id, frequency
                         FROM participants
-                        WHERE id = ANY(:participantIds)
+                        WHERE id = ANY(:participantIds) AND contract_id = :contractId
                         """)
                 .bind("participantIds", participantIds.toArray(new UUID[0]))
+                .bind("contractId", contractId)
                 .map((rs, ctx) ->
                         new FrequencyRow(rs.getObject("id", UUID.class), rs.getObject("frequency", Integer.class)))
                 .list();
@@ -370,11 +374,13 @@ public class ContractStore {
                     .map(ParticipantStore.PARTICIPANT_MAPPER)
                     .list();
 
+            Map<UUID, List<Participant>> byContract =
+                    participants.stream().collect(Collectors.groupingBy(Participant::contractId));
+
             List<ActiveContractRow> result = new ArrayList<>();
             for (ContractCyclePair pair : contractsAndCycles) {
-                List<Participant> contractParticipants = participants.stream()
-                        .filter(p -> p.contractId().equals(pair.contract().id()))
-                        .toList();
+                List<Participant> contractParticipants =
+                        byContract.getOrDefault(pair.contract().id(), List.of());
                 result.add(new ActiveContractRow(pair.contract(), pair.cycle(), contractParticipants));
             }
 

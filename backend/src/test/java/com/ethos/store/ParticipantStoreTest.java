@@ -36,7 +36,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenValidContractAndUser_createsWithWaitingStatus() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
 
             Participant participant =
@@ -53,7 +53,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenDuplicateUserAndContract_throwsConflictException() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             participantStore.insertParticipant(detail.contract().id(), user2);
 
@@ -70,7 +70,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenExistingId_returnsParticipant() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Participant> result = participantStore.findParticipantById(
                     detail.participants().get(0).id());
@@ -94,7 +94,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenExistingPair_returnsParticipant() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Participant> result = participantStore.findParticipantByContractAndUser(
                     detail.contract().id(), creator);
@@ -107,7 +107,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenUnknownPair_returnsEmpty() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Participant> result = participantStore.findParticipantByContractAndUser(
                     detail.contract().id(), UUID.randomUUID());
@@ -127,7 +127,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     dates.startDate(),
@@ -152,7 +152,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             ContractStoreTestHelper.setFrequency(detail.participants().get(0).id(), 3, participantStore);
             ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     dates.startDate(),
@@ -182,7 +182,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
             ContractStoreTestHelper.signParticipant(p2.id(), participantStore);
             ContractStoreTestHelper.setFrequency(p2.id(), 2, participantStore);
             ContractStoreTestHelper.CycleDates dates =
-                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.weekly);
+                    ContractStoreTestHelper.validCycleDates(LocalDate.now().plusDays(1), com.ethos.model.Period.WEEKLY);
             contractStore.activateContract(
                     detail.contract().id(),
                     dates.startDate(),
@@ -206,7 +206,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenValidTransition_updatesStatus() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant =
                     participantStore.insertParticipant(detail.contract().id(), user2);
@@ -223,7 +223,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenNonSignedStatus_signedAtIsNull() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant participant =
                     participantStore.insertParticipant(detail.contract().id(), user2);
@@ -252,7 +252,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenHabitOnly_updatesHabit() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Participant> result = participantStore.updateParticipantCommitment(
                     detail.participants().get(0).id(), "Gym", null);
@@ -266,7 +266,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenFrequencyOnly_updatesFrequency() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Participant> result = participantStore.updateParticipantCommitment(
                     detail.participants().get(0).id(), null, 3);
@@ -279,7 +279,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenBoth_updatesBoth() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             Optional<Participant> result = participantStore.updateParticipantCommitment(
                     detail.participants().get(0).id(), "Gym", 3);
@@ -297,7 +297,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenParticipant_setsOptedOut() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             participantStore.updateParticipantOptOut(
                     detail.participants().get(0).id());
@@ -312,7 +312,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenCalledTwice_stillTrue() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             participantStore.updateParticipantOptOut(
                     detail.participants().get(0).id());
@@ -339,7 +339,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenContractWithSignedParticipants_countsOnlySigned() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
             ContractStoreTestHelper.signParticipant(detail.participants().get(0).id(), participantStore);
             UUID user2 = ContractStoreTestHelper.insertUserRaw(JDBI, "user2", "user2@example.com");
             Participant p2 =
@@ -358,7 +358,7 @@ class ParticipantStoreTest extends IntegrationTestBase {
         void givenEmptyContract_returnsZero() {
             UUID creator = ContractStoreTestHelper.insertUserRaw(JDBI, "creator1", "creator1@example.com");
             ContractDetail detail = contractStore.insert(
-                    creator, "Test", "Forfeit", Period.weekly, LocalDate.now().plusDays(1));
+                    creator, "Test", "Forfeit", Period.WEEKLY, LocalDate.now().plusDays(1));
 
             int count =
                     participantStore.countSignedParticipants(detail.contract().id());
