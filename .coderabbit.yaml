@@ -14,10 +14,12 @@ reviews:
     path_filters:
         - "!**/*.lock"
         - "!**/node_modules/**"
-        - "!app/src/api/**" # Orval-generated — never edit manually
         - "!**/.gradle/**"
         - "!**/build/**"
         - "!**/target/**"
+        - "!**/package-lock.json"
+        - "!**/pnpm-lock.yaml"
+        - "!**/npm-shrinkwrap.json"
 
     path_instructions:
         - path: "**"
