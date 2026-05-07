@@ -1,0 +1,92 @@
+language: "en-GB"
+tone_instructions: "Be direct and concise. Flag real issues — don't nitpick style that Spotless or ESLint already enforce automatically."
+early_access: false
+
+reviews:
+    profile: "chill"
+    request_changes_workflow: false
+    high_level_summary: true
+    poem: false
+    review_status: true
+    collapse_walkthrough: false
+    sequence_diagrams: true
+
+    path_filters:
+        - "!**/*.lock"
+        - "!**/node_modules/**"
+        - "!**/.gradle/**"
+        - "!**/build/**"
+        - "!**/target/**"
+        - "!**/package-lock.json"
+        - "!**/pnpm-lock.yaml"
+        - "!**/npm-shrinkwrap.json"
+
+    path_instructions:
+        - path: "**"
+          instructions: |
+              Read CLAUDE.md for the full architecture, feature development flow, and project conventions before reviewing any file.
+              Feature development order is strict: @OpenApi annotation → Orval regeneration → dbmate migration (if needed) → backend → frontend. Flag PRs that skip steps.
+
+        - path: "backend/**"
+          instructions: |
+              Backend is Java 25 + Javalin 7. Refer to docs/BACKEND.md (architecture), docs/BACKEND_STYLE.md (conventions), and docs/DATAMODEL.md (schema).
+              Hard rules to enforce:
+              - Database access only via Store classes — never from a handler or service directly
+              - API responses must use DTOs — never expose Store or model objects
+              - Structural validation (is the request well-formed?) belongs in the handler; business validation (is it valid given current state?) belongs in the service
+              - Extract userId from the verified JWT context — never trust user-supplied identity in request bodies
+              - All exceptions are mapped globally in AppRouter via app.exception() — flag any per-handler try/catch for error responses
+              - Constructor injection only; the full object graph is wired once in Main.java — flag any new/static lookups
+
+        - path: "backend/src/main/java/com/ethos/handler/**"
+          instructions: |
+              Handlers are HTTP layer only — request parsing, response serialisation, auth context extraction. Flag any business logic here; it belongs in a Service.
+              Every handler method must have an @OpenApi annotation defining path, method, request body, and response schemas. Flag missing or incomplete annotations.
+
+        - path: "backend/src/main/java/com/ethos/auth/**"
+          instructions: |
+              Two before-handlers exist — enforce correct usage:
+              - requireAuth: verifies JWT and loads the users row; attaches userId UUID to context. Used on all protected routes.
+              - requireJwt: verifies JWT only, no DB lookup. Used only on POST /users (the users row doesn't exist yet at registration time).
+              Flag any route using the wrong handler for its context.
+
+        - path: "backend/db/migrations/**"
+          instructions: |
+              Migrations are immutable once run against a shared or persistent database. Flag any PR that edits an existing migration file instead of creating a new one.
+              Primary keys must use UUID DEFAULT gen_random_uuid() — flag any auto-increment integer primary key.
+
+        - path: "app/**"
+          instructions: |
+              Frontend is Expo React Native with Expo Router. Refer to docs/ROUTING.md (navigation), docs/COMPONENTS.md (shared components), and product/DESIGN.md (design system).
+              Hard rules to enforce:
+              - Server state via TanStack Query using Orval-generated hooks only — flag any raw fetch calls
+              - Global client state via React Context only — flag introduction of Redux, Zustand, or any external state library
+              - Local UI state via useState
+              - Native capabilities must use Expo SDK modules — flag bare React Native API usage
+              - Auth tokens stored with expo-secure-store — flag any use of AsyncStorage for tokens
+              - Every API call must handle loading and error states — flag missing handling
+              - Frontend types must come from Orval — flag any manually defined API types in TypeScript
+
+        - path: "app/src/api/**"
+          instructions: |
+              This directory is entirely Orval-generated from the backend's @OpenApi annotations. Flag any manual edits — nothing here should ever be hand-written.
+
+        - path: "**/*.test.*"
+          instructions: |
+              Refer to docs/TESTS.md for the testing strategy.
+              Backend unit tests mock Store dependencies — no database. Backend integration tests use Testcontainers with a real PostgreSQL instance — flag any in-memory database usage.
+              Tests must be independent and clean up state in @AfterEach — flag shared mutable state between tests.
+              Frontend: RNTL for components with non-trivial logic; mock Orval hooks with jest.mock, not by mocking fetch.
+              Test user-visible behaviour, not implementation details — flag tests that assert on internal state.
+
+knowledge_base:
+    opt_out: false
+    learnings:
+        scope: auto
+    issues:
+        scope: auto
+    pull_requests:
+        scope: auto
+
+chat:
+    auto_reply: true
