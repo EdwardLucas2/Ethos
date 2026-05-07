@@ -43,9 +43,9 @@ CREATE TABLE contracts (
     creator_id UUID        NOT NULL REFERENCES users (id),
     name       TEXT        NOT NULL,
     forfeit    TEXT        NOT NULL,
-    period     TEXT        NOT NULL CHECK (period IN ('weekly', 'biweekly', 'monthly')),
+    period     TEXT        NOT NULL CHECK (period IN ('WEEKLY', 'BIWEEKLY', 'MONTHLY')),
     start_date DATE        NOT NULL,
-    status     TEXT        NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'ended', 'cancelled')),
+    status     TEXT        NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'ACTIVE', 'ENDED', 'CANCELLED')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -56,7 +56,7 @@ CREATE TABLE participants (
     user_id                  UUID        NOT NULL REFERENCES users (id),
     habit                    TEXT,
     frequency                INTEGER CHECK (frequency > 0),
-    sign_status              TEXT        NOT NULL DEFAULT 'waiting' CHECK (sign_status IN ('waiting', 'drafting', 'signed', 'declined', 'removed')),
+    sign_status              TEXT        NOT NULL DEFAULT 'WAITING' CHECK (sign_status IN ('WAITING', 'DRAFTING', 'SIGNED', 'DECLINED', 'REMOVED')),
     opted_out_of_next_cycle  BOOLEAN     NOT NULL DEFAULT false,
     invited_at               TIMESTAMPTZ NOT NULL DEFAULT now(),
     signed_at                TIMESTAMPTZ,
@@ -74,11 +74,16 @@ CREATE TABLE cycles (
     start_date      DATE    NOT NULL,
     end_date        DATE    NOT NULL,
     voting_deadline DATE    NOT NULL,
-    status          TEXT    NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_resolution', 'settled')),
+    status          TEXT    NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'PENDING_RESOLUTION', 'SETTLED')),
     UNIQUE (contract_id, cycle_number),
     CHECK (end_date > start_date),
     CHECK (voting_deadline > end_date)
 );
+
+CREATE UNIQUE INDEX uq_cycles_one_active_per_contract ON cycles (contract_id) WHERE status = 'ACTIVE';
+-- Scheduler queries filter by status + date columns; composite indexes avoid full scans
+CREATE INDEX idx_cycles_status_end_date ON cycles (status, end_date);
+CREATE INDEX idx_cycles_status_voting_deadline ON cycles (status, voting_deadline);
 
 -- Habit actions (one slot per participant per frequency unit per cycle)
 CREATE TABLE habit_actions (
@@ -98,7 +103,7 @@ CREATE TABLE evidence (
     habit_action_id UUID        NOT NULL REFERENCES habit_actions (id),
     photo_id        UUID,
     note            TEXT,
-    status          TEXT        NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'auto_approved')),
+    status          TEXT        NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'VERIFIED', 'REJECTED', 'AUTO_APPROVED')),
     submitted_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (photo_id IS NOT NULL OR note IS NOT NULL)
 );
@@ -110,7 +115,7 @@ CREATE TABLE votes (
     id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     evidence_id          UUID        NOT NULL REFERENCES evidence (id),
     voter_participant_id UUID        NOT NULL REFERENCES participants (id),
-    decision             TEXT        NOT NULL CHECK (decision IN ('approve', 'reject')),
+    decision             TEXT        NOT NULL CHECK (decision IN ('APPROVE', 'REJECT')),
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (evidence_id, voter_participant_id)

@@ -11,5 +11,5 @@ public record Contract(
         String forfeit,
         Period period,
         LocalDate startDate,
-        String status,
+        ContractStatus status,
         Instant createdAt) {}

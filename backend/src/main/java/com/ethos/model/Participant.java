@@ -9,7 +9,7 @@ public record Participant(
         UUID userId,
         String habit,
         Integer frequency,
-        String signStatus,
+        SignStatus signStatus,
         boolean optedOutOfNextCycle,
         Instant invitedAt,
         Instant signedAt) {}

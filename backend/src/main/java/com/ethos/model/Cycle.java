@@ -10,4 +10,4 @@ public record Cycle(
         LocalDate startDate,
         LocalDate endDate,
         LocalDate votingDeadline,
-        String status) {}
+        CycleStatus status) {}

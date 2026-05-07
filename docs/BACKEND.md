@@ -89,16 +89,16 @@ URL resolution — converting a stored UUID (`avatar_id`, `photo_id`) to a front
 ---
 
 **`UserService`**  
-*Stores:* `UserStore`  
-*Calls:* `FileService`
+_Stores:_ `UserStore`  
+_Calls:_ `FileService`
 
 Handles user registration and profile management. On `POST /users`, derives `supertokens_user_id` and email from the JWT, generates a tag (first word of display name, lowercased, alphanumeric only, truncated to 8 chars, plus 4 random chars; retries on collision), and inserts the user row — returns `409` if a row already exists for this SuperTokens account. Handles profile reads and updates. For tag search, fetches prefix-matched users excluding the caller, with `isContact` computed via a join in `UserStore`. Lists, adds, and removes contacts — validates target exists, is not the caller, and (on add) is not already a contact.
 
 ---
 
 **`ContractService`**  
-*Stores:* `ContractStore`, `EvidenceStore`  
-*Calls:* `NotificationService`, `FileService`
+_Stores:_ `ContractStore`, `EvidenceStore`  
+_Calls:_ `NotificationService`, `FileService`
 
 Owns all contract lifecycle and participant operations.
 
@@ -111,8 +111,8 @@ Owns all contract lifecycle and participant operations.
 ---
 
 **`EvidenceService`**  
-*Stores:* `EvidenceStore`, `ContractStore`  
-*Calls:* `NotificationService`, `FileService`
+_Stores:_ `EvidenceStore`, `ContractStore`  
+_Calls:_ `NotificationService`, `FileService`
 
 Lists habit actions for a participant joined with their evidence (using `evidence.status` for filled/unfilled state). Lists all evidence for a cycle with `hasMyVote` per item. Fetches a single evidence item via `EvidenceStore.findByIdInCycle()` — this validates that the evidence belongs to the specified cycle, preventing path-param spoofing.
 
@@ -121,6 +121,7 @@ Submits evidence: validates via `ContractStore` that the `habitActionId` belongs
 Casts or updates a vote (upsert): validates via `ContractStore` that the caller is a signed participant and the cycle is not `settled`. Calls `EvidenceStore.upsertVoteAndRecomputeStatus()` — an atomic store method that upserts the vote and rewrites `evidence.status` in one transaction. Voting is permitted during `active` and `pending_resolution`.
 
 **Evidence status rule:**
+
 - `VERIFIED` if approvals > (total votes cast) / 2
 - `REJECTED` if rejections > (total votes cast) / 2
 - `PENDING` otherwise (tie or no votes yet)
@@ -128,24 +129,24 @@ Casts or updates a vote (upsert): validates via `ContractStore` that the caller 
 ---
 
 **`CycleService`**  
-*Stores:* `ContractStore`, `EvidenceStore`  
-*Calls:* `ResolutionService`, `NotificationService`
+_Stores:_ `ContractStore`, `EvidenceStore`  
+_Calls:_ `ResolutionService`, `NotificationService`
 
 Fetches a single cycle by contract + cycle number, validating the caller is a non-removed participant via `ContractStore`.
 
 Runs the background scheduler (see [Scheduler](#scheduler)):
 
-**`active → pending_resolution`:** validates `end_date` has passed. Calls `ContractStore.advanceCycleToResolution()` — an atomic method that sets the current cycle's status to `pending_resolution` and inserts the next cycle row and its habit action rows for all non-opted-out signed participants in the same transaction, using `CycleDateCalculator` to compute `start_date`, `end_date`, and `voting_deadline`. Sends `cycle_pending_resolution` notifications after the commit.
+**`active → pending_resolution`:** validates `end_date` has passed. Calls `ContractStore.advanceCycleToResolution()` — an atomic method that sets the current cycle's status to `pending_resolution` and inserts the next cycle row and its habit action rows for all non-opted-out signed participants in the same transaction, using `CycleDateCalculator` to compute `start_date`, `end_date`, and `voting_deadline`. If no active participants remain (all opted out), the contract is transitioned to `ended` instead and no next cycle is created. Sends `cycle_pending_resolution` notifications after the commit (only when a next cycle was created).
 
-**`pending_resolution → settled`:** triggered when either (a) no evidence for the cycle has `status = 'pending'` (all items have a majority decision — early settlement) or (b) `voting_deadline <= today` (hard deadline). In case (b), `EvidenceStore.autoApproveAll(cycleId)` runs first to clear remaining pending items. Delegates outcome computation and the resolution write to `ResolutionService.computeAndWriteResolution()`, which returns `true` if the resolution row was newly inserted, `false` if it already existed (retry scenario) — notifications are only sent when it returns `true`. Updates cycle status to `settled` via `ContractStore.updateCycleStatus()`. Calls `ContractStore.endContractIfEmpty()` — transitions `contracts.status` to `ended` if zero non-opted-out signed participants remain.
+**`pending_resolution → settled`:** triggered when either (a) no evidence for the cycle has `status = 'pending'` (all items have a majority decision — early settlement) or (b) `voting_deadline <= today` (hard deadline). In case (b), `EvidenceStore.autoApproveAll(cycleId)` runs first to clear remaining pending items. Delegates outcome computation and the resolution write to `ResolutionService.computeAndWriteResolution()`, which returns `true` if the resolution row was newly inserted, `false` if it already existed (retry scenario) — notifications are only sent when it returns `true`. Updates cycle status to `settled` via `ContractStore.updateCycleStatus()`.
 
 ---
 
 **`ResolutionService`**  
-*Stores:* `ResolutionStore`, `EvidenceStore`, `ContractStore`  
-*Calls:* `NotificationService`, `FileService`
+_Stores:_ `ResolutionStore`, `EvidenceStore`, `ContractStore`  
+_Calls:_ `NotificationService`, `FileService`
 
-**`computeAndWriteResolution(cycleId)`** — called by `CycleService` on settlement. Reads verified evidence counts per participant from `EvidenceStore` and habit/frequency from `ContractStore`. Determines winners (verified count ≥ frequency) and losers. Writes the `cycle_resolutions` row with `INSERT ... ON CONFLICT DO NOTHING`; **returns `true` if the row was newly inserted, `false` if it already existed** (retry). Sends `resolution_winner` and `resolution_loser` notifications only when returning `true` — preventing duplicate notifications on scheduler retry.
+**`computeAndWriteResolution(cycleId)`** — called by `CycleService` on settlement. Reads verified evidence counts per participant from `EvidenceStore` and habit/frequency from `ContractStore`. Determines winners (verified count ≥ frequency) and losers. Writes the `cycle_resolutions` row with `INSERT ... ON CONFLICT DO NOTHING`; **returns `true` if the row was newly inserted, `false` if it already existed** (retry). Sends `resolution_winner` and `resolution_loser` notifications only when returning `true` — preventing duplicate notifications on scheduler retry. After writing, calls `ContractStore.endContractIfEmpty(contractId)` to transition the contract to `ended` if all signed participants are now opted out — this handles the case where opt-outs occur mid-resolution rather than at cycle rollover (contrast with `advanceCycleToResolution`, which handles the immediate-end path when all participants are already opted out before the next cycle is created).
 
 Gets a resolution by ID: validates the caller is a winner or loser (returns `404` otherwise). The response includes `contractId`, `contractName`, and `cycleNumber` from the `cycle_resolutions → cycles → contracts` join in `ResolutionStore`; winner/loser user data and ack timestamps from `ResolutionStore`; and a participants summary (habit, frequency, verified count) assembled from `ContractStore` and `EvidenceStore`.
 
@@ -156,9 +157,9 @@ Creates pesters: validates caller is a winner and `toUserId` is a loser, checks 
 ---
 
 **`NotificationService`**  
-*Stores:* `NotificationStore`  
-*Calls:* `FileService`  
-*External:* `PushNotificationService` (Expo Push API)
+_Stores:_ `NotificationStore`  
+_Calls:_ `FileService`  
+_External:_ `PushNotificationService` (Expo Push API)
 
 Called by `ContractService`, `EvidenceService`, `CycleService`, and `ResolutionService` to write notification rows and deliver push notifications. Never calls other domain services.
 
@@ -169,7 +170,7 @@ Upserts device tokens (insert or update `last_seen_at`) and deletes them on logo
 ---
 
 **`FileService`**  
-*External:* `FileStorageService` (injected interface — local or S3/R2 implementation)
+_External:_ `FileStorageService` (injected interface — local or S3/R2 implementation)
 
 Validates content type (`image/jpeg` / `image/png`) and size (≤ 10 MB), generates a UUID, streams the file to storage at key `evidence/{photoId}`, and returns the `photoId`. `resolveUrl(String key)` delegates to `FileStorageService` — returns `http://localhost:8080/files/{key}` in local dev and the R2 CDN URL in production. Called by other services when assembling DTOs that include `photoUrl` or `avatarUrl`.
 
@@ -241,8 +242,8 @@ Contract: insert, find by ID (with participants and current `active`-cycle join)
 Participants: insert, find by ID, find by contract + user, find all by cycle ID (used by `ResolutionService` for the participants summary), update `sign_status`, update habit/frequency, update opt-out flag, count signed participants.  
 Cycles: find by contract + cycle number, find cycles due for transition (scheduler query), update status.  
 `activateContract(contractId, cycleStart, cycleEnd, votingDeadline, signedParticipants)` — atomic method: `UPDATE contracts SET status = 'active' WHERE id = ? AND status = 'draft'` (test-and-set); if zero rows updated, returns `false` (service maps to `ConflictException` for concurrent-start protection); if one row updated, inserts the first cycle row and batch-inserts habit action rows in the same `jdbi.inTransaction()`.  
-`advanceCycleToResolution(currentCycleId, contractId, nextCycleNumber, nextStart, nextEnd, nextVotingDeadline, activeParticipants)` — atomically sets the current cycle's status to `pending_resolution` and inserts the next cycle row and its habit action rows in one `jdbi.inTransaction()`. Used by `CycleService` on the `active → pending_resolution` transition.  
-`endContractIfEmpty(contractId)` — transitions `contracts.status` to `ended` if zero non-opted-out signed participants remain.  
+`advanceCycleToResolution(currentCycleId, contractId, nextCycleNumber, nextStart, nextEnd, nextVotingDeadline, activeParticipants)` — atomically sets the current cycle's status to `pending_resolution` and inserts the next cycle row and its habit action rows in one `jdbi.inTransaction()`. If `activeParticipants` is empty (all signed participants are opted out), the method instead settles the current cycle and transitions the contract to `ended` — no next cycle is created. Used by `CycleService` on the `active → pending_resolution` transition.  
+`endContractIfEmpty(contractId)` — transitions `contracts.status` to `ended` if zero non-opted-out signed participants remain. Called by `ResolutionService` after a cycle settles.
 Dashboard: `getActiveContracts(userId)`, `getPendingResolutionContracts(userId)` — return contract + cycle + participant shape; progress data is fetched separately from `EvidenceStore`.
 
 ---
@@ -267,6 +268,7 @@ Pesters: insert, count recent pesters for a winner–loser pair (rate limit quer
 **`NotificationStore`** — `notifications`, `device_tokens`
 
 Notifications: insert, `findAllUnreadHeaders(userId)` (raw notification rows only — id, type, entity_id, created_at — no joins), per-type enrichment methods called by `NotificationService` after grouping by type:
+
 - `enrichEvidenceUploaded(ids)` — joins `evidence → habit_actions → cycles → contracts` for submitter name, contract name, cycle number, and evidence ID
 - `enrichContractInvited(ids)` — joins `contracts → users (via creator_id)` for inviter name and contract name
 - `enrichCyclePendingResolution(ids)` — joins `cycles → contracts` for contract name and cycle number
@@ -336,6 +338,7 @@ An `AtomicBoolean isRunning` flag guards against pile-up: if the previous tick h
 **`active → pending_resolution` predicate:** `WHERE cycles.status = 'active' AND cycles.end_date < today`
 
 **`pending_resolution → settled` predicate:** fires when either:
+
 - All evidence for the cycle has a majority decision (no `evidence.status = 'pending'` rows remain) — early settlement when all participants have voted
 - `cycles.voting_deadline <= today` — hard deadline; `EvidenceStore.autoApproveAll(cycleId)` runs first to clear remaining pending items before settlement proceeds
 

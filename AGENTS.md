@@ -109,7 +109,7 @@ Auth tokens must be stored with `expo-secure-store` — never `AsyncStorage`.
 - Test user-visible behaviour, not implementation details
 
 ```bash
-mvn test                          # Backend
+mvn verify                        # Backend (unit + integration tests)
 npx jest                          # Frontend
 maestro test /app/.maestro/       # E2E
 ```
