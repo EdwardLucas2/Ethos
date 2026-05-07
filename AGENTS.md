@@ -7,6 +7,7 @@ Read these docs when working on anything that touches their domain:
 - [docs/API.md](docs/API.md) — all endpoints, request/response shapes, error codes
 - [docs/BACKEND.md](docs/BACKEND.md) — service/store architecture, transaction strategy, scheduler
 - [docs/BACKEND_STYLE.md](docs/BACKEND_STYLE.md) — naming, nulls, JDBI, DTOs, logging, comments, tests, OpenAPI conventions
+- [docs/FRONTEND_STYLE.md](docs/FRONTEND_STYLE.md) — file naming, exports, component structure, styling, state management, TanStack Query patterns, TypeScript rules, tests
 - [docs/DATAMODEL.md](docs/DATAMODEL.md) — database schema, table definitions, conventions
 - [docs/ROUTING.md](docs/ROUTING.md) — Expo Router file structure, route params, navigation flows
 - [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
@@ -122,11 +123,45 @@ cd backend && ./run-dev.sh                               # Backend on :8080
 cd app && npx expo start                                 # Expo dev server
 ```
 
+# Frontend Visual Verification
+
+Agents have three ways to verify UI during development, in order of preference:
+
+**1. Expo Web (fastest — use this first)**
+
+```bash
+cd app && npx expo start --web
+```
+
+The app runs at `http://localhost:8081`. Use the `gstack` skill to navigate pages, take screenshots, interact with buttons, and verify rendered output. Expo Web uses real CSS so layout and colour are accurate; native-specific behaviour (haptics, secure store) is mocked. Good for 90% of visual checks.
+
+**2. iOS Simulator screenshot (when native rendering matters)**
+
+With the iOS Simulator already open and the Expo app running:
+
+```bash
+xcrun simctl io booted screenshot /tmp/screen.png
+```
+
+Read the image to inspect the current simulator state. Useful for checking native shadows, fonts, and gesture behaviour that Expo Web doesn't replicate.
+
+**3. Maestro E2E (full user flows)**
+
+Install the CLI once: `curl -Ls "https://get.maestro.mobile.dev" | bash`
+
+```bash
+maestro test app/.maestro/login.yaml   # run a specific flow
+maestro test app/.maestro/             # run all flows
+```
+
+Flows live in `app/.maestro/`. Add a new `.yaml` file per user journey. Requires a running simulator with the app installed.
+
 # Linting & Formatting
 
 ```bash
 npm run lint          # ESLint (frontend)
 npm run format        # Prettier fix (frontend)
+npm test              # Frontend unit tests (RNTL)
 mvn spotless:apply    # Java format fix (backend)
 mvn spotless:check    # Java format verify (backend)
 ```
