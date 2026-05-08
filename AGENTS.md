@@ -125,27 +125,19 @@ cd app && npx expo start                                 # Expo dev server
 
 # Frontend Visual Verification
 
-Agents have three ways to verify UI during development, in order of preference:
+Agents have two ways to verify UI during development:
 
-**1. Expo Web (fastest — use this first)**
+**1. iOS Simulator screenshot**
 
-```bash
-cd app && npx expo start --web
-```
-
-The app runs at `http://localhost:8081`. Use the `gstack` skill to navigate pages, take screenshots, interact with buttons, and verify rendered output. Expo Web uses real CSS so layout and colour are accurate; native-specific behaviour (haptics, secure store) is mocked. Good for 90% of visual checks.
-
-**2. iOS Simulator screenshot (when native rendering matters)**
-
-With the iOS Simulator already open and the Expo app running:
+With the iOS Simulator open and the Expo app running:
 
 ```bash
 xcrun simctl io booted screenshot /tmp/screen.png
 ```
 
-Read the image to inspect the current simulator state. Useful for checking native shadows, fonts, and gesture behaviour that Expo Web doesn't replicate.
+Read the image to inspect the current simulator state. Use this for quick visual spot-checks after making changes.
 
-**3. Maestro E2E (full user flows)**
+**2. Maestro E2E (full user flows)**
 
 Install the CLI once: `curl -Ls "https://get.maestro.mobile.dev" | bash`
 
