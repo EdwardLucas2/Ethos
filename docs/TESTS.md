@@ -20,7 +20,7 @@
 ### Integration Tests — `@Tag("integration")`
 
 - **Scope:** Handler → service → store → real PostgreSQL (Testcontainers). Schema applied via dbmate before each class.
-- **What to test:** Full logical flows end-to-end. Assert on resulting DB state. Run data invariant checks at the end of each flow (see below).
+- **What to test:** Full logical flows end-to-end. Assert on resulting DB state and data invariants (see below).
 - **Run:** `mvn test -Dgroups=integration`
 
 ### E2E Tests — `@Tag("e2e")`
@@ -52,8 +52,30 @@ mvn verify
 
 ## Frontend (React Native/Expo)
 
-- **Tool:** Jest.
-- **Run:** `npx jest` (from `app/`)
+### Component Tests
+
+- **Tool:** Jest + RNTL. Files co-located with the component (`ContractCard.test.tsx` next to `ContractCard.tsx`).
+- **Scope:** Non-trivial logic only — conditional rendering, computed values, interaction sequences. Skip pure layout wrappers.
+- **Mock Orval hooks** (`jest.mock('@/src/api', ...)`), never `fetch`.
+- **Run:** `npm test` (from `app/`)
+
+### E2E Tests
+
+- **Tool:** Maestro. Flows live in `app/.maestro/`, one `.yaml` file per journey.
+- **Scope:** Critical user journeys that cross multiple screens.
+
+```
+app/.maestro/
+  login.yaml              # sign in and reach dashboard
+  contract-create.yaml    # create contract, invite participant, start
+  evidence-submit.yaml    # upload evidence on an active cycle
+  evidence-review.yaml    # reviewer approves/rejects evidence
+  settlement.yaml         # cycle settles, loser pays up
+```
+
+- Each flow must be fully independent — `launchApp: clearState: true` at the start of every file.
+- Assert on visible text and labels, not element IDs.
+- **Run:** `maestro test app/.maestro/` (from monorepo root, with iOS Simulator running)
 
 ---
 

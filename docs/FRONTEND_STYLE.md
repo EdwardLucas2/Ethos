@@ -103,3 +103,4 @@ Only add a comment when the **why** is non-obvious. Never comment what the code 
 - Mock Orval hooks (`jest.mock('@/src/api', ...)`), not `fetch`
 - Test user-visible behaviour — rendered text, accessible labels, navigation calls — not implementation details
 - Only test components with non-trivial logic; skip pure layout wrappers
+- E2E flows use Maestro — see [docs/TESTS.md](TESTS.md) for structure and naming conventions
