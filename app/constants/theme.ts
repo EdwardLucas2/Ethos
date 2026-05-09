@@ -82,14 +82,15 @@ export const borderRadius = {
 } as const;
 
 // ─── Typography ──────────────────────────────────────────────────────────────
+// Font family names as registered by @expo-google-fonts/public-sans.
+// Use these directly as the `fontFamily` value in StyleSheet.
 
 export const typography = {
-    fontFamily: 'PublicSans',
-    fontWeights: {
-        regular: '400',
-        medium: '500',
-        bold: '700',
-        extraBold: '800',
-        black: '900',
+    fonts: {
+        regular: 'PublicSans_400Regular',
+        medium: 'PublicSans_500Medium',
+        bold: 'PublicSans_700Bold',
+        extraBold: 'PublicSans_800ExtraBold',
+        black: 'PublicSans_900Black',
     },
 } as const;
