@@ -5,5 +5,5 @@ jest.mock('supertokens-react-native', () => ({
     default: { init: jest.fn() },
     doesSessionExist: jest.fn().mockResolvedValue(false),
     getAccessToken: jest.fn().mockResolvedValue(null),
-    signOut: jest.fn().mockResolvedValue(undefined)
-}))
+    signOut: jest.fn().mockResolvedValue(undefined),
+}));

@@ -2,10 +2,10 @@ appId: com.ethos.app
 ---
 - launchApp:
       clearState: true
-- assertVisible: "WELCOME BACK."
-- tapOn: "EMAIL ADDRESS"
+- assertVisible: 'WELCOME BACK.'
+- tapOn: 'EMAIL ADDRESS'
 - inputText: ${TEST_EMAIL}
-- tapOn: "PASSWORD"
+- tapOn: 'PASSWORD'
 - inputText: ${TEST_PASSWORD}
-- tapOn: "CONTINUE"
-- assertVisible: "Dashboard"
+- tapOn: 'CONTINUE'
+- assertVisible: 'Dashboard'

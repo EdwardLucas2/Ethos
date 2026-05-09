@@ -60,9 +60,7 @@ export default function LoginScreen() {
 
                 {/* ── Heading ───────────────────────────────── */}
                 <Text style={styles.heading}>WELCOME BACK.</Text>
-                <Text style={styles.subheading}>
-                    Enter your credentials to access the vault.
-                </Text>
+                <Text style={styles.subheading}>Enter your credentials to access the vault.</Text>
 
                 {/* ── Card ──────────────────────────────────── */}
                 <View style={styles.cardShadow}>

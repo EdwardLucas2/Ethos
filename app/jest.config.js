@@ -3,6 +3,6 @@ module.exports = {
     testMatch: ['**/*.test.ts', '**/*.test.tsx'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
     moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/$1'
-    }
-}
+        '^@/(.*)$': '<rootDir>/$1',
+    },
+};
