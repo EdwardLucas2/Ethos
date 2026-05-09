@@ -3,9 +3,11 @@ appId: com.ethos.app
 - launchApp:
       clearState: true
 - assertVisible: "WELCOME BACK."
+- tapOn: "REQUEST ACCESS"
+- assertVisible: "CREATE ACCOUNT"
 - tapOn: "EMAIL ADDRESS"
-- inputText: ${TEST_EMAIL}
+- inputText: ${TEST_SIGNUP_EMAIL}
 - tapOn: "PASSWORD"
-- inputText: ${TEST_PASSWORD}
-- tapOn: "CONTINUE"
+- inputText: ${TEST_SIGNUP_PASSWORD}
+- tapOn: "CREATE ACCOUNT →"
 - assertVisible: "Dashboard"
