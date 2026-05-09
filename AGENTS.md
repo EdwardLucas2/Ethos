@@ -143,6 +143,7 @@ Read the image to inspect the current simulator state. Use this for quick visual
 Install the CLI once: `curl -Ls "https://get.maestro.mobile.dev" | bash`
 
 ```bash
+# from repository root
 maestro test app/.maestro/login.yaml   # run a specific flow
 maestro test app/.maestro/             # run all flows
 ```

@@ -119,7 +119,7 @@ Short, urgent, slightly loaded. Notifications are interruptions — they should 
 
 | Don't                                                        | Why                                                    |
 | ------------------------------------------------------------ | ------------------------------------------------------ |
-| Corporate SaaS language ("unlock", "get started", "explore") | Wrong register — reads as generic and hollow           |
+| Corporate SaaS language ("unlock", "explore")                | Wrong register — reads as generic and hollow           |
 | Toxic positivity ("Amazing!", "You've got this!")            | Undercuts the competitive tone and feels fake          |
 | Casual internet slang ("ngl", "hits different", "slay")      | Dates quickly and feels try-hard                       |
 | Overly aggressive shaming                                    | Pressure is good; humiliation isn't                    |
