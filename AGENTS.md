@@ -140,9 +140,15 @@ Read the image to inspect the current simulator state. Use this for quick visual
 
 **2. Maestro E2E (full user flows)**
 
-Install the CLI once: `curl -Ls "https://get.maestro.mobile.dev" | bash`
+Before running flows, seed the test user (idempotent — safe to run repeatedly):
 
 ```bash
+cp app/.maestro/.env.example app/.maestro/.env  # first time only — fill in credentials
+./scripts/seed-test-user.sh
+```
+
+```bash
+# from repository root
 maestro test app/.maestro/login.yaml   # run a specific flow
 maestro test app/.maestro/             # run all flows
 ```

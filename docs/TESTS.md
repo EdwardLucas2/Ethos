@@ -75,7 +75,7 @@ app/.maestro/
 
 - Each flow must be fully independent — `launchApp: clearState: true` at the start of every file.
 - Assert on visible text and labels, not element IDs.
-- **Run:** `maestro test app/.maestro/` (from monorepo root, with iOS Simulator running)
+- **Run:** `maestro test app/.maestro/` (from monorepo root, with a supported simulator/emulator running)
 
 ---
 

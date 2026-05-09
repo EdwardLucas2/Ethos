@@ -19,43 +19,24 @@ export const colors = {
 // shadowOffset + elevation. The visual shift is achieved by giving the
 // element a margin/offset equal to the shadow size in consuming components.
 
+const shadow = (size: 4 | 6 | 8) =>
+    Platform.select({
+        ios: {
+            shadowColor: '#000000',
+            shadowOffset: { width: size, height: size },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+        },
+        default: {
+            elevation: size,
+            shadowColor: '#000000',
+        },
+    }) ?? { elevation: size, shadowColor: '#000000' };
+
 export const shadows = {
-    sm: Platform.select({
-        ios: {
-            shadowColor: '#000000',
-            shadowOffset: { width: 4, height: 4 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-        },
-        default: {
-            elevation: 4,
-            shadowColor: '#000000',
-        },
-    })!,
-    md: Platform.select({
-        ios: {
-            shadowColor: '#000000',
-            shadowOffset: { width: 6, height: 6 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-        },
-        default: {
-            elevation: 6,
-            shadowColor: '#000000',
-        },
-    })!,
-    lg: Platform.select({
-        ios: {
-            shadowColor: '#000000',
-            shadowOffset: { width: 8, height: 8 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-        },
-        default: {
-            elevation: 8,
-            shadowColor: '#000000',
-        },
-    })!,
+    sm: shadow(4),
+    md: shadow(6),
+    lg: shadow(8),
 } as const;
 
 // ─── Spacing (8px base grid) ──────────────────────────────────────────────────
