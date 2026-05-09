@@ -15,6 +15,7 @@ Read these docs when working on anything that touches their domain:
 - [docs/TECHSTACK.md](docs/TECHSTACK.md) — full tech stack, env vars, infrastructure
 - [product/PRD.md](product/PRD.md) — full product requirements
 - [product/DESIGN.md](product/DESIGN.md) — design system
+- [product/TONE.md](product/TONE.md) — tone of voice, copy principles, context-specific guidance
 
 # Project Structure
 
