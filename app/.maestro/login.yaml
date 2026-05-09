@@ -4,8 +4,8 @@ appId: com.ethos.app
     clearState: true
 - assertVisible: "Log in"
 - tapOn: "Email"
-- inputText: "test@example.com"
+- inputText: ${TEST_EMAIL}
 - tapOn: "Password"
-- inputText: "password123"
+- inputText: ${TEST_PASSWORD}
 - tapOn: "LOG IN"
 - assertVisible: "Dashboard"

@@ -8,6 +8,7 @@ app/node_modules/
 app/.expo/
 app/dist/
 app/.env
+app/.maestro/.env
 
 # Docker volumes
 docker/volumes/
