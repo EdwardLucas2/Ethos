@@ -9,12 +9,7 @@ type Props = {
 export function EthosLogo({ size = 64 }: Props) {
     const radius = Math.round(size * 0.22);
     return (
-        <View
-            style={[
-                styles.container,
-                { width: size, height: size, borderRadius: radius },
-            ]}
-        >
+        <View style={[styles.container, { width: size, height: size, borderRadius: radius }]}>
             <Ionicons name="flash" size={size * 0.52} color={colors.yellow} />
         </View>
     );
