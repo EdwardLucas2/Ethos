@@ -1,4 +1,4 @@
-import { getAccessToken } from 'supertokens-react-native';
+import SuperTokens from 'supertokens-react-native';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 const API_URL = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:8080';
@@ -69,7 +69,7 @@ export async function signUp(email: string, password: string): Promise<void> {
     }
 
     // Token is now in SecureStore — read it to call the backend
-    const token = await getAccessToken();
+    const token = await SuperTokens.getAccessToken();
     if (!token) {
         throw new AuthError('Session not established after signup', 'UNKNOWN');
     }

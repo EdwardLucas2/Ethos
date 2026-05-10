@@ -12,7 +12,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "maestro test .maestro/"
   },
   "dependencies": {
     "@expo-google-fonts/public-sans": "^0.4.2",

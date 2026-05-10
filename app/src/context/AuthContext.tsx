@@ -1,9 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import SuperTokens, {
-    doesSessionExist,
-    getAccessToken,
-    signOut as superTokensSignOut,
-} from 'supertokens-react-native';
+import SuperTokens from 'supertokens-react-native';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 
@@ -34,10 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        doesSessionExist()
-            .then(async (exists) => {
+        SuperTokens.doesSessionExist()
+            .then(async (exists: boolean) => {
                 if (exists) {
-                    const token = await getAccessToken();
+                    const token = await SuperTokens.getAccessToken();
                     setSession(token ?? null);
                 } else {
                     setSession(null);
@@ -48,9 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const refreshSession = useCallback(async () => {
-        const exists = await doesSessionExist();
+        const exists = await SuperTokens.doesSessionExist();
         if (exists) {
-            const token = await getAccessToken();
+            const token = await SuperTokens.getAccessToken();
             setSession(token ?? null);
         } else {
             setSession(null);
@@ -58,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const signOut = useCallback(async () => {
-        await superTokensSignOut();
+        await SuperTokens.signOut();
         setSession(null);
     }, []);
 
