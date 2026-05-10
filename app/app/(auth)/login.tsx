@@ -1,5 +1,6 @@
 import { signIn } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
+import { EthosLogo } from '@/components/ethos-logo';
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -53,9 +54,7 @@ export default function LoginScreen() {
             >
                 {/* ── Logo ─────────────────────────────────── */}
                 <View style={styles.logoWrapper}>
-                    <View style={styles.logoBolt}>
-                        <Text style={styles.logoBoltText}>⚡</Text>
-                    </View>
+                    <EthosLogo size={72} />
                 </View>
 
                 {/* ── Heading ───────────────────────────────── */}
@@ -149,22 +148,6 @@ const styles = StyleSheet.create({
     // Logo
     logoWrapper: {
         marginBottom: spacing.lg,
-    },
-    logoBolt: {
-        width: 56,
-        height: 56,
-        backgroundColor: colors.yellow,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        alignItems: 'center',
-        justifyContent: 'center',
-        // Hard shadow: black square offset 4px right + down
-        ...shadows.sm,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-    },
-    logoBoltText: {
-        fontSize: 28,
     },
 
     // Heading

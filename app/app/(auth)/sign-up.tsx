@@ -1,5 +1,6 @@
 import { signUp } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
+import { EthosLogo } from '@/components/ethos-logo';
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -54,7 +55,7 @@ export default function SignUpScreen() {
         >
             {/* ── Header bar ────────────────────────────── */}
             <View style={styles.header}>
-                <Text style={styles.headerLogo}>ETHOS</Text>
+                <EthosLogo size={36} />
                 <Pressable
                     style={styles.loginButton}
                     onPress={() => router.replace('/login' as any)}
@@ -159,12 +160,6 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
         borderBottomWidth: borderWidth.structural,
         borderBottomColor: colors.ink,
-    },
-    headerLogo: {
-        fontFamily: typography.fonts.black,
-        fontSize: 20,
-        color: colors.ink,
-        letterSpacing: 2,
     },
     loginButton: {
         backgroundColor: colors.ink,
