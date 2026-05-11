@@ -59,7 +59,6 @@ export default function LoginScreen() {
 
                 {/* ── Heading ───────────────────────────────── */}
                 <Text style={styles.heading}>WELCOME BACK.</Text>
-                <Text style={styles.subheading}>Enter your credentials to access the vault.</Text>
 
                 {/* ── Card ──────────────────────────────────── */}
                 <View style={styles.cardShadow}>
@@ -68,7 +67,7 @@ export default function LoginScreen() {
                         <Text style={styles.label}>EMAIL ADDRESS</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="ARCHITECT@ETHOS.NETWORK"
+                            placeholder="Enter your email"
                             placeholderTextColor={colors.inkSecondary}
                             autoCapitalize="none"
                             autoCorrect={false}
@@ -82,11 +81,11 @@ export default function LoginScreen() {
                         {/* Password */}
                         <View style={styles.passwordHeader}>
                             <Text style={styles.label}>PASSWORD</Text>
-                            <Text style={styles.forgot}>FORGOT?</Text>
+                            <Text style={styles.forgot}>FORGOT PASSWORD</Text>
                         </View>
                         <TextInput
                             style={styles.input}
-                            placeholder="••••••••••••"
+                            placeholder="Enter your password"
                             placeholderTextColor={colors.inkSecondary}
                             secureTextEntry
                             returnKeyType="done"
@@ -113,7 +112,7 @@ export default function LoginScreen() {
                                 {loading ? (
                                     <ActivityIndicator color={colors.white} />
                                 ) : (
-                                    <Text style={styles.buttonText}>CONTINUE</Text>
+                                    <Text style={styles.buttonText}>LOGIN</Text>
                                 )}
                             </Pressable>
                         </View>
@@ -122,9 +121,9 @@ export default function LoginScreen() {
 
                 {/* ── Footer ────────────────────────────────── */}
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>NEW TO THE NETWORK? </Text>
+                    <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
                     <Link href={'/sign-up' as any} testID="signup-link">
-                        <Text style={styles.footerLink}>REQUEST ACCESS</Text>
+                        <Text style={styles.footerLink}>SIGN UP</Text>
                     </Link>
                 </View>
             </ScrollView>
