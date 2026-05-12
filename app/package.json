@@ -14,7 +14,9 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "typecheck": "tsc --noEmit",
-        "test:e2e": "maestro test .maestro/"
+        "test:e2e": "maestro test .maestro/",
+        "storybook": "storybook dev -p 6006",
+        "build-storybook": "storybook build"
     },
     "dependencies": {
         "@expo-google-fonts/public-sans": "^0.4.2",
@@ -49,6 +51,8 @@
         "supertokens-react-native": "^5.1.5"
     },
     "devDependencies": {
+        "@storybook/react": "^10.3.6",
+        "@storybook/react-native-web-vite": "^10.3.6",
         "@tanstack/eslint-plugin-query": "^5.100.9",
         "@testing-library/react-native": "^13.3.3",
         "@types/jest": "^29.5.14",
@@ -61,6 +65,7 @@
         "orval": "^8.7.0",
         "prettier": "^3.8.2",
         "react-test-renderer": "^19.2.0",
+        "storybook": "^10.3.6",
         "typescript": "~5.9.2"
     },
     "private": true

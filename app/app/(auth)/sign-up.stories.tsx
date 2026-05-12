@@ -1,0 +1,72 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { signUp, AuthError } from '@/src/api/auth';
+import SignUpScreen from './sign-up';
+
+const meta: Meta<typeof SignUpScreen> = {
+    title: 'Screens/Auth/SignUp',
+    component: SignUpScreen,
+    parameters: { layout: 'fullscreen' },
+};
+
+export default meta;
+type Story = StoryObj<typeof SignUpScreen>;
+
+// ── Idle ─────────────────────────────────────────────────────────────────────
+
+export const Default: Story = {};
+
+// ── Validation errors ─────────────────────────────────────────────────────────
+
+export const EmptyFieldsError: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await userEvent.click(canvas.getByTestId('submit-button'));
+        await waitFor(() =>
+            expect(canvas.getByText('Please enter your email and password.')).toBeTruthy()
+        );
+    },
+};
+
+export const PasswordTooShort: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await userEvent.type(canvas.getByTestId('email-input'), 'user@example.com');
+        await userEvent.type(canvas.getByTestId('password-input'), 'short');
+        await userEvent.click(canvas.getByTestId('submit-button'));
+        await waitFor(() =>
+            expect(canvas.getByText('Password must be at least 8 characters.')).toBeTruthy()
+        );
+    },
+};
+
+// ── API error states ───────────────────────────────────────────────────────────
+
+export const EmailAlreadyExists: Story = {
+    play: async ({ canvasElement }) => {
+        // Set mock inside play so it works in both the Storybook browser UI and the test runner.
+        (signUp as ReturnType<typeof fn>).mockRejectedValue(
+            new AuthError('An account with this email already exists', 'EMAIL_EXISTS')
+        );
+        const canvas = within(canvasElement);
+        await userEvent.type(canvas.getByTestId('email-input'), 'taken@example.com');
+        await userEvent.type(canvas.getByTestId('password-input'), 'password123');
+        await userEvent.click(canvas.getByTestId('submit-button'));
+        await waitFor(() =>
+            expect(canvas.getByText('An account with this email already exists')).toBeTruthy()
+        );
+    },
+};
+
+// ── Loading state ─────────────────────────────────────────────────────────────
+
+export const Loading: Story = {
+    play: async ({ canvasElement }) => {
+        // Never resolves — keeps the spinner visible indefinitely.
+        (signUp as ReturnType<typeof fn>).mockImplementation(() => new Promise(() => {}));
+        const canvas = within(canvasElement);
+        await userEvent.type(canvas.getByTestId('email-input'), 'user@example.com');
+        await userEvent.type(canvas.getByTestId('password-input'), 'password123');
+        await userEvent.click(canvas.getByTestId('submit-button'));
+    },
+};
