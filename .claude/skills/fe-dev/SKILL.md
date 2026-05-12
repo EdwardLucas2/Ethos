@@ -1,7 +1,7 @@
 ---
 name: fe-dev
 description: Full-pipeline workflow for implementing a frontend screen — context gathering, planning, implementation, visual conformance loop (screenshots vs wireframe), and Maestro e2e tests.
-argument-hint: [screen-name]
+argument-hint: "[screen-name]"
 disable-model-invocation: true
 allowed-tools: Bash Agent Read Write Edit
 ---
@@ -52,6 +52,7 @@ Spawn a general-purpose sub-agent. Brief:
 > 5. Current state of `app/app/(auth)/<screen>.tsx` if it exists — what is already implemented, what is missing
 > 6. The Storybook mock setup in `app/.storybook/mocks/` — what modules are mocked and how
 > 7. Code style reference from `app/app/(auth)/login.tsx` — note patterns used (StyleSheet structure, component shape, testID conventions)
+> 8. Navigation structure from `app/app/(auth)/_layout.tsx` — how screens are registered in the Expo Router stack (stack config, header options, any screen-specific options)
 >
 > Be specific and concrete. Do not paste raw file contents — summarise what matters for implementation.
 
@@ -102,7 +103,9 @@ Spawn a general-purpose sub-agent with a complete self-contained brief:
 > - Use `react-native` core components only — no external UI kit
 > - Follow the code style from the reference screen
 > - Add `testID` to every interactive element and major container
-> - Must compile without TypeScript errors (`cd app && npm run typecheck`)
+> - Must compile without TypeScript errors
+>
+> **Before returning:** run `cd app && npm run typecheck` and fix all type errors. Include the result (clean / errors fixed) in your summary.
 >
 > **Stories requirements:**
 >
@@ -125,9 +128,10 @@ Run the helper script to ensure Storybook is running:
 bash "${CLAUDE_SKILL_DIR}/scripts/ensure-storybook.sh"
 ```
 
-The script outputs either `already-running` or `started:<pid>`.
+The script outputs `already-running`, `started:<pid>`, or exits non-zero with an `error:` message on stderr.
 
-Record the output. If it starts with `started:`, extract the PID — you will need it for cleanup.
+- If the output starts with `started:`, extract the PID — you will need it for cleanup.
+- If the script exits with an error, report the message to the user and stop here.
 
 ---
 
@@ -156,19 +160,21 @@ Spawn a general-purpose sub-agent. This sub-agent runs the full loop internally.
 >     cd app && npm run test-storybook
 >     ```
 > 2. Read the wireframe PNG.
-> 3. Read `app/storybook-screenshots/screens-<screen>--default.png`. Also read any other story screenshots relevant to checking visual states.
+> 3. Read the Default story screenshot. The filename follows the pattern `app/storybook-screenshots/screens-<screen>--default.png`, where `<screen>` is the kebab-case screen name (e.g. `sign-up`, `login`) matching the story title prefix. Also read any other story screenshots relevant to checking visual states.
 > 4. Compare screenshot to wireframe. List every discrepancy: missing elements, wrong colour, wrong layout, wrong font weight, wrong spacing, wrong border style.
 > 5. No significant discrepancies → return: `DONE after N passes.`
 > 6. Discrepancies found → fix them in the screen file, then proceed to next pass.
 > 7. After pass 10 → return: `LIMIT REACHED after 10 passes. Remaining issues: <specific list>.`
 >
-> Focus on changing the visual presentation. Do not touch test files.
+> Focus on changing the visual presentation. You may edit the screen file and the stories file. Do not touch Maestro test files (`app/.maestro/`).
 
 If the sub-agent returns `LIMIT REACHED`, report the issues to the user and stop here.
 
 ---
 
 ## Phase 7 — Maestro e2e loop (sub-agent, max 3 passes)
+
+Before spawning, check whether `app/.maestro/<screen>.yaml` exists. If it does not, note this in the sub-agent brief and instruct it to create the file first using the `testID` values from the Phase 4 summary.
 
 Spawn a general-purpose sub-agent:
 
@@ -180,6 +186,8 @@ Spawn a general-purpose sub-agent:
 >
 > **Implementation summary:**
 > <paste Phase 4 summary verbatim>
+>
+> **If the test file does not exist:** create `app/.maestro/<screen>.yaml` covering the main user flows using the `testID` values listed in the implementation summary. Then proceed with the loop.
 >
 > **Loop — up to 3 passes:**
 >
