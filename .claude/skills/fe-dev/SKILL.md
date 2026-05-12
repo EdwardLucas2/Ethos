@@ -175,7 +175,7 @@ Spawn a general-purpose sub-agent. This sub-agent runs the full loop internally.
 >     cd app && npm run test-storybook
 >     ```
 > 2. Read the wireframe PNG.
-> 3. Read the Default story screenshot. The filename follows the pattern `app/storybook-screenshots/screens-<screen>--default.png`, where `<screen>` is the kebab-case screen name (e.g. `sign-up`, `login`) matching the story title prefix. Also read any other story screenshots relevant to checking visual states.
+> 3. Read the Default story screenshot. The filename is `app/storybook-screenshots/<story-id>--default.png`, where `<story-id>` is derived from the story's `title` field by lowercasing and replacing `/` and spaces with `-`. For auth screens (`title: 'Screens/Auth/<Name>'`) the pattern is `screens-auth-<name-lowercased>--default.png` — e.g. `title: 'Screens/Auth/Login'` → `screens-auth-login--default.png`, `title: 'Screens/Auth/SignUp'` → `screens-auth-signup--default.png`. If unsure of the exact filename, run `ls app/storybook-screenshots/` and match by story title. Also read any other story screenshots relevant to checking visual states.
 > 4. Compare screenshot to wireframe. List every discrepancy: missing elements, wrong colour, wrong layout, wrong font weight, wrong spacing, wrong border style.
 > 5. No significant discrepancies → return: `DONE after N passes.`
 > 6. Discrepancies found → fix them in the screen file, then proceed to next pass.
