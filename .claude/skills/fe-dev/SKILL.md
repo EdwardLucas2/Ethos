@@ -55,6 +55,10 @@ Spawn a general-purpose sub-agent. Brief:
 > 8. Navigation structure from `app/app/(auth)/_layout.tsx` — how screens are registered in the Expo Router stack (stack config, header options, any screen-specific options)
 >
 > Be specific and concrete. Do not paste raw file contents — summarise what matters for implementation.
+>
+> **Failure contract:** If any file you need to read does not exist, stop immediately and return a message starting with `BLOCKED:` that names every missing path. Do not invent or assume file contents.
+
+If the sub-agent returns a message starting with `BLOCKED:`, stop and report the blocker to the user verbatim. Do not proceed to Phase 3.
 
 Store the returned summary. You will paste it verbatim into subsequent sub-agent briefs.
 
@@ -107,6 +111,8 @@ Spawn a general-purpose sub-agent with a complete self-contained brief:
 >
 > **Before returning:** run `cd app && npm run typecheck` and fix all type errors. Include the result (clean / errors fixed) in your summary.
 >
+> **Failure contract:** If `npm run typecheck` exits non-zero and you cannot fix the errors stop immediately and return a message starting with `BLOCKED:` that includes the exact typecheck output. Do not ship code with type errors.
+>
 > **Stories requirements:**
 >
 > - A `Default` story (idle state, no play function) — used for visual comparison
@@ -115,6 +121,8 @@ Spawn a general-purpose sub-agent with a complete self-contained brief:
 > - Mock any new API calls in `app/.storybook/mocks/auth-api.ts` if needed
 >
 > Return: what was implemented, which files were changed, any trade-offs, anything the visual loop should pay attention to.
+
+If the sub-agent returns a message starting with `BLOCKED:`, stop and report the blocker to the user verbatim. Do not proceed to Phase 5.
 
 Wait for the sub-agent. Store its summary.
 
@@ -151,6 +159,13 @@ Spawn a general-purpose sub-agent. This sub-agent runs the full loop internally.
 > **Implementation summary:**
 > <paste Phase 4 summary verbatim>
 >
+> **Failure contract (checked before every pass):**
+>
+> - If `npm run test-storybook` exits non-zero, stop immediately and return `BLOCKED: test-storybook failed — <exact stderr>`. Do not proceed to the comparison step.
+> - If the wireframe PNG does not exist at the stated path, stop and return `BLOCKED: wireframe not found at <path>`.
+> - If the screenshot file does not exist after a successful test run, stop and return `BLOCKED: screenshot not found — expected <path>. Directory listing: <ls app/storybook-screenshots/>`. Do not guess at the filename or skip the comparison.
+> - Do NOT report a pass without having read both the wireframe and the screenshot in the same pass. If either read fails, that is a blocker.
+>
 > **Loop — up to 10 passes:**
 >
 > Each pass:
@@ -167,6 +182,8 @@ Spawn a general-purpose sub-agent. This sub-agent runs the full loop internally.
 > 7. After pass 10 → return: `LIMIT REACHED after 10 passes. Remaining issues: <specific list>.`
 >
 > Focus on changing the visual presentation. You may edit the screen file and the stories file. Do not touch Maestro test files (`app/.maestro/`).
+
+If the sub-agent returns a message starting with `BLOCKED:`, stop and report the blocker to the user verbatim. Do not proceed to Phase 7.
 
 If the sub-agent returns `LIMIT REACHED`, report the issues to the user and stop here.
 
@@ -188,6 +205,11 @@ Spawn a general-purpose sub-agent:
 > <paste Phase 4 summary verbatim>
 >
 > **If the test file does not exist:** create `app/.maestro/<screen>.yaml` covering the main user flows using the `testID` values listed in the implementation summary. Then proceed with the loop.
+>
+> **Failure contract:**
+> - If the maestro binary is not found or exits with a startup/infrastructure error (not a test assertion failure), stop immediately and return `BLOCKED: maestro could not run — <exact error output>`. Do not attempt to work around a missing binary or misconfigured device.
+> - If the test YAML file does not exist and you cannot create it because testIDs are missing from the implementation summary, stop and return `BLOCKED: cannot create test file — testIDs missing from implementation summary`.
+> - Test assertion failures are expected during the loop — they are not blockers. Only stop for infrastructure failures (binary missing, YAML parse error, no device/emulator found).
 >
 > **Loop — up to 3 passes:**
 >
