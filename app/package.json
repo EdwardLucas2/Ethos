@@ -16,7 +16,8 @@
         "typecheck": "tsc --noEmit",
         "test:e2e": "maestro test .maestro/",
         "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "build-storybook": "storybook build",
+        "test-storybook": "test-storybook --url http://localhost:6006"
     },
     "dependencies": {
         "@expo-google-fonts/public-sans": "^0.4.2",
@@ -53,6 +54,7 @@
     "devDependencies": {
         "@storybook/react": "^10.3.6",
         "@storybook/react-native-web-vite": "^10.3.6",
+        "@storybook/test-runner": "^0.24.3",
         "@tanstack/eslint-plugin-query": "^5.100.9",
         "@testing-library/react-native": "^13.3.3",
         "@types/jest": "^29.5.14",

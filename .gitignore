@@ -30,3 +30,5 @@ auth/.env
 
 # macOS
 .DS_Store
+
+storybook-screenshots/
