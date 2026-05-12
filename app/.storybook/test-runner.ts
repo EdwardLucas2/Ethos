@@ -13,10 +13,7 @@ const config: TestRunnerConfig = {
         await waitForPageReady(page);
         fs.mkdirSync(screenshotDir, { recursive: true });
         const screenshot = await page.screenshot();
-        await fs.promises.writeFile(
-            path.join(screenshotDir, `${context.id}.png`),
-            screenshot
-        );
+        await fs.promises.writeFile(path.join(screenshotDir, `${context.id}.png`), screenshot);
     },
 };
 
