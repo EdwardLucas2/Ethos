@@ -191,22 +191,44 @@ If the sub-agent returns `LIMIT REACHED`, report the issues to the user and stop
 
 ## Phase 7 — Maestro e2e loop (sub-agent, max 3 passes)
 
-Before spawning, check whether `app/.maestro/<screen>.yaml` exists. If it does not, note this in the sub-agent brief and instruct it to create the file first using the `testID` values from the Phase 4 summary.
+Before spawning, run these prerequisite checks from the monorepo root and stop immediately if any fail:
+
+```bash
+# 1. Backend is reachable
+curl -sf --max-time 3 http://localhost:8080 > /dev/null && echo "backend up" || echo "backend down"
+
+# 2. A simulator is booted
+xcrun simctl list devices | grep Booted
+
+# 3. App is installed on it
+xcrun simctl listapps booted 2>/dev/null | grep com.ethos.app
+```
+
+If the backend is not reachable, stop and report: "Phase 7 requires the backend to be running on port 8080. Start it with `cd backend && ./run-dev.sh` (and Docker if needed) before continuing."
+
+If no simulator is booted, stop and report: "Phase 7 requires a booted iOS simulator with `com.ethos.app` installed. Run `npx expo run:ios` from `app/` first."
+
+If `com.ethos.app` is not installed, stop and report: "Phase 7 requires `com.ethos.app` to be installed on the booted simulator. Run `npx expo run:ios` from `app/` first."
+
+Also check whether `app/.maestro/<screen>.yaml` exists. If it does not, note this in the sub-agent brief and instruct it to create the file first using the `testID` values from the Phase 4 summary.
 
 Spawn a general-purpose sub-agent:
 
 > Run and fix the Maestro e2e tests for the **<screen name>** screen.
 >
-> **Test file:** `app/.maestro/<screen>.yaml`
-> **Screen file:** `app/app/(auth)/<screen>.tsx`
+> **Test file:** `.maestro/<screen>.yaml` (paths are relative to `app/`)
+> **Screen file:** `app/(auth)/<screen>.tsx` (relative to `app/`)
+> **Screenshots:** saved to `app/maestro-screenshots/` in the monorepo
 > **Maestro binary:** `~/.maestro/bin/maestro`
+> **Credentials:** stored in `.maestro/.env` — maestro auto-loads this when running from `app/`
 >
 > **Implementation summary:**
 > <paste Phase 4 summary verbatim>
 >
-> **If the test file does not exist:** create `app/.maestro/<screen>.yaml` covering the main user flows using the `testID` values listed in the implementation summary. Then proceed with the loop.
+> **If the test file does not exist:** create `.maestro/<screen>.yaml` (in `app/`) covering the main user flows using the `testID` values listed in the implementation summary. Then proceed with the loop.
 >
 > **Failure contract:**
+> - Lines starting with `WARNING: A restricted method` or `WARNING: Use --enable-native-access` appear on every maestro startup — they are harmless JVM noise, not errors. Ignore them.
 > - If the maestro binary is not found or exits with a startup/infrastructure error (not a test assertion failure), stop immediately and return `BLOCKED: maestro could not run — <exact error output>`. Do not attempt to work around a missing binary or misconfigured device.
 > - If the test YAML file does not exist and you cannot create it because testIDs are missing from the implementation summary, stop and return `BLOCKED: cannot create test file — testIDs missing from implementation summary`.
 > - Test assertion failures are expected during the loop — they are not blockers. Only stop for infrastructure failures (binary missing, YAML parse error, no device/emulator found).
@@ -215,12 +237,16 @@ Spawn a general-purpose sub-agent:
 >
 > Each pass:
 >
-> 1. Run the tests:
+> 1. Run the tests from the `app/` directory:
 >     ```bash
->     ~/.maestro/bin/maestro test app/.maestro/<screen>.yaml
+>     cd app && rm -rf maestro-screenshots && ~/.maestro/bin/maestro test .maestro/<screen>.yaml --debug-output maestro-screenshots --flatten-debug-output 2>&1
 >     ```
 > 2. All pass → return: `PASS after N passes.`
-> 3. Failures → analyse output, fix the root cause in the screen or test file, proceed to next pass.
+> 3. Failures → before fixing, read the evidence:
+>     a. Note which assertions failed from the test output.
+>     b. Run `ls app/maestro-screenshots/` to find the PNG screenshots captured at the point of failure.
+>     c. Read those screenshots to see what the UI was actually showing — use this to diagnose the root cause.
+>     d. Fix the root cause in the screen file or test file, then proceed to next pass.
 > 4. After pass 3 → return: `LIMIT REACHED after 3 passes. Failing: <test names>. Root cause: <diagnosis>. Suggested next step: <what to do>.`
 >
 > Do not rewrite test assertions to paper over app bugs — fix the app.

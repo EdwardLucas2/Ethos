@@ -46,3 +46,6 @@ app-example
 /android
 
 .codacy
+
+# Maestro e2e debug output
+maestro-screenshots/
