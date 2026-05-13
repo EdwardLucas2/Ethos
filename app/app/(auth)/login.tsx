@@ -60,14 +60,11 @@ export default function LoginScreen() {
 
                 {/* ── Heading ───────────────────────────────── */}
                 <Text style={styles.heading}>WELCOME BACK.</Text>
-                <Text style={styles.subheading}>
-                    Enter your credentials to access the vault.
-                </Text>
+                <Text style={styles.subheading}>Enter your credentials to access the vault.</Text>
 
                 {/* ── Card ──────────────────────────────────── */}
                 <View style={styles.cardShadow}>
                     <View style={styles.card} testID="login-card">
-
                         {/* Email */}
                         <Text style={styles.label}>EMAIL ADDRESS</Text>
                         <TextInput
@@ -86,7 +83,9 @@ export default function LoginScreen() {
                         {/* Password header row */}
                         <View style={styles.passwordHeader}>
                             <Text style={styles.label}>PASSWORD</Text>
-                            <Text style={styles.forgot} testID="forgot-button">FORGOT?</Text>
+                            <Text style={styles.forgot} testID="forgot-button">
+                                FORGOT?
+                            </Text>
                         </View>
                         <TextInput
                             style={styles.input}
@@ -167,7 +166,6 @@ export default function LoginScreen() {
                                 </Pressable>
                             </View>
                         </View>
-
                     </View>
                 </View>
 
