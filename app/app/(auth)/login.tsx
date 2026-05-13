@@ -47,6 +47,7 @@ export default function LoginScreen() {
         <KeyboardAvoidingView
             style={styles.flex}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            testID="login-screen"
         >
             <ScrollView
                 contentContainerStyle={styles.container}
@@ -59,15 +60,19 @@ export default function LoginScreen() {
 
                 {/* ── Heading ───────────────────────────────── */}
                 <Text style={styles.heading}>WELCOME BACK.</Text>
+                <Text style={styles.subheading}>
+                    Enter your credentials to access the vault.
+                </Text>
 
                 {/* ── Card ──────────────────────────────────── */}
                 <View style={styles.cardShadow}>
-                    <View style={styles.card}>
+                    <View style={styles.card} testID="login-card">
+
                         {/* Email */}
                         <Text style={styles.label}>EMAIL ADDRESS</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter your email"
+                            placeholder="ARCHITECT@ETHOS.NETWORK"
                             placeholderTextColor={colors.inkSecondary}
                             autoCapitalize="none"
                             autoCorrect={false}
@@ -78,14 +83,14 @@ export default function LoginScreen() {
                             testID="email-input"
                         />
 
-                        {/* Password */}
+                        {/* Password header row */}
                         <View style={styles.passwordHeader}>
                             <Text style={styles.label}>PASSWORD</Text>
-                            <Text style={styles.forgot}>FORGOT PASSWORD</Text>
+                            <Text style={styles.forgot} testID="forgot-button">FORGOT?</Text>
                         </View>
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter your password"
+                            placeholder="••••••••••••"
                             placeholderTextColor={colors.inkSecondary}
                             secureTextEntry
                             returnKeyType="done"
@@ -112,18 +117,65 @@ export default function LoginScreen() {
                                 {loading ? (
                                     <ActivityIndicator color={colors.white} />
                                 ) : (
-                                    <Text style={styles.buttonText}>LOGIN</Text>
+                                    <Text style={styles.buttonText}>CONTINUE</Text>
                                 )}
                             </Pressable>
                         </View>
+
+                        {/* Send Email OTP button */}
+                        <View style={styles.otpButtonShadow}>
+                            <Pressable
+                                style={styles.otpButton}
+                                onPress={() => {}}
+                                disabled
+                                testID="otp-button"
+                            >
+                                <Text style={styles.otpButtonIcon}>🔑</Text>
+                                <Text style={styles.otpButtonText}>SEND EMAIL OTP</Text>
+                            </Pressable>
+                        </View>
+
+                        {/* Divider */}
+                        <View style={styles.orDivider}>
+                            <View style={styles.orLine} />
+                            <Text style={styles.orText}>OR CONNECT WITH</Text>
+                            <View style={styles.orLine} />
+                        </View>
+
+                        {/* Social buttons */}
+                        <View style={styles.socialRow}>
+                            <View style={styles.socialButtonShadow}>
+                                <Pressable
+                                    style={styles.socialButton}
+                                    onPress={() => {}}
+                                    disabled
+                                    testID="apple-button"
+                                >
+                                    <Text style={styles.socialButtonIcon}>iOS</Text>
+                                    <Text style={styles.socialButtonText}>APPLE</Text>
+                                </Pressable>
+                            </View>
+                            <View style={styles.socialButtonShadow}>
+                                <Pressable
+                                    style={styles.socialButton}
+                                    onPress={() => {}}
+                                    disabled
+                                    testID="google-button"
+                                >
+                                    <Text style={styles.socialButtonIcon}>🌐</Text>
+                                    <Text style={styles.socialButtonText}>GOOGLE</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+
                     </View>
                 </View>
 
                 {/* ── Footer ────────────────────────────────── */}
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
+                    <Text style={styles.footerText}>NEW TO THE NETWORK? </Text>
                     <Link href={'/sign-up' as any} testID="signup-link">
-                        <Text style={styles.footerLink}>SIGN UP</Text>
+                        <Text style={styles.footerLink}>REQUEST ACCESS</Text>
                     </Link>
                 </View>
             </ScrollView>
@@ -134,42 +186,47 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     flex: {
         flex: 1,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.surfaceRaised,
     },
+
+    // Content
     container: {
         flexGrow: 1,
         alignItems: 'center',
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xxl,
-        paddingBottom: spacing.xl,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.lg,
     },
 
     // Logo
     logoWrapper: {
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
     },
 
     // Heading
     heading: {
         fontFamily: typography.fonts.black,
-        fontSize: 36,
+        fontSize: 48,
         color: colors.ink,
+        fontStyle: 'italic',
         textAlign: 'center',
-        marginBottom: spacing.sm,
+        textTransform: 'uppercase',
+        marginBottom: spacing.xs,
+        lineHeight: 52,
+        letterSpacing: -1,
     },
     subheading: {
         fontFamily: typography.fonts.regular,
-        fontSize: 16,
+        fontSize: 14,
         color: colors.inkSecondary,
         textAlign: 'center',
-        marginBottom: spacing.xl,
+        marginBottom: spacing.lg,
         paddingHorizontal: spacing.md,
     },
 
     // Card
     cardShadow: {
         width: '100%',
-        // Extra margin to give the shadow room
         marginBottom: spacing.xs,
         marginRight: spacing.xs,
         ...shadows.sm,
@@ -179,7 +236,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surfaceRaised,
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
-        padding: spacing.lg,
+        padding: spacing.md,
+        overflow: 'visible',
     },
 
     // Form fields
@@ -189,18 +247,22 @@ const styles = StyleSheet.create({
         color: colors.ink,
         letterSpacing: 1,
         marginBottom: spacing.xs,
+        textTransform: 'uppercase',
     },
     passwordHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: spacing.md,
+        marginBottom: spacing.xs,
     },
     forgot: {
         fontFamily: typography.fonts.bold,
         fontSize: 12,
         color: colors.blue,
         letterSpacing: 1,
+        textTransform: 'uppercase',
+        textDecorationLine: 'underline',
     },
     input: {
         borderWidth: borderWidth.structural,
@@ -211,7 +273,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.ink,
         backgroundColor: colors.surfaceRaised,
-        marginBottom: spacing.xs,
     },
 
     // Error
@@ -223,15 +284,17 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
     },
 
-    // Button
+    // Continue button
     buttonShadow: {
-        marginTop: spacing.md,
+        marginTop: spacing.lg,
         marginBottom: spacing.xs,
         marginRight: spacing.xs,
         ...shadows.sm,
     },
     button: {
         backgroundColor: colors.blue,
+        borderWidth: borderWidth.structural,
+        borderColor: colors.ink,
         paddingVertical: spacing.md,
         alignItems: 'center',
         justifyContent: 'center',
@@ -245,24 +308,115 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: colors.white,
         letterSpacing: 2,
+        textTransform: 'uppercase',
+    },
+
+    // OTP button
+    otpButtonShadow: {
+        marginTop: spacing.md,
+        marginBottom: spacing.xs,
+        marginRight: spacing.xs,
+        ...shadows.sm,
+    },
+    otpButton: {
+        backgroundColor: colors.yellow,
+        borderWidth: borderWidth.structural,
+        borderColor: colors.ink,
+        paddingVertical: spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: spacing.sm,
+    },
+    otpButtonIcon: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 16,
+        color: colors.ink,
+    },
+    otpButtonText: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 14,
+        color: colors.ink,
+        letterSpacing: 2,
+        textTransform: 'uppercase',
+    },
+
+    // OR divider
+    orDivider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.lg,
+        marginBottom: spacing.md,
+        gap: spacing.sm,
+    },
+    orLine: {
+        flex: 1,
+        height: 2,
+        backgroundColor: colors.ink,
+    },
+    orText: {
+        fontFamily: typography.fonts.regular,
+        fontSize: 11,
+        color: colors.inkSecondary,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+    },
+
+    // Social row
+    socialRow: {
+        flexDirection: 'row',
+        gap: spacing.md,
+    },
+    socialButtonShadow: {
+        flex: 1,
+        marginBottom: spacing.xs,
+        marginRight: spacing.xs,
+        ...shadows.sm,
+    },
+    socialButton: {
+        flex: 1,
+        backgroundColor: colors.surfaceRaised,
+        borderWidth: borderWidth.structural,
+        borderColor: colors.ink,
+        paddingVertical: spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: spacing.xs,
+    },
+    socialButtonIcon: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 13,
+        color: colors.ink,
+    },
+    socialButtonText: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 13,
+        color: colors.ink,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
     },
 
     // Footer
     footer: {
         flexDirection: 'row',
-        marginTop: spacing.xl,
+        marginTop: spacing.lg,
         alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
     },
     footerText: {
         fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.ink,
+        fontSize: 11,
+        color: colors.inkSecondary,
         letterSpacing: 1,
+        textTransform: 'uppercase',
     },
     footerLink: {
         fontFamily: typography.fonts.bold,
-        fontSize: 12,
+        fontSize: 11,
         color: colors.blue,
         letterSpacing: 1,
+        textTransform: 'uppercase',
     },
 });

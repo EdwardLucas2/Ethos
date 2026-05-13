@@ -56,3 +56,7 @@ export const Loading: Story = {
         await userEvent.click(canvas.getByTestId('submit-button'));
     },
 };
+
+// ── OTP button visual ─────────────────────────────────────────────────────────
+
+export const OtpButton: Story = {};

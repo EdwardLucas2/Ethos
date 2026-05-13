@@ -8,4 +8,4 @@ appId: com.ethos.app
 - tapOn: 'PASSWORD'
 - inputText: ${TEST_PASSWORD}
 - tapOn: 'CONTINUE'
-- assertVisible: 'Dashboard'
+- assertVisible: 'Welcome!'
