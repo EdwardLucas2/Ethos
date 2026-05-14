@@ -192,20 +192,28 @@ If the sub-agent returns `LIMIT REACHED`, report the issues to the user and stop
 
 ## Phase 7 — Maestro e2e loop (sub-agent, max 3 passes)
 
-Before spawning, run these prerequisite checks from the monorepo root and stop immediately if any fail:
+Before spawning, run these prerequisite checks and stop immediately if any fail:
+
+**1. Ensure backend is running:**
 
 ```bash
-# 1. Backend is reachable
-curl -sf --max-time 3 http://localhost:8080 > /dev/null && echo "backend up" || echo "backend down"
-
-# 2. A simulator is booted
-xcrun simctl list devices | grep Booted
-
-# 3. App is installed on it
-xcrun simctl listapps booted 2>/dev/null | grep com.ethos.app
+bash "${CLAUDE_SKILL_DIR}/scripts/ensure-backend.sh"
 ```
 
-If the backend is not reachable, stop and report: "Phase 7 requires the backend to be running on port 8080. Start it with `cd backend && ./run-dev.sh` (and Docker if needed) before continuing."
+The script outputs `already-running`, `started:<pid>`, or exits non-zero with an `error:` message on stderr.
+
+- If the output starts with `started:`, note the PID — stop it in Phase 8 cleanup.
+- If the script exits with an error, report it to the user and stop here.
+
+**2. Check simulator and app:**
+
+```bash
+# A simulator is booted
+xcrun simctl list devices | grep Booted
+
+# App is installed on it
+xcrun simctl listapps booted 2>/dev/null | grep com.ethos.app
+```
 
 If no simulator is booted, stop and report: "Phase 7 requires a booted iOS simulator with `com.ethos.app` installed. Run `npx expo run:ios` from `app/` first."
 

@@ -22,8 +22,9 @@ export const EmptyFieldsError: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await userEvent.click(canvas.getByTestId('submit-button'));
+        await waitFor(() => expect(canvas.getByTestId('alert-message-text')).toBeTruthy());
         await waitFor(() =>
-            expect(canvas.getByText('Please enter your email and password.')).toBeTruthy()
+            expect(canvas.getByText('PLEASE ENTER YOUR EMAIL AND PASSWORD.')).toBeTruthy()
         );
     },
 };
@@ -35,7 +36,7 @@ export const PasswordTooShort: Story = {
         await userEvent.type(canvas.getByTestId('password-input'), 'short');
         await userEvent.click(canvas.getByTestId('submit-button'));
         await waitFor(() =>
-            expect(canvas.getByText('Password must be at least 8 characters.')).toBeTruthy()
+            expect(canvas.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS.')).toBeTruthy()
         );
     },
 };
@@ -53,7 +54,7 @@ export const EmailAlreadyExists: Story = {
         await userEvent.type(canvas.getByTestId('password-input'), 'password123');
         await userEvent.click(canvas.getByTestId('submit-button'));
         await waitFor(() =>
-            expect(canvas.getByText('An account with this email already exists')).toBeTruthy()
+            expect(canvas.getByText('AN ACCOUNT WITH THIS EMAIL ALREADY EXISTS')).toBeTruthy()
         );
     },
 };

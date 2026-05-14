@@ -1,13 +1,21 @@
 appId: com.ethos.app
 ---
+- runScript:
+      file: gen-test-email.js
 - launchApp:
       clearState: true
 - assertVisible: 'WELCOME BACK.'
 - tapOn: 'REQUEST ACCESS'
 - assertVisible: 'CREATE ACCOUNT'
-- tapOn: 'EMAIL ADDRESS'
-- inputText: ${TEST_SIGNUP_EMAIL}
-- tapOn: 'PASSWORD'
-- inputText: ${TEST_SIGNUP_PASSWORD}
-- tapOn: 'CREATE ACCOUNT →'
-- assertVisible: 'Dashboard'
+- tapOn:
+      id: 'email-input'
+- inputText: ${output.TEST_SIGNUP_EMAIL}
+- hideKeyboard
+- tapOn:
+      id: 'password-input'
+- inputText: ${TEST_PASSWORD}
+- pressKey: enter
+- tapOn:
+      text: 'Not Now'
+      optional: true
+- assertVisible: 'Welcome!'

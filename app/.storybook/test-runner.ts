@@ -12,7 +12,7 @@ const config: TestRunnerConfig = {
     async postVisit(page, context) {
         await waitForPageReady(page);
         fs.mkdirSync(screenshotDir, { recursive: true });
-        const screenshot = await page.screenshot();
+        const screenshot = await page.screenshot({ fullPage: true });
         await fs.promises.writeFile(path.join(screenshotDir, `${context.id}.png`), screenshot);
     },
 };
