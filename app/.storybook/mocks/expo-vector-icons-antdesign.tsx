@@ -15,7 +15,13 @@ type AntDesignProps = {
     testID?: string;
 };
 
-export default function AntDesign({ name, size = 24, color = '#000', style, testID }: AntDesignProps) {
+export default function AntDesign({
+    name,
+    size = 24,
+    color = '#000',
+    style,
+    testID,
+}: AntDesignProps) {
     return (
         <Text
             testID={testID}

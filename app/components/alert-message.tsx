@@ -68,10 +68,7 @@ export function AlertMessage({
             testID="alert-message"
             activeOpacity={dismissible ? 0.8 : 1}
             onPress={handlePress}
-            style={[
-                styles.container,
-                { backgroundColor: config.backgroundColor },
-            ]}
+            style={[styles.container, { backgroundColor: config.backgroundColor }]}
         >
             <AntDesign
                 testID="alert-message-icon"
@@ -80,10 +77,7 @@ export function AlertMessage({
                 color={config.iconColor}
                 style={styles.icon}
             />
-            <Text
-                testID="alert-message-text"
-                style={[styles.text, { color: config.textColor }]}
-            >
+            <Text testID="alert-message-text" style={[styles.text, { color: config.textColor }]}>
                 {message.toUpperCase()}
             </Text>
         </TouchableOpacity>

@@ -22,9 +22,7 @@ export const EmptyFieldsError: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await userEvent.click(canvas.getByTestId('submit-button'));
-        await waitFor(() =>
-            expect(canvas.getByTestId('alert-message-text')).toBeTruthy()
-        );
+        await waitFor(() => expect(canvas.getByTestId('alert-message-text')).toBeTruthy());
     },
 };
 
