@@ -23,6 +23,8 @@ const config: StorybookConfig = {
                     'expo-router': path.resolve(__dirname, 'mocks/expo-router.tsx'),
                     // expo-haptics has no web implementation
                     'expo-haptics': path.resolve(__dirname, 'mocks/expo-haptics.ts'),
+                    // AntDesign from @expo/vector-icons has no web build — stub with a text-based mock
+                    '@expo/vector-icons/AntDesign': path.resolve(__dirname, 'mocks/expo-vector-icons-antdesign.tsx'),
                 },
             },
             define: {

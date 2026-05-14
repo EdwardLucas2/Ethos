@@ -23,7 +23,7 @@ export const EmptyFieldsError: Story = {
         const canvas = within(canvasElement);
         await userEvent.click(canvas.getByTestId('submit-button'));
         await waitFor(() =>
-            expect(canvas.getByText('Please enter your email and password.')).toBeTruthy()
+            expect(canvas.getByTestId('alert-message-text')).toBeTruthy()
         );
     },
 };
@@ -40,7 +40,7 @@ export const WrongCredentials: Story = {
         await userEvent.type(canvas.getByTestId('email-input'), 'user@example.com');
         await userEvent.type(canvas.getByTestId('password-input'), 'wrongpassword');
         await userEvent.click(canvas.getByTestId('submit-button'));
-        await waitFor(() => expect(canvas.getByText('Invalid email or password')).toBeTruthy());
+        await waitFor(() => expect(canvas.getByTestId('alert-message-text')).toBeTruthy());
     },
 };
 

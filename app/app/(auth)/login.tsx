@@ -1,5 +1,6 @@
 import { signIn } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
+import { AlertMessage } from '@/components/alert-message';
 import { EthosLogo } from '@/components/ethos-logo';
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
 import { Link } from 'expo-router';
@@ -100,7 +101,15 @@ export default function LoginScreen() {
                         />
 
                         {/* Error */}
-                        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                        {error ? (
+                            <View style={styles.errorWrapper}>
+                                <AlertMessage
+                                    message={error}
+                                    severity="error"
+                                    onDismiss={() => setError(null)}
+                                />
+                            </View>
+                        ) : null}
 
                         {/* Continue button */}
                         <View style={styles.buttonShadow}>
@@ -274,10 +283,7 @@ const styles = StyleSheet.create({
     },
 
     // Error
-    errorText: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 13,
-        color: colors.red,
+    errorWrapper: {
         marginTop: spacing.sm,
         marginBottom: spacing.sm,
     },
