@@ -105,6 +105,7 @@ Spawn a general-purpose sub-agent with a complete self-contained brief:
 >
 > - Only use tokens from `app/constants/theme.ts` — no hardcoded colours, fonts, or spacing
 > - Use `react-native` core components only — no external UI kit
+> - For icons, use `AntDesign` from `@expo/vector-icons` (outline variants, e.g. `checkcircleo`) — never use emoji as icons
 > - Follow the code style from the reference screen
 > - Add `testID` to every interactive element and major container
 > - Must compile without TypeScript errors
