@@ -1,21 +1,54 @@
 appId: com.ethos.app
 ---
+# Happy path: create a new account
 - runScript:
       file: gen-test-email.js
 - launchApp:
       clearState: true
-- assertVisible: 'WELCOME BACK.'
-- tapOn: 'REQUEST ACCESS'
-- assertVisible: 'CREATE ACCOUNT'
+- extendedWaitUntil:
+      visible: 'WELCOME BACK.'
+      timeout: 10000
+- tapOn:
+      id: 'signup-link'
+- extendedWaitUntil:
+      visible: 'CREATE ACCOUNT'
+      timeout: 10000
 - tapOn:
       id: 'email-input'
 - inputText: ${output.TEST_SIGNUP_EMAIL}
-- hideKeyboard
+- pressKey: enter
 - tapOn:
       id: 'password-input'
 - inputText: ${TEST_PASSWORD}
 - pressKey: enter
 - tapOn:
+      id: 'submit-button'
+- tapOn:
       text: 'Not Now'
       optional: true
-- assertVisible: 'Welcome!'
+- extendedWaitUntil:
+      visible: 'Welcome!'
+      timeout: 10000
+
+# Error path: same email again → email already exists error
+- launchApp:
+      clearState: true
+- extendedWaitUntil:
+      visible: 'WELCOME BACK.'
+      timeout: 10000
+- tapOn:
+      id: 'signup-link'
+- extendedWaitUntil:
+      visible: 'CREATE ACCOUNT'
+      timeout: 10000
+- tapOn:
+      id: 'email-input'
+- inputText: ${output.TEST_SIGNUP_EMAIL}
+- pressKey: enter
+- inputText: ${TEST_PASSWORD}
+- pressKey: enter
+- tapOn:
+      id: 'submit-button'
+- extendedWaitUntil:
+      visible: 'AN ACCOUNT WITH THIS EMAIL ALREADY EXISTS'
+      timeout: 10000

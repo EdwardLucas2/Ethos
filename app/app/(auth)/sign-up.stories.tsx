@@ -71,3 +71,54 @@ export const Loading: Story = {
         await userEvent.click(canvas.getByTestId('submit-button'));
     },
 };
+
+// ── More validation errors ────────────────────────────────────────────────────
+
+export const InvalidEmail: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await userEvent.type(canvas.getByTestId('email-input'), 'notanemail');
+        await userEvent.type(canvas.getByTestId('password-input'), 'password123');
+        await userEvent.click(canvas.getByTestId('submit-button'));
+        await waitFor(() =>
+            expect(canvas.getByText('PLEASE ENTER A VALID EMAIL ADDRESS.')).toBeTruthy()
+        );
+    },
+};
+
+// ── More API error states ─────────────────────────────────────────────────────
+
+export const NetworkError: Story = {
+    play: async ({ canvasElement }) => {
+        (signUp as ReturnType<typeof fn>).mockRejectedValue(
+            new AuthError('Sign up failed', 'UNKNOWN')
+        );
+        const canvas = within(canvasElement);
+        await userEvent.type(canvas.getByTestId('email-input'), 'user@example.com');
+        await userEvent.type(canvas.getByTestId('password-input'), 'password123');
+        await userEvent.click(canvas.getByTestId('submit-button'));
+        await waitFor(() => expect(canvas.getByText('SIGN UP FAILED')).toBeTruthy());
+    },
+};
+
+export const Success: Story = {
+    play: async ({ canvasElement }) => {
+        (signUp as ReturnType<typeof fn>).mockResolvedValue(undefined);
+        const canvas = within(canvasElement);
+        await userEvent.type(canvas.getByTestId('email-input'), 'user@example.com');
+        await userEvent.type(canvas.getByTestId('password-input'), 'password123');
+        await userEvent.click(canvas.getByTestId('submit-button'));
+        // refreshSession is called — no error alert should be visible
+        await waitFor(() => expect(canvas.queryByTestId('alert-message')).toBeNull());
+    },
+};
+
+// ── OAuth coming soon ─────────────────────────────────────────────────────────
+
+export const ComingSoon: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await userEvent.click(canvas.getByTestId('google-button'));
+        await waitFor(() => expect(canvas.getByText('COMING SOON')).toBeTruthy());
+    },
+};

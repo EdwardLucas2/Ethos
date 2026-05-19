@@ -38,6 +38,7 @@ yarn-error.*
 
 # Storybook
 storybook-static/
+storybook-screenshots/
 
 app-example
 

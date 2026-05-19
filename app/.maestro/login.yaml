@@ -1,11 +1,42 @@
 appId: com.ethos.app
 ---
+# Setup: create a fresh account via sign-up so login credentials are known
+- runScript:
+      file: gen-test-email.js
 - launchApp:
       clearState: true
-- assertVisible: 'WELCOME BACK.'
-- tapOn: 'EMAIL ADDRESS'
-- inputText: ${TEST_EMAIL}
-- tapOn: 'PASSWORD'
+- extendedWaitUntil:
+      visible: 'WELCOME BACK.'
+      timeout: 30000
+- tapOn:
+      id: 'signup-link'
+- extendedWaitUntil:
+      visible: 'CREATE ACCOUNT'
+      timeout: 10000
+- tapOn:
+      id: 'email-input'
+- inputText: ${output.TEST_SIGNUP_EMAIL}
+- pressKey: enter
 - inputText: ${TEST_PASSWORD}
-- tapOn: 'CONTINUE'
+- pressKey: enter
+- tapOn:
+      id: 'submit-button'
+- extendedWaitUntil:
+      visible: 'Welcome!'
+      timeout: 30000
+
+# Test: clear state (log out), then log in with the same credentials
+- launchApp:
+      clearState: true
+- extendedWaitUntil:
+      visible: 'WELCOME BACK.'
+      timeout: 30000
+- tapOn:
+      id: 'email-input'
+- inputText: ${output.TEST_SIGNUP_EMAIL}
+- pressKey: enter
+- inputText: ${TEST_PASSWORD}
+- pressKey: enter
+- tapOn:
+      id: 'submit-button'
 - assertVisible: 'Welcome!'

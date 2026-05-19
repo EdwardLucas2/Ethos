@@ -1,9 +1,12 @@
 import { signIn } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
-import { EthosLogo } from '@/components/ethos-logo';
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
-import { Link } from 'expo-router';
+import { AuthHeader } from '@/components/AuthHeader';
+import { EthosTextInput } from '@/components/text-input';
+import { OAuthButton } from '@/components/oauth-button';
+import { colors } from '@/constants/theme';
+import { styles } from './login.styles';
+import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
     ActivityIndicator,
@@ -11,14 +14,13 @@ import {
     Platform,
     Pressable,
     ScrollView,
-    StyleSheet,
     Text,
-    TextInput,
     View,
 } from 'react-native';
 
 export default function LoginScreen() {
     const { refreshSession } = useAuth();
+    const router = useRouter();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -50,34 +52,33 @@ export default function LoginScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             testID="login-screen"
         >
+            <AuthHeader
+                rightAction={{
+                    label: 'SIGN UP',
+                    onPress: () => router.replace('/sign-up' as any),
+                    testID: 'header-signup-button',
+                }}
+            />
+
             <ScrollView
                 contentContainerStyle={styles.container}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* ── Logo ─────────────────────────────────── */}
-                <View style={styles.logoWrapper}>
-                    <EthosLogo size={72} />
-                </View>
-
-                {/* ── Heading ───────────────────────────────── */}
-                <Text style={styles.heading}>WELCOME BACK.</Text>
-                <Text style={styles.subheading}>Enter your credentials to access the vault.</Text>
-
-                {/* ── Card ──────────────────────────────────── */}
+                {/* ── Card ──────────────────────────────────────────── */}
                 <View style={styles.cardShadow}>
                     <View style={styles.card} testID="login-card">
+                        <Text style={styles.heading}>WELCOME BACK.</Text>
+                        <Text style={styles.subheading}>ENTER YOUR CREDENTIALS TO CONTINUE.</Text>
+
+                        <View style={styles.divider} />
+
                         {/* Email */}
                         <Text style={styles.label}>EMAIL ADDRESS</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="ARCHITECT@ETHOS.NETWORK"
-                            placeholderTextColor={colors.inkSecondary}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            keyboardType="email-address"
-                            returnKeyType="next"
+                        <EthosTextInput
+                            placeholder="Enter your email address"
                             value={email}
                             onChangeText={setEmail}
+                            returnKeyType="next"
                             testID="email-input"
                         />
 
@@ -88,21 +89,19 @@ export default function LoginScreen() {
                                 FORGOT?
                             </Text>
                         </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="••••••••••••"
-                            placeholderTextColor={colors.inkSecondary}
-                            secureTextEntry
-                            returnKeyType="done"
-                            onSubmitEditing={handleSubmit}
+                        <EthosTextInput
+                            placeholder="Enter your password"
+                            isPassword
                             value={password}
                             onChangeText={setPassword}
+                            returnKeyType="done"
+                            onSubmitEditing={handleSubmit}
                             testID="password-input"
                         />
 
                         {/* Error */}
                         {error ? (
-                            <View style={styles.errorWrapper}>
+                            <View style={styles.alertWrapper}>
                                 <AlertMessage
                                     message={error}
                                     severity="error"
@@ -125,12 +124,15 @@ export default function LoginScreen() {
                                 {loading ? (
                                     <ActivityIndicator color={colors.white} />
                                 ) : (
-                                    <Text style={styles.buttonText}>CONTINUE</Text>
+                                    <View style={styles.buttonContent}>
+                                        <Text style={styles.buttonText}>CONTINUE</Text>
+                                        <Text style={styles.buttonIcon}>→</Text>
+                                    </View>
                                 )}
                             </Pressable>
                         </View>
 
-                        {/* Send Email OTP button */}
+                        {/* OTP button */}
                         <View style={styles.otpButtonShadow}>
                             <Pressable
                                 style={styles.otpButton}
@@ -138,289 +140,43 @@ export default function LoginScreen() {
                                 disabled
                                 testID="otp-button"
                             >
-                                <Text style={styles.otpButtonIcon}>🔑</Text>
                                 <Text style={styles.otpButtonText}>SEND EMAIL OTP</Text>
                             </Pressable>
                         </View>
 
-                        {/* Divider */}
-                        <View style={styles.orDivider}>
-                            <View style={styles.orLine} />
-                            <Text style={styles.orText}>OR CONNECT WITH</Text>
-                            <View style={styles.orLine} />
+                        {/* OR LOGIN WITH separator */}
+                        <View style={styles.separator} testID="oauth-separator">
+                            <View style={styles.separatorLine} />
+                            <Text style={styles.separatorText}>OR LOGIN WITH</Text>
+                            <View style={styles.separatorLine} />
                         </View>
 
-                        {/* Social buttons */}
-                        <View style={styles.socialRow}>
-                            <View style={styles.socialButtonShadow}>
-                                <Pressable
-                                    style={styles.socialButton}
-                                    onPress={() => {}}
-                                    disabled
-                                    testID="apple-button"
-                                >
-                                    <Text style={styles.socialButtonIcon}>iOS</Text>
-                                    <Text style={styles.socialButtonText}>APPLE</Text>
-                                </Pressable>
-                            </View>
-                            <View style={styles.socialButtonShadow}>
-                                <Pressable
-                                    style={styles.socialButton}
-                                    onPress={() => {}}
-                                    disabled
-                                    testID="google-button"
-                                >
-                                    <Text style={styles.socialButtonIcon}>🌐</Text>
-                                    <Text style={styles.socialButtonText}>GOOGLE</Text>
-                                </Pressable>
-                            </View>
+                        {/* OAuth row — side by side */}
+                        <View style={styles.oauthRow}>
+                            <OAuthButton
+                                provider="apple"
+                                testID="apple-button"
+                                style={styles.oauthFlex}
+                            />
+                            <OAuthButton
+                                provider="google"
+                                testID="google-button"
+                                style={styles.oauthFlex}
+                            />
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        {/* Footer link */}
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
+                            <Link href={'/sign-up' as any} testID="signup-link">
+                                <Text style={styles.footerLink}>SIGN UP</Text>
+                            </Link>
                         </View>
                     </View>
-                </View>
-
-                {/* ── Footer ────────────────────────────────── */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>NEW TO THE NETWORK? </Text>
-                    <Link href={'/sign-up' as any} testID="signup-link">
-                        <Text style={styles.footerLink}>REQUEST ACCESS</Text>
-                    </Link>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    flex: {
-        flex: 1,
-        backgroundColor: colors.surfaceRaised,
-    },
-
-    // Content
-    container: {
-        flexGrow: 1,
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.lg,
-    },
-
-    // Logo
-    logoWrapper: {
-        marginBottom: spacing.md,
-    },
-
-    // Heading
-    heading: {
-        fontFamily: typography.fonts.black,
-        fontSize: 48,
-        color: colors.ink,
-        fontStyle: 'italic',
-        textAlign: 'center',
-        textTransform: 'uppercase',
-        marginBottom: spacing.xs,
-        lineHeight: 52,
-        letterSpacing: -1,
-    },
-    subheading: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 14,
-        color: colors.inkSecondary,
-        textAlign: 'center',
-        marginBottom: spacing.lg,
-        paddingHorizontal: spacing.md,
-    },
-
-    // Card
-    cardShadow: {
-        width: '100%',
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    card: {
-        width: '100%',
-        backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.md,
-        overflow: 'visible',
-    },
-
-    // Form fields
-    label: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.ink,
-        letterSpacing: 1,
-        marginBottom: spacing.xs,
-        textTransform: 'uppercase',
-    },
-    passwordHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-    },
-    forgot: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.blue,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-        textDecorationLine: 'underline',
-    },
-    input: {
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 2,
-        fontFamily: typography.fonts.regular,
-        fontSize: 14,
-        color: colors.ink,
-        backgroundColor: colors.surfaceRaised,
-    },
-
-    // Error
-    errorWrapper: {
-        marginTop: spacing.sm,
-        marginBottom: spacing.sm,
-    },
-
-    // Continue button
-    buttonShadow: {
-        marginTop: spacing.lg,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    button: {
-        backgroundColor: colors.blue,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonPressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
-    },
-    buttonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 16,
-        color: colors.white,
-        letterSpacing: 2,
-        textTransform: 'uppercase',
-    },
-
-    // OTP button
-    otpButtonShadow: {
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    otpButton: {
-        backgroundColor: colors.yellow,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingVertical: spacing.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: spacing.sm,
-    },
-    otpButtonIcon: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 16,
-        color: colors.ink,
-    },
-    otpButtonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 14,
-        color: colors.ink,
-        letterSpacing: 2,
-        textTransform: 'uppercase',
-    },
-
-    // OR divider
-    orDivider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: spacing.lg,
-        marginBottom: spacing.md,
-        gap: spacing.sm,
-    },
-    orLine: {
-        flex: 1,
-        height: 2,
-        backgroundColor: colors.ink,
-    },
-    orText: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 11,
-        color: colors.inkSecondary,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-    },
-
-    // Social row
-    socialRow: {
-        flexDirection: 'row',
-        gap: spacing.md,
-    },
-    socialButtonShadow: {
-        flex: 1,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    socialButton: {
-        flex: 1,
-        backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingVertical: spacing.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: spacing.xs,
-    },
-    socialButtonIcon: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 13,
-        color: colors.ink,
-    },
-    socialButtonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 13,
-        color: colors.ink,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-    },
-
-    // Footer
-    footer: {
-        flexDirection: 'row',
-        marginTop: spacing.lg,
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-    },
-    footerText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.inkSecondary,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-    },
-    footerLink: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.blue,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-    },
-});

@@ -51,7 +51,7 @@ Spawn a general-purpose sub-agent. Brief:
 > 4. Any orval-generated hooks in `app/src/api/index.ts` relevant to this screen
 > 5. Current state of `app/app/(auth)/<screen>.tsx` if it exists — what is already implemented, what is missing
 > 6. The Storybook mock setup in `app/.storybook/mocks/` — what modules are mocked and how
-> 7. Code style reference from `app/app/(auth)/login.tsx` — note patterns used (StyleSheet structure, component shape, testID conventions)
+> 7. Code style reference from `app/app/(auth)/login.tsx` and `app/app/(auth)/login.styles.ts` — note patterns used (styles live in a co-located `<name>.styles.ts` file, component shape, testID conventions)
 > 8. Navigation structure from `app/app/(auth)/_layout.tsx` — how screens are registered in the Expo Router stack (stack config, header options, any screen-specific options)
 >
 > Be specific and concrete. Do not paste raw file contents — summarise what matters for implementation.
@@ -90,7 +90,10 @@ Spawn a general-purpose sub-agent with a complete self-contained brief:
 > **Files to create/update:**
 >
 > - Screen: `app/app/(auth)/<screen>.tsx`
+> - Styles: `app/app/(auth)/<screen>.styles.ts` (all `StyleSheet.create` lives here; screen imports `{ styles }` from it)
 > - Stories: `app/app/(auth)/<screen>.stories.tsx`
+>
+> Do NOT create a `<screen>.stories.test.tsx` file — stories are tested via the Storybook test runner, not Jest portable stories.
 >
 > **Codebase context:**
 > <paste Phase 2 summary verbatim>
@@ -237,6 +240,7 @@ Spawn a general-purpose sub-agent:
 > **If the test file does not exist:** create `.maestro/<screen>.yaml` (in `app/`) covering the main user flows using the `testID` values listed in the implementation summary. Then proceed with the loop.
 >
 > **Failure contract:**
+>
 > - Lines starting with `WARNING: A restricted method` or `WARNING: Use --enable-native-access` appear on every maestro startup — they are harmless JVM noise, not errors. Ignore them.
 > - If the maestro binary is not found or exits with a startup/infrastructure error (not a test assertion failure), stop immediately and return `BLOCKED: maestro could not run — <exact error output>`. Do not attempt to work around a missing binary or misconfigured device.
 > - If the test YAML file does not exist and you cannot create it because testIDs are missing from the implementation summary, stop and return `BLOCKED: cannot create test file — testIDs missing from implementation summary`.
@@ -252,10 +256,10 @@ Spawn a general-purpose sub-agent:
 >     ```
 > 2. All pass → return: `PASS after N passes.`
 > 3. Failures → before fixing, read the evidence:
->     a. Note which assertions failed from the test output.
->     b. Run `ls app/maestro-screenshots/` to find the PNG screenshots captured at the point of failure.
->     c. Read those screenshots to see what the UI was actually showing — use this to diagnose the root cause.
->     d. Fix the root cause in the screen file or test file, then proceed to next pass.
+>    a. Note which assertions failed from the test output.
+>    b. Run `ls app/maestro-screenshots/` to find the PNG screenshots captured at the point of failure.
+>    c. Read those screenshots to see what the UI was actually showing — use this to diagnose the root cause.
+>    d. Fix the root cause in the screen file or test file, then proceed to next pass.
 > 4. After pass 3 → return: `LIMIT REACHED after 3 passes. Failing: <test names>. Root cause: <diagnosis>. Suggested next step: <what to do>.`
 >
 > Do not rewrite test assertions to paper over app bugs — fix the app.

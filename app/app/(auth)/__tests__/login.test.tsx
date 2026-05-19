@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import LoginScreen from '../login';
-import { AuthError } from '@/src/api/auth';
+import { AuthError, signIn } from '@/src/api/auth';
+
+// ─── Setup ────────────────────────────────────────────────────────────────────
+
+import { useAuth } from '@/src/context/AuthContext';
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
@@ -31,11 +35,6 @@ jest.mock('expo-router', () => {
         useRouter: () => ({ replace: jest.fn() }),
     };
 });
-
-// ─── Setup ────────────────────────────────────────────────────────────────────
-
-import { signIn } from '@/src/api/auth';
-import { useAuth } from '@/src/context/AuthContext';
 
 beforeEach(() => {
     jest.clearAllMocks();
@@ -69,7 +68,7 @@ describe('LoginScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('Please enter your email and password.')).toBeTruthy();
+            expect(screen.getByText('PLEASE ENTER YOUR EMAIL AND PASSWORD.')).toBeTruthy();
         });
         expect(signIn).not.toHaveBeenCalled();
     });
@@ -81,7 +80,7 @@ describe('LoginScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('Please enter your email and password.')).toBeTruthy();
+            expect(screen.getByText('PLEASE ENTER YOUR EMAIL AND PASSWORD.')).toBeTruthy();
         });
         expect(signIn).not.toHaveBeenCalled();
     });
@@ -97,7 +96,7 @@ describe('LoginScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('Invalid email or password')).toBeTruthy();
+            expect(screen.getByText('INVALID EMAIL OR PASSWORD')).toBeTruthy();
         });
         expect(mockRefreshSession).not.toHaveBeenCalled();
     });

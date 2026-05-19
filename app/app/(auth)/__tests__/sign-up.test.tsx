@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import SignUpScreen from '../sign-up';
-import { AuthError } from '@/src/api/auth';
+import { AuthError, signUp } from '@/src/api/auth';
+
+// ─── Setup ────────────────────────────────────────────────────────────────────
+
+import { useAuth } from '@/src/context/AuthContext';
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
@@ -32,11 +36,6 @@ jest.mock('expo-router', () => {
         useRouter: () => ({ replace: mockReplace }),
     };
 });
-
-// ─── Setup ────────────────────────────────────────────────────────────────────
-
-import { signUp } from '@/src/api/auth';
-import { useAuth } from '@/src/context/AuthContext';
 
 beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +74,20 @@ describe('SignUpScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('Please enter your email and password.')).toBeTruthy();
+            expect(screen.getByText('PLEASE ENTER YOUR EMAIL AND PASSWORD.')).toBeTruthy();
+        });
+        expect(signUp).not.toHaveBeenCalled();
+    });
+
+    it('shows a validation error for an invalid email format', async () => {
+        render(<SignUpScreen />);
+
+        fireEvent.changeText(screen.getByTestId('email-input'), 'notanemail');
+        fireEvent.changeText(screen.getByTestId('password-input'), 'password123');
+        fireEvent.press(screen.getByTestId('submit-button'));
+
+        await waitFor(() => {
+            expect(screen.getByText('PLEASE ENTER A VALID EMAIL ADDRESS.')).toBeTruthy();
         });
         expect(signUp).not.toHaveBeenCalled();
     });
@@ -88,7 +100,7 @@ describe('SignUpScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('Password must be at least 8 characters.')).toBeTruthy();
+            expect(screen.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS.')).toBeTruthy();
         });
         expect(signUp).not.toHaveBeenCalled();
     });
@@ -104,7 +116,7 @@ describe('SignUpScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('An account with this email already exists')).toBeTruthy();
+            expect(screen.getByText('AN ACCOUNT WITH THIS EMAIL ALREADY EXISTS')).toBeTruthy();
         });
         expect(mockRefreshSession).not.toHaveBeenCalled();
     });

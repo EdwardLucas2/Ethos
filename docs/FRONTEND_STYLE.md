@@ -34,17 +34,21 @@ React Native has no CSS — styles are JavaScript objects. Rules:
 - Always use theme constants from `constants/theme.ts` — never hardcode colours, shadows, or spacing
 - Shadows use separate RN props (`shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`, `elevation`) — the theme exports pre-built objects (`theme.shadows.sm/md/lg`), spread them in
 
+**Screens** (`app/` files) keep styles in a co-located `<name>.styles.ts` file and import `{ styles }` from it. This keeps screen files focused on JSX and navigation logic. Example: `sign-up.tsx` → `sign-up.styles.ts`.
+
+**Components** (`components/` files) keep `StyleSheet.create(...)` at the bottom of the same file — components are self-contained and the co-location is more readable at that scale.
+
 ---
 
 ## State Management
 
 Three layers — use the right one, don't introduce others (no Zustand, Redux, etc.):
 
-| What | How |
-|---|---|
-| Server data | TanStack Query via Orval-generated hooks |
-| Global client state (auth, current user) | React Context in `src/context/` |
-| Local UI state | `useState` |
+| What                                     | How                                      |
+| ---------------------------------------- | ---------------------------------------- |
+| Server data                              | TanStack Query via Orval-generated hooks |
+| Global client state (auth, current user) | React Context in `src/context/`          |
+| Local UI state                           | `useState`                               |
 
 ---
 
@@ -88,6 +92,16 @@ Import only from `src/api/` — never from a sub-path within it.
 ## Expo SDK
 
 Use Expo SDK modules for all native capabilities — never bare React Native APIs when an Expo equivalent exists (`expo-secure-store`, `expo-haptics`, `expo-image`, `expo-image-picker`, `expo-linking`).
+
+---
+
+## Form Validation
+
+Use **Zod** (v4) for all client-side form validation.
+
+- Define schemas at module level, not inside the component
+- Use `safeParse` — avoids `try/catch` and returns a typed result
+- Client validation covers format only. Business rules belong on the server.
 
 ---
 
