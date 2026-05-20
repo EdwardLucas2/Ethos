@@ -1,6 +1,6 @@
 appId: com.ethos.app
 env:
-  TEST_PASSWORD: TestPassword123!
+    TEST_PASSWORD: TestPassword123!
 ---
 # Happy path: create a new account
 - runScript:
@@ -25,9 +25,6 @@ env:
 - pressKey: enter
 - tapOn:
       id: 'submit-button'
-- tapOn:
-      text: 'Not Now'
-      optional: true
 - extendedWaitUntil:
       visible: 'Welcome!'
       timeout: 10000
@@ -47,6 +44,8 @@ env:
       id: 'email-input'
 - inputText: ${output.TEST_SIGNUP_EMAIL}
 - pressKey: enter
+- tapOn:
+      id: 'password-input'
 - inputText: ${TEST_PASSWORD}
 - pressKey: enter
 - tapOn:
