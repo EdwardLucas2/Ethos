@@ -1,4 +1,6 @@
 appId: com.ethos.app
+env:
+  TEST_PASSWORD: TestPassword123!
 ---
 # Setup: create a fresh account via sign-up so login credentials are known
 - runScript:

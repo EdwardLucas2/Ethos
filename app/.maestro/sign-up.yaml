@@ -1,4 +1,6 @@
 appId: com.ethos.app
+env:
+  TEST_PASSWORD: TestPassword123!
 ---
 # Happy path: create a new account
 - runScript:
