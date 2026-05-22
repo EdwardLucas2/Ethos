@@ -112,8 +112,9 @@ Auth tokens must be stored with `expo-secure-store` — never `AsyncStorage`.
 
 ```bash
 mvn verify                        # Backend (unit + integration tests)
-npx jest                          # Frontend
-maestro test /app/.maestro/       # E2E
+cd app && npm run typecheck       # Frontend — fast type/compilation check, no simulator needed
+cd app && npm test                # Frontend — RNTL unit tests
+cd app && npm run test:e2e        # Frontend — Maestro E2E (requires running simulator)
 ```
 
 # Local Development
@@ -126,34 +127,33 @@ cd app && npx expo start                                 # Expo dev server
 
 # Frontend Visual Verification
 
-Agents have two ways to verify UI during development:
+Keep the iOS Simulator running throughout a development session. Agents can verify the UI without human intervention using two tools:
 
-**1. iOS Simulator screenshot**
-
-With the iOS Simulator open and the Expo app running:
+**1. Quick screenshot**
 
 ```bash
 xcrun simctl io booted screenshot /tmp/screen.png
 ```
 
-Read the image to inspect the current simulator state. Use this for quick visual spot-checks after making changes.
+Read the image to spot-check the current state after a change.
 
-**2. Maestro E2E (full user flows)**
+**2. Maestro E2E flows**
 
-Before running flows, seed the test user (idempotent — safe to run repeatedly):
+Seed test credentials once:
 
 ```bash
-cp app/.maestro/.env.example app/.maestro/.env  # first time only — fill in credentials
+cp app/.maestro/.env.example app/.maestro/.env  # fill in credentials
 ./scripts/seed-test-user.sh
 ```
 
+Run flows:
+
 ```bash
-# from repository root
-maestro test app/.maestro/login.yaml   # run a specific flow
-maestro test app/.maestro/             # run all flows
+cd app && npm run test:e2e              # all flows
+maestro test app/.maestro/login.yaml   # single flow
 ```
 
-Flows live in `app/.maestro/`. Add a new `.yaml` file per user journey. Requires a running simulator with the app installed.
+Flows live in `app/.maestro/` — Dev flows may add `takeScreenshot: <name>` commands at key steps so agents can read the captured images and verify layout. Do not add `takeScreenshot` to flows intended for CI.
 
 # Linting & Formatting
 
@@ -164,5 +164,3 @@ npm test              # Frontend unit tests (RNTL)
 mvn spotless:apply    # Java format fix (backend)
 mvn spotless:check    # Java format verify (backend)
 ```
-
-Pre-commit hooks (Lefthook) run lint and format checks automatically on staged files.

@@ -107,6 +107,20 @@ jobs:
               working-directory: app
               run: npx jest --coverage --coverageDirectory=coverage --coverageReporters=lcov --coverageReporters=text-summary
 
+            - name: Install Playwright browsers
+              working-directory: app
+              run: npx playwright install --with-deps chromium
+
+            - name: Build Storybook
+              working-directory: app
+              run: npm run build-storybook -- --quiet
+
+            - name: Storybook tests
+              working-directory: app
+              run: |
+                  npx http-server storybook-static -p 6006 --silent &
+                  npx wait-on tcp:6006 && npm run test-storybook
+
             - name: Upload coverage to Codacy
               uses: codacy/codacy-coverage-reporter-action@v1.3.0
               continue-on-error: true
@@ -114,4 +128,3 @@ jobs:
                   project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
                   coverage-reports: app/coverage/lcov.info
                   language: typescript
-

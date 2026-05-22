@@ -21,6 +21,10 @@ export const colors = {
 
 const shadow = (size: 4 | 6 | 8) =>
     Platform.select({
+        web: {
+            // react-native-web: use CSS box-shadow for hard offset effect
+            boxShadow: `${size}px ${size}px 0px #000000`,
+        } as object,
         ios: {
             shadowColor: '#000000',
             shadowOffset: { width: size, height: size },
@@ -63,14 +67,15 @@ export const borderRadius = {
 } as const;
 
 // ─── Typography ──────────────────────────────────────────────────────────────
+// Font family names as registered by @expo-google-fonts/public-sans.
+// Use these directly as the `fontFamily` value in StyleSheet.
 
 export const typography = {
-    fontFamily: 'PublicSans',
-    fontWeights: {
-        regular: '400',
-        medium: '500',
-        bold: '700',
-        extraBold: '800',
-        black: '900',
+    fonts: {
+        regular: 'PublicSans_400Regular',
+        medium: 'PublicSans_500Medium',
+        bold: 'PublicSans_700Bold',
+        extraBold: 'PublicSans_800ExtraBold',
+        black: 'PublicSans_900Black',
     },
 } as const;

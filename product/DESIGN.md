@@ -20,12 +20,14 @@ Ethos is a high-stakes accountability app. The design should feel like it means 
 **Typeface: Public Sans**
 
 **Weight communicates hierarchy:**
+
 - Page titles, stamps, hero text — ExtraBold (800) or Black (900)
 - Section headers, card titles — Bold (700)
 - Body text, descriptions — Medium (500)
 - Supporting metadata, labels — Regular (400)
 
 **Case:**
+
 - Headers, labels, CTAs, and status indicators are ALL CAPS
 - Body text and user-generated content (habit names, notes) use sentence case
 - Don't force all-caps on anything the user typed
@@ -33,6 +35,7 @@ Ethos is a high-stakes accountability app. The design should feel like it means 
 **Scale:** Don't prescribe exact sizes for every element — use relative scale and let context breathe. The key principle is contrast through size: a hero stamp should feel dramatically larger than the text around it. A progress fraction ("2/3") should be clearly secondary to the habit name above it.
 
 **Letter spacing:**
+
 - All-caps text: slight tracking (+2–4%) to improve legibility
 - Hero/display text: tighten tracking for impact (−1–2%)
 - Body text: default tracking
@@ -79,6 +82,18 @@ The design has a physical, tactile quality. Interactions should reinforce this.
 **Disabled state:** Reduce opacity to ~40%. Maintain borders and shape — a disabled element should look like the same component, just unavailable.
 
 **Transitions:** Fast and decisive. 150ms ease is a good default. Avoid slow fades or elaborate animations.
+
+## Icons
+
+Use the **AntDesign** icon set from `@expo/vector-icons` — outline variants only.
+
+```tsx
+import { AntDesign } from "@expo/vector-icons";
+```
+
+- Outline variants use an `"o"` suffix (e.g. `checkcircleo`, `hearto`, `staro`)
+- Never use emoji as icons in the UI
+- Size icons relative to the text they accompany
 
 ## Tone & Voice
 
