@@ -8,7 +8,7 @@ import { OAuthButton } from '@/components/oauth-button';
 import { colors, spacing } from '@/constants/theme';
 import { styles } from './sign-up.styles';
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -16,6 +16,7 @@ import {
     Pressable,
     ScrollView,
     Text,
+    TextInput,
     View,
 } from 'react-native';
 
@@ -24,6 +25,7 @@ const emailSchema = z.email();
 export default function SignUpScreen() {
     const { refreshSession } = useAuth();
     const router = useRouter();
+    const passwordRef = useRef<TextInput>(null);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -122,12 +124,14 @@ export default function SignUpScreen() {
                             value={email}
                             onChangeText={setEmail}
                             returnKeyType="next"
+                            onSubmitEditing={() => passwordRef.current?.focus()}
                             testID="email-input"
                         />
 
                         {/* Password */}
                         <Text style={[styles.label, { marginTop: spacing.md }]}>PASSWORD</Text>
                         <EthosTextInput
+                            ref={passwordRef}
                             placeholder="Enter a password"
                             isPassword
                             value={password}

@@ -7,7 +7,7 @@ import { OAuthButton } from '@/components/oauth-button';
 import { colors } from '@/constants/theme';
 import { styles } from './login.styles';
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -15,6 +15,7 @@ import {
     Pressable,
     ScrollView,
     Text,
+    TextInput,
     View,
 } from 'react-native';
 
@@ -22,6 +23,7 @@ export default function LoginScreen() {
     const { refreshSession } = useAuth();
     const router = useRouter();
 
+    const passwordRef = useRef<TextInput>(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -79,6 +81,7 @@ export default function LoginScreen() {
                             value={email}
                             onChangeText={setEmail}
                             returnKeyType="next"
+                            onSubmitEditing={() => passwordRef.current?.focus()}
                             testID="email-input"
                         />
 
@@ -90,6 +93,7 @@ export default function LoginScreen() {
                             </Text>
                         </View>
                         <EthosTextInput
+                            ref={passwordRef}
                             placeholder="Enter your password"
                             isPassword
                             value={password}

@@ -19,18 +19,19 @@ env:
       id: 'email-input'
 - inputText: ${output.TEST_SIGNUP_EMAIL}
 - pressKey: enter
-- tapOn:
-      id: 'password-input'
 - inputText: ${TEST_PASSWORD}
 - tapOn:
       id: 'submit-button'
+- tapOn:
+      text: 'Not Now'
+      optional: true
 - extendedWaitUntil:
       visible: 'Welcome!'
       timeout: 10000
 
-# Test: clear state (log out), then log in with the same credentials
-- launchApp:
-      clearState: true
+# Test: sign out, then log in with the same credentials
+- tapOn:
+      id: 'sign-out-button'
 - extendedWaitUntil:
       visible: 'WELCOME BACK.'
       timeout: 10000
@@ -38,9 +39,10 @@ env:
       id: 'email-input'
 - inputText: ${output.TEST_SIGNUP_EMAIL}
 - pressKey: enter
-- tapOn:
-      id: 'password-input'
 - inputText: ${TEST_PASSWORD}
 - tapOn:
       id: 'submit-button'
+- tapOn:
+      text: 'Not Now'
+      optional: true
 - assertVisible: 'Welcome!'
