@@ -1,37 +1,49 @@
+import { z } from 'zod';
 import { signUp } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
-import { EthosLogo } from '@/components/ethos-logo';
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import { AlertMessage } from '@/components/alert-message';
+import { AuthHeader } from '@/components/AuthHeader';
+import { EthosTextInput } from '@/components/text-input';
+import { OAuthButton } from '@/components/oauth-button';
+import { colors, spacing } from '@/constants/theme';
+import { styles } from './sign-up.styles';
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     ScrollView,
-    StyleSheet,
     Text,
     TextInput,
     View,
 } from 'react-native';
 
+const emailSchema = z.email();
+
 export default function SignUpScreen() {
     const { refreshSession } = useAuth();
     const router = useRouter();
+    const passwordRef = useRef<TextInput>(null);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showComingSoon, setShowComingSoon] = useState(false);
 
     async function handleSubmit() {
         if (!email.trim() || !password) {
             setError('Please enter your email and password.');
             return;
         }
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters.');
+        if (!emailSchema.safeParse(email.trim()).success) {
+            setError('Please enter a valid email address.');
+            return;
+        }
+        if (password.length < 8 || !/\d/.test(password)) {
+            setError('Password must be at least 8 characters and include a number.');
             return;
         }
 
@@ -52,24 +64,21 @@ export default function SignUpScreen() {
         <KeyboardAvoidingView
             style={styles.flex}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            testID="sign-up-screen"
         >
-            {/* ── Header bar ────────────────────────────── */}
-            <View style={styles.header}>
-                <EthosLogo size={36} />
-                <Pressable
-                    style={styles.loginButton}
-                    onPress={() => router.replace('/login' as any)}
-                    testID="header-login-button"
-                >
-                    <Text style={styles.loginButtonText}>LOGIN</Text>
-                </Pressable>
-            </View>
+            <AuthHeader
+                rightAction={{
+                    label: 'LOGIN',
+                    onPress: () => router.replace('/login' as any),
+                    testID: 'header-login-button',
+                }}
+            />
 
             <ScrollView
                 contentContainerStyle={styles.container}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* ── Card ──────────────────────────────────── */}
+                {/* ── Card ──────────────────────────────────────────── */}
                 <View style={styles.cardShadow}>
                     <View style={styles.card}>
                         <Text style={styles.heading}>CREATE ACCOUNT</Text>
@@ -77,37 +86,71 @@ export default function SignUpScreen() {
 
                         <View style={styles.divider} />
 
+                        {/* Social buttons */}
+                        <OAuthButton
+                            provider="google"
+                            testID="google-button"
+                            onPress={() => setShowComingSoon(true)}
+                        />
+                        <OAuthButton
+                            provider="apple"
+                            testID="apple-button"
+                            onPress={() => setShowComingSoon(true)}
+                            style={styles.oauthGap}
+                        />
+
+                        {showComingSoon ? (
+                            <View style={styles.alertWrapper}>
+                                <AlertMessage
+                                    message="Coming soon"
+                                    severity="info"
+                                    dismissible
+                                    onDismiss={() => setShowComingSoon(false)}
+                                />
+                            </View>
+                        ) : null}
+
+                        {/* OR USE EMAIL separator */}
+                        <View style={styles.separator} testID="social-separator">
+                            <View style={styles.separatorLine} />
+                            <Text style={styles.separatorText}>OR USE EMAIL</Text>
+                            <View style={styles.separatorLine} />
+                        </View>
+
                         {/* Email */}
                         <Text style={styles.label}>EMAIL ADDRESS</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="NAME@EMAIL.COM"
-                            placeholderTextColor={colors.inkSecondary}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            keyboardType="email-address"
-                            returnKeyType="next"
+                        <EthosTextInput
+                            placeholder="Enter your email address"
                             value={email}
                             onChangeText={setEmail}
+                            returnKeyType="next"
+                            onSubmitEditing={() => passwordRef.current?.focus()}
                             testID="email-input"
                         />
 
                         {/* Password */}
                         <Text style={[styles.label, { marginTop: spacing.md }]}>PASSWORD</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="••••••••••••"
-                            placeholderTextColor={colors.inkSecondary}
-                            secureTextEntry
-                            returnKeyType="done"
-                            onSubmitEditing={handleSubmit}
+                        <EthosTextInput
+                            ref={passwordRef}
+                            placeholder="Enter a password"
+                            isPassword
                             value={password}
                             onChangeText={setPassword}
+                            returnKeyType="done"
+                            onSubmitEditing={handleSubmit}
                             testID="password-input"
                         />
 
                         {/* Error */}
-                        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                        {error ? (
+                            <View style={styles.alertWrapper}>
+                                <AlertMessage
+                                    message={error}
+                                    severity="error"
+                                    onDismiss={() => setError(null)}
+                                />
+                            </View>
+                        ) : null}
 
                         {/* Create account button */}
                         <View style={styles.buttonShadow}>
@@ -123,7 +166,10 @@ export default function SignUpScreen() {
                                 {loading ? (
                                     <ActivityIndicator color={colors.white} />
                                 ) : (
-                                    <Text style={styles.buttonText}>CREATE ACCOUNT →</Text>
+                                    <View style={styles.buttonContent}>
+                                        <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
+                                        <Text style={styles.buttonIcon}>→</Text>
+                                    </View>
                                 )}
                             </Pressable>
                         </View>
@@ -143,150 +189,3 @@ export default function SignUpScreen() {
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    flex: {
-        flex: 1,
-        backgroundColor: colors.surface,
-    },
-
-    // Header
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.md,
-        borderBottomWidth: borderWidth.structural,
-        borderBottomColor: colors.ink,
-    },
-    loginButton: {
-        backgroundColor: colors.ink,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs + 2,
-    },
-    loginButtonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 13,
-        color: colors.white,
-        letterSpacing: 1,
-    },
-
-    // Content
-    container: {
-        flexGrow: 1,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.xl,
-    },
-
-    // Card
-    cardShadow: {
-        width: '100%',
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    card: {
-        width: '100%',
-        backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.lg,
-    },
-
-    // Heading
-    heading: {
-        fontFamily: typography.fonts.black,
-        fontSize: 28,
-        color: colors.ink,
-        marginBottom: spacing.xs,
-    },
-    subheading: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.inkSecondary,
-        letterSpacing: 1,
-        marginBottom: spacing.md,
-    },
-
-    // Divider
-    divider: {
-        height: borderWidth.structural,
-        backgroundColor: colors.ink,
-        marginVertical: spacing.md,
-    },
-
-    // Form fields
-    label: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.ink,
-        letterSpacing: 1,
-        marginBottom: spacing.xs,
-    },
-    input: {
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 2,
-        fontFamily: typography.fonts.regular,
-        fontSize: 14,
-        color: colors.ink,
-        backgroundColor: colors.surfaceRaised,
-    },
-
-    // Error
-    errorText: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 13,
-        color: colors.red,
-        marginTop: spacing.sm,
-        marginBottom: spacing.sm,
-    },
-
-    // Button
-    buttonShadow: {
-        marginTop: spacing.lg,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    button: {
-        backgroundColor: colors.blue,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonPressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
-    },
-    buttonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 16,
-        color: colors.white,
-        letterSpacing: 2,
-    },
-
-    // Footer
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-    },
-    footerText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.ink,
-        letterSpacing: 1,
-    },
-    footerLink: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.blue,
-        letterSpacing: 1,
-    },
-});

@@ -21,6 +21,10 @@ export const colors = {
 
 const shadow = (size: 4 | 6 | 8) =>
     Platform.select({
+        web: {
+            // react-native-web: use CSS box-shadow for hard offset effect
+            boxShadow: `${size}px ${size}px 0px #000000`,
+        } as object,
         ios: {
             shadowColor: '#000000',
             shadowOffset: { width: size, height: size },

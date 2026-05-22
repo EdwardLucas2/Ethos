@@ -1,16 +1,19 @@
 import { signIn } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
-import { EthosLogo } from '@/components/ethos-logo';
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
-import { Link } from 'expo-router';
-import { useState } from 'react';
+import { AlertMessage } from '@/components/alert-message';
+import { AuthHeader } from '@/components/AuthHeader';
+import { EthosTextInput } from '@/components/text-input';
+import { OAuthButton } from '@/components/oauth-button';
+import { colors } from '@/constants/theme';
+import { styles } from './login.styles';
+import { Link, useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     ScrollView,
-    StyleSheet,
     Text,
     TextInput,
     View,
@@ -18,7 +21,9 @@ import {
 
 export default function LoginScreen() {
     const { refreshSession } = useAuth();
+    const router = useRouter();
 
+    const passwordRef = useRef<TextInput>(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -47,56 +52,67 @@ export default function LoginScreen() {
         <KeyboardAvoidingView
             style={styles.flex}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            testID="login-screen"
         >
+            <AuthHeader
+                rightAction={{
+                    label: 'SIGN UP',
+                    onPress: () => router.replace('/sign-up' as any),
+                    testID: 'header-signup-button',
+                }}
+            />
+
             <ScrollView
                 contentContainerStyle={styles.container}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* ── Logo ─────────────────────────────────── */}
-                <View style={styles.logoWrapper}>
-                    <EthosLogo size={72} />
-                </View>
-
-                {/* ── Heading ───────────────────────────────── */}
-                <Text style={styles.heading}>WELCOME BACK.</Text>
-
-                {/* ── Card ──────────────────────────────────── */}
+                {/* ── Card ──────────────────────────────────────────── */}
                 <View style={styles.cardShadow}>
-                    <View style={styles.card}>
+                    <View style={styles.card} testID="login-card">
+                        <Text style={styles.heading}>WELCOME BACK.</Text>
+                        <Text style={styles.subheading}>ENTER YOUR CREDENTIALS TO CONTINUE.</Text>
+
+                        <View style={styles.divider} />
+
                         {/* Email */}
                         <Text style={styles.label}>EMAIL ADDRESS</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your email"
-                            placeholderTextColor={colors.inkSecondary}
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            keyboardType="email-address"
-                            returnKeyType="next"
+                        <EthosTextInput
+                            placeholder="Enter your email address"
                             value={email}
                             onChangeText={setEmail}
+                            returnKeyType="next"
+                            onSubmitEditing={() => passwordRef.current?.focus()}
                             testID="email-input"
                         />
 
-                        {/* Password */}
+                        {/* Password header row */}
                         <View style={styles.passwordHeader}>
                             <Text style={styles.label}>PASSWORD</Text>
-                            <Text style={styles.forgot}>FORGOT PASSWORD</Text>
+                            <Text style={styles.forgot} testID="forgot-button">
+                                FORGOT?
+                            </Text>
                         </View>
-                        <TextInput
-                            style={styles.input}
+                        <EthosTextInput
+                            ref={passwordRef}
                             placeholder="Enter your password"
-                            placeholderTextColor={colors.inkSecondary}
-                            secureTextEntry
-                            returnKeyType="done"
-                            onSubmitEditing={handleSubmit}
+                            isPassword
                             value={password}
                             onChangeText={setPassword}
+                            returnKeyType="done"
+                            onSubmitEditing={handleSubmit}
                             testID="password-input"
                         />
 
                         {/* Error */}
-                        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                        {error ? (
+                            <View style={styles.alertWrapper}>
+                                <AlertMessage
+                                    message={error}
+                                    severity="error"
+                                    onDismiss={() => setError(null)}
+                                />
+                            </View>
+                        ) : null}
 
                         {/* Continue button */}
                         <View style={styles.buttonShadow}>
@@ -112,157 +128,59 @@ export default function LoginScreen() {
                                 {loading ? (
                                     <ActivityIndicator color={colors.white} />
                                 ) : (
-                                    <Text style={styles.buttonText}>LOGIN</Text>
+                                    <View style={styles.buttonContent}>
+                                        <Text style={styles.buttonText}>CONTINUE</Text>
+                                        <Text style={styles.buttonIcon}>→</Text>
+                                    </View>
                                 )}
                             </Pressable>
                         </View>
-                    </View>
-                </View>
 
-                {/* ── Footer ────────────────────────────────── */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
-                    <Link href={'/sign-up' as any} testID="signup-link">
-                        <Text style={styles.footerLink}>SIGN UP</Text>
-                    </Link>
+                        {/* OTP button */}
+                        <View style={styles.otpButtonShadow}>
+                            <Pressable
+                                style={styles.otpButton}
+                                onPress={() => {}}
+                                disabled
+                                testID="otp-button"
+                            >
+                                <Text style={styles.otpButtonText}>SEND EMAIL OTP</Text>
+                            </Pressable>
+                        </View>
+
+                        {/* OR LOGIN WITH separator */}
+                        <View style={styles.separator} testID="oauth-separator">
+                            <View style={styles.separatorLine} />
+                            <Text style={styles.separatorText}>OR LOGIN WITH</Text>
+                            <View style={styles.separatorLine} />
+                        </View>
+
+                        {/* OAuth row — side by side */}
+                        <View style={styles.oauthRow}>
+                            <OAuthButton
+                                provider="apple"
+                                testID="apple-button"
+                                style={styles.oauthFlex}
+                            />
+                            <OAuthButton
+                                provider="google"
+                                testID="google-button"
+                                style={styles.oauthFlex}
+                            />
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        {/* Footer link */}
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
+                            <Link href={'/sign-up' as any} testID="signup-link">
+                                <Text style={styles.footerLink}>SIGN UP</Text>
+                            </Link>
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    flex: {
-        flex: 1,
-        backgroundColor: colors.surface,
-    },
-    container: {
-        flexGrow: 1,
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xxl,
-        paddingBottom: spacing.xl,
-    },
-
-    // Logo
-    logoWrapper: {
-        marginBottom: spacing.lg,
-    },
-
-    // Heading
-    heading: {
-        fontFamily: typography.fonts.black,
-        fontSize: 36,
-        color: colors.ink,
-        textAlign: 'center',
-        marginBottom: spacing.sm,
-    },
-    subheading: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 16,
-        color: colors.inkSecondary,
-        textAlign: 'center',
-        marginBottom: spacing.xl,
-        paddingHorizontal: spacing.md,
-    },
-
-    // Card
-    cardShadow: {
-        width: '100%',
-        // Extra margin to give the shadow room
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    card: {
-        width: '100%',
-        backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.lg,
-    },
-
-    // Form fields
-    label: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.ink,
-        letterSpacing: 1,
-        marginBottom: spacing.xs,
-    },
-    passwordHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: spacing.md,
-    },
-    forgot: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.blue,
-        letterSpacing: 1,
-    },
-    input: {
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 2,
-        fontFamily: typography.fonts.regular,
-        fontSize: 14,
-        color: colors.ink,
-        backgroundColor: colors.surfaceRaised,
-        marginBottom: spacing.xs,
-    },
-
-    // Error
-    errorText: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 13,
-        color: colors.red,
-        marginTop: spacing.sm,
-        marginBottom: spacing.sm,
-    },
-
-    // Button
-    buttonShadow: {
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    button: {
-        backgroundColor: colors.blue,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonPressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
-    },
-    buttonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 16,
-        color: colors.white,
-        letterSpacing: 2,
-    },
-
-    // Footer
-    footer: {
-        flexDirection: 'row',
-        marginTop: spacing.xl,
-        alignItems: 'center',
-    },
-    footerText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.ink,
-        letterSpacing: 1,
-    },
-    footerLink: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 12,
-        color: colors.blue,
-        letterSpacing: 1,
-    },
-});

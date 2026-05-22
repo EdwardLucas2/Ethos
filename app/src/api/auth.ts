@@ -20,18 +20,23 @@ function deriveDisplayName(email: string): string {
     return email.split('@')[0] ?? email;
 }
 
-async function authFetch(path: string, body: unknown): Promise<{ status: string }> {
+type AuthResponse = {
+    status: string;
+    formFields?: Array<{ id: string; error: string }>;
+};
+
+async function authFetch(path: string, body: unknown): Promise<AuthResponse> {
     const response = await fetch(`${AUTH_URL}${path}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
     });
 
-    if (!response.ok && response.status !== 200) {
+    if (!response.ok) {
         throw new AuthError('Request failed', 'UNKNOWN');
     }
 
-    return response.json() as Promise<{ status: string }>;
+    return response.json() as Promise<AuthResponse>;
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -61,11 +66,16 @@ export async function signUp(email: string, password: string): Promise<void> {
         ],
     });
 
-    if (data.status === 'EMAIL_ALREADY_EXISTS_ERROR') {
-        throw new AuthError('An account with this email already exists', 'EMAIL_EXISTS');
+    if (data.status === 'FIELD_ERROR') {
+        const emailError = data.formFields?.find((f) => f.id === 'email')?.error;
+        if (emailError?.toLowerCase().includes('already exists')) {
+            throw new AuthError('An account with this email already exists', 'EMAIL_EXISTS');
+        }
+        const firstError = data.formFields?.[0]?.error ?? 'Sign up failed. Please try again.';
+        throw new AuthError(firstError, 'UNKNOWN');
     }
     if (data.status !== 'OK') {
-        throw new AuthError('Sign up failed', 'UNKNOWN');
+        throw new AuthError('Sign up failed. Please try again.', 'UNKNOWN');
     }
 
     // Token is now in SecureStore — read it to call the backend
