@@ -19,7 +19,7 @@ jobs:
 
             - name: Install dbmate
               run: |
-                  curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+                  curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.33.0/dbmate-linux-amd64
                   chmod +x /usr/local/bin/dbmate
 
             - name: Format check
@@ -106,6 +106,20 @@ jobs:
             - name: Test
               working-directory: app
               run: npx jest --coverage --coverageDirectory=coverage --coverageReporters=lcov --coverageReporters=text-summary
+
+            - name: Install Playwright browsers
+              working-directory: app
+              run: npx playwright install --with-deps chromium
+
+            - name: Build Storybook
+              working-directory: app
+              run: npm run build-storybook -- --quiet
+
+            - name: Storybook tests
+              working-directory: app
+              run: |
+                  npx http-server storybook-static -p 6006 --silent &
+                  npx wait-on tcp:6006 && npm run test-storybook
 
             - name: Upload coverage to Codacy
               uses: codacy/codacy-coverage-reporter-action@v1.3.0

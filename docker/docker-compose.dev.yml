@@ -27,7 +27,7 @@ services:
         ports:
             - "3567:3567"
         environment:
-            POSTGRESQL_CONNECTION_URI: ${DBMATE_URL}
+            POSTGRESQL_CONNECTION_URI: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/ethos
         healthcheck:
             test: >
                 bash -c 'exec 3<>/dev/tcp/127.0.0.1/3567 &&

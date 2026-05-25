@@ -1,0 +1,31 @@
+appId: com.ethos.app
+env:
+    TEST_EMAIL: test@ethos.app
+    TEST_PASSWORD: TestPassword123!
+---
+# Happy path: create a new account
+- launchApp:
+      clearState: true
+- runFlow: subflows/_signup-user.yaml
+
+# Error path: same email again → email already exists error
+- tapOn:
+      id: 'sign-out-button'
+- extendedWaitUntil:
+      visible: 'WELCOME BACK.'
+      timeout: 10000
+- tapOn:
+      id: 'signup-link'
+- extendedWaitUntil:
+      visible: 'CREATE ACCOUNT'
+      timeout: 10000
+- tapOn:
+      id: 'email-input'
+- inputText: ${TEST_EMAIL}
+- pressKey: enter
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+      id: 'submit-button'
+- extendedWaitUntil:
+      visible: 'AN ACCOUNT WITH THIS EMAIL ALREADY EXISTS'
+      timeout: 10000

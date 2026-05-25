@@ -7,6 +7,7 @@ Read these docs when working on anything that touches their domain:
 - [docs/API.md](docs/API.md) — all endpoints, request/response shapes, error codes
 - [docs/BACKEND.md](docs/BACKEND.md) — service/store architecture, transaction strategy, scheduler
 - [docs/BACKEND_STYLE.md](docs/BACKEND_STYLE.md) — naming, nulls, JDBI, DTOs, logging, comments, tests, OpenAPI conventions
+- [docs/FRONTEND_STYLE.md](docs/FRONTEND_STYLE.md) — file naming, exports, component structure, styling, state management, TanStack Query patterns, TypeScript rules, tests
 - [docs/DATAMODEL.md](docs/DATAMODEL.md) — database schema, table definitions, conventions
 - [docs/ROUTING.md](docs/ROUTING.md) — Expo Router file structure, route params, navigation flows
 - [docs/COMPONENTS.md](docs/COMPONENTS.md) — shared UI component specifications
@@ -14,6 +15,7 @@ Read these docs when working on anything that touches their domain:
 - [docs/TECHSTACK.md](docs/TECHSTACK.md) — full tech stack, env vars, infrastructure
 - [product/PRD.md](product/PRD.md) — full product requirements
 - [product/DESIGN.md](product/DESIGN.md) — design system
+- [product/TONE.md](product/TONE.md) — tone of voice, copy principles, context-specific guidance
 
 # Project Structure
 
@@ -110,8 +112,9 @@ Auth tokens must be stored with `expo-secure-store` — never `AsyncStorage`.
 
 ```bash
 mvn verify                        # Backend (unit + integration tests)
-npx jest                          # Frontend
-maestro test /app/.maestro/       # E2E
+cd app && npm run typecheck       # Frontend — fast type/compilation check, no simulator needed
+cd app && npm test                # Frontend — RNTL unit tests
+cd app && npm run test:e2e        # Frontend — Maestro E2E (requires running simulator)
 ```
 
 # Local Development
@@ -122,13 +125,43 @@ cd backend && ./run-dev.sh                               # Backend on :8080
 cd app && npx expo start                                 # Expo dev server
 ```
 
+# Frontend Visual Verification
+
+Keep the iOS Simulator running throughout a development session. Agents can verify the UI without human intervention using two tools:
+
+**1. Quick screenshot**
+
+```bash
+xcrun simctl io booted screenshot /tmp/screen.png
+```
+
+Read the image to spot-check the current state after a change.
+
+**2. Maestro E2E flows**
+
+Reset all auth and app data before each run:
+
+```bash
+./scripts/reset-test-db.sh
+```
+
+Run flows:
+
+```bash
+cd app && npm run test:e2e              # all flows
+maestro test app/.maestro/login.yaml   # single flow
+```
+
+Test credentials (`TEST_EMAIL` / `TEST_PASSWORD`) are defined inline in each top-level flow's `env:` block — no `.env` file needed. Sub-flows in `app/.maestro/subflows/` are reusable building blocks; use `runFlow: subflows/_signup-user.yaml` or `runFlow: subflows/_login-user.yaml` as a one-line setup step in any flow that needs an authenticated user.
+
+Flows live in `app/.maestro/` — Dev flows may add `takeScreenshot: <name>` commands at key steps so agents can read the captured images and verify layout. Do not add `takeScreenshot` to flows intended for CI.
+
 # Linting & Formatting
 
 ```bash
 npm run lint          # ESLint (frontend)
 npm run format        # Prettier fix (frontend)
+npm test              # Frontend unit tests (RNTL)
 mvn spotless:apply    # Java format fix (backend)
 mvn spotless:check    # Java format verify (backend)
 ```
-
-Pre-commit hooks (Lefthook) run lint and format checks automatically on staged files.

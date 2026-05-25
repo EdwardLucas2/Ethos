@@ -23,7 +23,7 @@ export default function ParallaxScrollView({
     headerImage,
     headerBackgroundColor,
 }: Props) {
-    const backgroundColor = useThemeColor({}, 'background');
+    const backgroundColor = useThemeColor({}, 'surface');
     const colorScheme = useColorScheme();
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useScrollOffset(scrollRef);

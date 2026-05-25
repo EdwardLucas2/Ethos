@@ -20,7 +20,7 @@
 ### Integration Tests — `@Tag("integration")`
 
 - **Scope:** Handler → service → store → real PostgreSQL (Testcontainers). Schema applied via dbmate before each class.
-- **What to test:** Full logical flows end-to-end. Assert on resulting DB state. Run data invariant checks at the end of each flow (see below).
+- **What to test:** Full logical flows end-to-end. Assert on resulting DB state and data invariants (see below).
 - **Run:** `mvn test -Dgroups=integration`
 
 ### E2E Tests — `@Tag("e2e")`
@@ -52,8 +52,36 @@ mvn verify
 
 ## Frontend (React Native/Expo)
 
-- **Tool:** Jest.
-- **Run:** `npx jest` (from `app/`)
+### Component Tests
+
+- **Tool:** Jest + RNTL. Files co-located with the component (`ContractCard.test.tsx` next to `ContractCard.tsx`).
+- **Scope:** Non-trivial logic only — conditional rendering, computed values, interaction sequences. Skip pure layout wrappers.
+- **Mock Orval hooks** (`jest.mock('@/src/api', ...)`), never `fetch`.
+- **Run:** `npm test` (from `app/`)
+
+### E2E Tests
+
+- **Tool:** Maestro. Flows live in `app/.maestro/`, one `.yaml` file per journey.
+- **Scope:** Critical user journeys that cross multiple screens.
+
+```
+app/.maestro/
+  sign-up.yaml            # create account (happy path + duplicate email error)
+  login.yaml              # sign in and reach dashboard
+  contract-create.yaml    # create contract, invite participant, start
+  evidence-submit.yaml    # upload evidence on an active cycle
+  evidence-review.yaml    # reviewer approves/rejects evidence
+  settlement.yaml         # cycle settles, loser pays up
+  subflows/
+    _signup-user.yaml     # reusable: navigate sign-up form, land on home
+    _login-user.yaml      # reusable: fill login form, land on home
+```
+
+- Each top-level flow defines `TEST_EMAIL` and `TEST_PASSWORD` in its `env:` block — no `.env` file.
+- Sub-flows inherit the calling flow's `env:` — use `runFlow: subflows/_signup-user.yaml` or `runFlow: subflows/_login-user.yaml` as a one-line setup step in any flow that needs an authenticated user.
+- Each flow must be fully independent — `launchApp: clearState: true` at the start of every top-level file.
+- Reset all auth and app data before a run: `./scripts/reset-test-db.sh` (truncates every table in the shared PostgreSQL instance, including SuperTokens tables, except `schema_migrations`).
+- **Run:** `maestro test app/.maestro/` (from monorepo root, with a supported simulator/emulator running)
 
 ---
 
