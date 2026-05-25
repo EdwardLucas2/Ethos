@@ -80,6 +80,14 @@ export const styles = StyleSheet.create({
         letterSpacing: 1,
         marginBottom: spacing.xs,
     },
+    labelSpaced: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 12,
+        color: colors.ink,
+        letterSpacing: 1,
+        marginBottom: spacing.xs,
+        marginTop: spacing.md,
+    },
 
     // Alert wrapper
     alertWrapper: {

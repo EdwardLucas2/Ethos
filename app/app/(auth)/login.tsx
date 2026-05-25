@@ -1,7 +1,7 @@
 import { signIn } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
-import { AuthHeader } from '@/components/AuthHeader';
+import { AuthHeader } from '@/components/auth-header';
 import { EthosTextInput } from '@/components/text-input';
 import { OAuthButton } from '@/components/oauth-button';
 import { colors } from '@/constants/theme';
@@ -57,7 +57,7 @@ export default function LoginScreen() {
             <AuthHeader
                 rightAction={{
                     label: 'SIGN UP',
-                    onPress: () => router.replace('/sign-up' as any),
+                    onPress: () => router.replace('/sign-up'),
                     testID: 'header-signup-button',
                 }}
             />
@@ -81,6 +81,7 @@ export default function LoginScreen() {
                             value={email}
                             onChangeText={setEmail}
                             returnKeyType="next"
+                            keyboardType="email-address"
                             onSubmitEditing={() => passwordRef.current?.focus()}
                             testID="email-input"
                         />
@@ -174,7 +175,7 @@ export default function LoginScreen() {
                         {/* Footer link */}
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
-                            <Link href={'/sign-up' as any} testID="signup-link">
+                            <Link href="/sign-up" testID="signup-link">
                                 <Text style={styles.footerLink}>SIGN UP</Text>
                             </Link>
                         </View>

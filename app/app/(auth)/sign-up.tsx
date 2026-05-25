@@ -2,10 +2,10 @@ import { z } from 'zod';
 import { signUp } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
-import { AuthHeader } from '@/components/AuthHeader';
+import { AuthHeader } from '@/components/auth-header';
 import { EthosTextInput } from '@/components/text-input';
 import { OAuthButton } from '@/components/oauth-button';
-import { colors, spacing } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import { styles } from './sign-up.styles';
 import { Link, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -69,7 +69,7 @@ export default function SignUpScreen() {
             <AuthHeader
                 rightAction={{
                     label: 'LOGIN',
-                    onPress: () => router.replace('/login' as any),
+                    onPress: () => router.replace('/login'),
                     testID: 'header-login-button',
                 }}
             />
@@ -124,12 +124,13 @@ export default function SignUpScreen() {
                             value={email}
                             onChangeText={setEmail}
                             returnKeyType="next"
+                            keyboardType="email-address"
                             onSubmitEditing={() => passwordRef.current?.focus()}
                             testID="email-input"
                         />
 
                         {/* Password */}
-                        <Text style={[styles.label, { marginTop: spacing.md }]}>PASSWORD</Text>
+                        <Text style={styles.labelSpaced}>PASSWORD</Text>
                         <EthosTextInput
                             ref={passwordRef}
                             placeholder="Enter a password"
@@ -179,7 +180,7 @@ export default function SignUpScreen() {
                         {/* Footer link */}
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>ALREADY HAVE AN ACCOUNT? </Text>
-                            <Link href={'/login' as any} testID="login-link">
+                            <Link href="/login" testID="login-link">
                                 <Text style={styles.footerLink}>LOGIN</Text>
                             </Link>
                         </View>

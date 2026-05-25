@@ -7,7 +7,7 @@ Conventions for all React Native / Expo code. Follow these rules in every featur
 ## File & Directory Naming
 
 - Screen files under `app/` — **kebab-case** (Expo Router derives the URL from the filename)
-- Component files under `app/components/` — **PascalCase** matching the export name
+- Component files under `app/components/` — **kebab-case** (e.g. `alert-message.tsx`); the export name remains PascalCase (e.g. `AlertMessage`)
 - Hook files — **camelCase** with a `use` prefix
 - Use `.tsx` when the file contains JSX, `.ts` otherwise
 

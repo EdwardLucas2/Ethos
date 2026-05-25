@@ -17,7 +17,8 @@ export class AuthError extends Error {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function deriveDisplayName(email: string): string {
-    return email.split('@')[0] ?? email;
+    // String.split always returns at least one element
+    return email.split('@')[0]!;
 }
 
 type AuthResponse = {
@@ -39,6 +40,28 @@ async function authFetch(path: string, body: unknown): Promise<AuthResponse> {
     return response.json() as Promise<AuthResponse>;
 }
 
+// Idempotent: POSTs to /users; treats 409 (row already exists) as success.
+// Called after both signup and signin so a signup that crashed between the
+// SuperTokens write and the /users write is recovered on the user's next login.
+async function ensureUserProfile(email: string): Promise<void> {
+    const token = await SuperTokens.getAccessToken();
+    if (!token) {
+        throw new AuthError('Session not established', 'UNKNOWN');
+    }
+
+    const res = await fetch(`${API_URL}/users`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ displayName: deriveDisplayName(email) }),
+    });
+
+    if (res.ok || res.status === 409) return;
+    throw new AuthError('Failed to create user profile', 'UNKNOWN');
+}
+
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 export async function signIn(email: string, password: string): Promise<void> {
@@ -56,6 +79,7 @@ export async function signIn(email: string, password: string): Promise<void> {
         throw new AuthError('Sign in failed', 'UNKNOWN');
     }
     // SuperTokens SDK has stored st-access-token from the response headers
+    await ensureUserProfile(email);
 }
 
 export async function signUp(email: string, password: string): Promise<void> {
@@ -78,22 +102,5 @@ export async function signUp(email: string, password: string): Promise<void> {
         throw new AuthError('Sign up failed. Please try again.', 'UNKNOWN');
     }
 
-    // Token is now in SecureStore — read it to call the backend
-    const token = await SuperTokens.getAccessToken();
-    if (!token) {
-        throw new AuthError('Session not established after signup', 'UNKNOWN');
-    }
-
-    const usersRes = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ displayName: deriveDisplayName(email) }),
-    });
-
-    if (!usersRes.ok) {
-        throw new AuthError('Failed to create user profile', 'UNKNOWN');
-    }
+    await ensureUserProfile(email);
 }

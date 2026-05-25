@@ -25,19 +25,19 @@ function RootRedirect() {
     const segments = useSegments();
     const router = useRouter();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const inAuthGroup = (segments[0] as any) === '(auth)';
+    const inAuthGroup = segments[0] === '(auth)';
 
     useEffect(() => {
         if (isLoading) return;
 
         if (!session && !inAuthGroup) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            router.replace('/login' as any);
+            router.replace('/login');
         } else if (session && inAuthGroup) {
             router.replace('/(tabs)');
         }
-    }, [session, isLoading, inAuthGroup, router]);
+        // useRouter() returns a stable instance; depending on it would re-run on every render
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session, isLoading, inAuthGroup]);
 
     return null;
 }

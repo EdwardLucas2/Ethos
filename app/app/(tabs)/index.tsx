@@ -3,7 +3,7 @@ import { Platform, StyleSheet } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { SignOutButton } from '@/components/SignOutButton';
+import { SignOutButton } from '@/components/sign-out-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';

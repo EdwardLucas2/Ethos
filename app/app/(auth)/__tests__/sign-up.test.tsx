@@ -96,11 +96,28 @@ describe('SignUpScreen', () => {
         render(<SignUpScreen />);
 
         fireEvent.changeText(screen.getByTestId('email-input'), 'test@example.com');
-        fireEvent.changeText(screen.getByTestId('password-input'), 'short');
+        fireEvent.changeText(screen.getByTestId('password-input'), 'short1');
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS.')).toBeTruthy();
+            expect(
+                screen.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS AND INCLUDE A NUMBER.')
+            ).toBeTruthy();
+        });
+        expect(signUp).not.toHaveBeenCalled();
+    });
+
+    it('shows a validation error when password has no digit', async () => {
+        render(<SignUpScreen />);
+
+        fireEvent.changeText(screen.getByTestId('email-input'), 'test@example.com');
+        fireEvent.changeText(screen.getByTestId('password-input'), 'longpassword');
+        fireEvent.press(screen.getByTestId('submit-button'));
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS AND INCLUDE A NUMBER.')
+            ).toBeTruthy();
         });
         expect(signUp).not.toHaveBeenCalled();
     });

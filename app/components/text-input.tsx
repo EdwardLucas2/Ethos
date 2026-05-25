@@ -1,6 +1,6 @@
 import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import { forwardRef } from 'react';
-import { TextInput as RNTextInput, StyleSheet } from 'react-native';
+import { KeyboardTypeOptions, TextInput as RNTextInput, StyleSheet } from 'react-native';
 
 type Props = {
     placeholder: string;
@@ -9,6 +9,7 @@ type Props = {
     onChangeText: (text: string) => void;
     onSubmitEditing?: () => void;
     returnKeyType?: 'next' | 'done';
+    keyboardType?: KeyboardTypeOptions;
     testID?: string;
 };
 
@@ -20,6 +21,7 @@ export const EthosTextInput = forwardRef<RNTextInput, Props>(function EthosTextI
         onChangeText,
         onSubmitEditing,
         returnKeyType,
+        keyboardType = 'default',
         testID,
     },
     ref
@@ -32,8 +34,8 @@ export const EthosTextInput = forwardRef<RNTextInput, Props>(function EthosTextI
             placeholderTextColor={colors.inkSecondary}
             autoCapitalize="none"
             autoCorrect={false}
-            keyboardType={isPassword ? 'default' : 'email-address'}
-            secureTextEntry={isPassword && !__DEV__}
+            keyboardType={keyboardType}
+            secureTextEntry={isPassword}
             returnKeyType={returnKeyType}
             onSubmitEditing={onSubmitEditing}
             value={value}
