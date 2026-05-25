@@ -139,11 +139,10 @@ Read the image to spot-check the current state after a change.
 
 **2. Maestro E2E flows**
 
-Seed test credentials once:
+Reset all auth and app data before each run:
 
 ```bash
-cp app/.maestro/.env.example app/.maestro/.env  # fill in credentials
-./scripts/seed-test-user.sh
+./scripts/reset-test-db.sh
 ```
 
 Run flows:
@@ -152,6 +151,8 @@ Run flows:
 cd app && npm run test:e2e              # all flows
 maestro test app/.maestro/login.yaml   # single flow
 ```
+
+Test credentials (`TEST_EMAIL` / `TEST_PASSWORD`) are defined inline in each top-level flow's `env:` block — no `.env` file needed. Sub-flows in `app/.maestro/subflows/` are reusable building blocks; use `runFlow: subflows/_signup-user.yaml` or `runFlow: subflows/_login-user.yaml` as a one-line setup step in any flow that needs an authenticated user.
 
 Flows live in `app/.maestro/` — Dev flows may add `takeScreenshot: <name>` commands at key steps so agents can read the captured images and verify layout. Do not add `takeScreenshot` to flows intended for CI.
 

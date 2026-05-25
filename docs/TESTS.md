@@ -66,15 +66,21 @@ mvn verify
 
 ```
 app/.maestro/
+  sign-up.yaml            # create account (happy path + duplicate email error)
   login.yaml              # sign in and reach dashboard
   contract-create.yaml    # create contract, invite participant, start
   evidence-submit.yaml    # upload evidence on an active cycle
   evidence-review.yaml    # reviewer approves/rejects evidence
   settlement.yaml         # cycle settles, loser pays up
+  subflows/
+    _signup-user.yaml     # reusable: navigate sign-up form, land on home
+    _login-user.yaml      # reusable: fill login form, land on home
 ```
 
-- Each flow must be fully independent — `launchApp: clearState: true` at the start of every file.
-- Assert on visible text and labels, not element IDs.
+- Each top-level flow defines `TEST_EMAIL` and `TEST_PASSWORD` in its `env:` block — no `.env` file.
+- Sub-flows inherit the calling flow's `env:` — use `runFlow: subflows/_signup-user.yaml` or `runFlow: subflows/_login-user.yaml` as a one-line setup step in any flow that needs an authenticated user.
+- Each flow must be fully independent — `launchApp: clearState: true` at the start of every top-level file.
+- Reset all auth and app data before a run: `./scripts/reset-test-db.sh` (truncates every table in the shared PostgreSQL instance, including SuperTokens tables, except `schema_migrations`).
 - **Run:** `maestro test app/.maestro/` (from monorepo root, with a supported simulator/emulator running)
 
 ---
