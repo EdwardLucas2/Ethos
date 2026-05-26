@@ -1,27 +1,26 @@
 ---
 # Languages not used in this project — disable to skip their tools
 languages:
-  dart:
-    enabled: false
-  go:
-    enabled: false
-  python:
-    enabled: false
+    dart:
+        enabled: false
+    go:
+        enabled: false
+    python:
+        enabled: false
 
 engines:
-  # Run Biome and ESLint from app/ so they find app/package.json
-  # and app/eslint.config.mjs, avoiding false "dependency not found" positives
-  biome:
-    base_sub_dir: "app"
-  eslint-8:
-    base_sub_dir: "app"
-  eslint-9:
-    base_sub_dir: "app"
+    # Run Biome and ESLint from app/ so they find app/package.json
+    # and app/eslint.config.mjs, avoiding false "dependency not found" positives
+    biome:
+        base_sub_dir: "app"
+    eslint-8:
+        base_sub_dir: "app"
+    eslint-9:
+        base_sub_dir: "app"
 
 exclude_paths:
-  - "target/**"                                    # Maven build output
-  - "node_modules/**"                              # Node dependencies
-  - "backend/src/main/resources/META-INF/**"       # Java metadata
-  - "product/**"                                   # Product docs, not code
-  - "app/src/api/**"                               # Orval-generated API client
-  - "db/migrations/**"                             # Immutable SQL migrations
+    - "target/**"
+    - "node_modules/**"
+    - "**/generated/**"
+    - "backend/src/main/resources/META-INF/**"
+    - "product/**"
