@@ -3,7 +3,7 @@
 # Outputs "already-running", "started:<pid>", or "error:<message>" (on stderr + exit 1).
 set -e
 
-APP_DIR="$(dirname "$0")/../../../app"
+APP_DIR="$(dirname "$0")/../../../../app"
 
 if curl -sf http://localhost:6006 > /dev/null 2>&1; then
     echo "already-running"

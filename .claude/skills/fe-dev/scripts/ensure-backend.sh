@@ -2,7 +2,7 @@
 # Ensures the backend API is running on port 8080.
 # Outputs "already-running", "started:<pid>", or "error:<message>" (on stderr + exit 1).
 
-MONOREPO_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+MONOREPO_DIR="$(cd "$(dirname "$0")/../../../.." && pwd)"
 BACKEND_DIR="$MONOREPO_DIR/backend"
 
 # TCP check — avoids curl -sf failing on 4xx responses from Javalin

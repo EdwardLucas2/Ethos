@@ -11,7 +11,8 @@ if [ -z "$PR" ]; then
     exit 1
 fi
 
-source .env.local
+# shellcheck source=/dev/null
+[ -f .env.local ] && source .env.local || true
 
 if [ -z "${CODACY_API_TOKEN:-}" ]; then
     echo "Error: CODACY_API_TOKEN not set. Add it to .env.local or export it." >&2
