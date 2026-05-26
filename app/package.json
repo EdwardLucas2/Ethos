@@ -14,7 +14,7 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "typecheck": "tsc --noEmit",
-        "test:e2e": "for f in .maestro/*.yaml; do ../scripts/reset-test-db.sh && maestro test \"$f\" || exit 1; done",
+        "test:e2e": "bash ../scripts/run-e2e.sh",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
         "test-storybook": "test-storybook --url http://localhost:6006"
