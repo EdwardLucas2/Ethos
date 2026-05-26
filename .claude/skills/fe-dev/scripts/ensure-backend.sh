@@ -2,7 +2,7 @@
 # Ensures the backend API is running on port 8080.
 # Outputs "already-running", "started:<pid>", or "error:<message>" (on stderr + exit 1).
 
-MONOREPO_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+MONOREPO_DIR="$(cd "$(dirname "$0")/../../../.." && pwd)"
 BACKEND_DIR="$MONOREPO_DIR/backend"
 
 # TCP check — avoids curl -sf failing on 4xx responses from Javalin
@@ -13,7 +13,7 @@ backend_up() {
 if backend_up; then
     echo "already-running"
 else
-    cd "$BACKEND_DIR"
+    cd "$BACKEND_DIR" || { echo "error:Cannot cd to $BACKEND_DIR" >&2; exit 1; }
     ./run-dev.sh --docker > /tmp/backend-fe-dev.log 2>&1 &
     PID=$!
     TRIES=0

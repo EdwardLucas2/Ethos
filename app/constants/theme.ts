@@ -79,3 +79,66 @@ export const typography = {
         black: 'PublicSans_900Black',
     },
 } as const;
+
+// ─── Text styles ─────────────────────────────────────────────────────────────
+// Spread into StyleSheet.create() entries: { ...textStyles.hero, color: colors.ink }
+// All-caps roles use textTransform: 'uppercase' — never write uppercase strings in JSX.
+// letterSpacing is intentionally omitted; see product/DESIGN.md for guidance.
+
+export const textStyles = {
+    // Page stamps — Black italic. "WELCOME BACK.", "PAY UP", "BUILD THE LOBBY"
+    hero: {
+        fontFamily: typography.fonts.black,
+        fontSize: 40,
+        fontStyle: 'italic' as const,
+        textTransform: 'uppercase' as const,
+    },
+    // Section identity headers — italic. "ACTIVE ARENA", "YOUR COMMITMENT"
+    title: {
+        fontFamily: typography.fonts.extraBold,
+        fontSize: 24,
+        fontStyle: 'italic' as const,
+        textTransform: 'uppercase' as const,
+    },
+    // Structural card headers — upright. "GROUND RULES", "SQUAD STATUS"
+    section: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 13,
+        textTransform: 'uppercase' as const,
+    },
+    // Card titles and page headings — upright. "GYM 3X/WEEK", "CREATE ACCOUNT"
+    heading: {
+        fontFamily: typography.fonts.extraBold,
+        fontSize: 20,
+        textTransform: 'uppercase' as const,
+    },
+    // Running copy — sentence case. "Enter your credentials to access the vault."
+    body: {
+        fontFamily: typography.fonts.regular,
+        fontSize: 15,
+    },
+    // Field and control labels. "EMAIL ADDRESS", "CONTRACT NAME"
+    label: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 11,
+        textTransform: 'uppercase' as const,
+    },
+    // Supporting metadata. "VS ALEX", "CYCLE #42 · RESOLVED"
+    meta: {
+        fontFamily: typography.fonts.regular,
+        fontSize: 10,
+        textTransform: 'uppercase' as const,
+    },
+    // Button labels. "CONTINUE", "SIGN CONTRACT", "I KNOW"
+    cta: {
+        fontFamily: typography.fonts.extraBold,
+        fontSize: 16,
+        textTransform: 'uppercase' as const,
+    },
+    // Badges, tab labels, dividers. "HUB", "SIGNED", "OR CONNECT WITH"
+    micro: {
+        fontFamily: typography.fonts.bold,
+        fontSize: 9,
+        textTransform: 'uppercase' as const,
+    },
+};

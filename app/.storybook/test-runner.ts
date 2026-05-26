@@ -13,7 +13,8 @@ const config: TestRunnerConfig = {
         await waitForPageReady(page);
         fs.mkdirSync(screenshotDir, { recursive: true });
         const screenshot = await page.screenshot({ fullPage: true });
-        await fs.promises.writeFile(path.join(screenshotDir, `${context.id}.png`), screenshot);
+        const safeId = context.id.replace(/[^a-zA-Z0-9_-]/g, '-');
+        await fs.promises.writeFile(path.join(screenshotDir, `${safeId}.png`), screenshot);
     },
 };
 

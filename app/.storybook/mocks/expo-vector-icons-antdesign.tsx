@@ -1,4 +1,4 @@
-import { Text } from 'react-native';
+import { StyleProp, Text, TextStyle } from 'react-native';
 
 const ICON_CHARS: Record<string, string> = {
     warning: '!',
@@ -11,7 +11,7 @@ type AntDesignProps = {
     name: string;
     size?: number;
     color?: string;
-    style?: object;
+    style?: StyleProp<TextStyle>;
     testID?: string;
 };
 
