@@ -1,10 +1,7 @@
 /**
- * Tests our auth API functions (signIn, signUp) in isolation:
- *   - correct fetch URL and request body
- *   - correct AuthError codes on server error responses
- *
- * supertokens-react-native is mocked globally (jest.setup.ts) — its token
- * storage is not exercised here. The full auth handshake is covered by Maestro.
+ * Unit tests for the auth API module (signIn, signUp).
+ * Both fetch and supertokens-react-native are mocked — no network or token
+ * storage is exercised. The full auth handshake is covered by Maestro E2E.
  */
 import { signIn, signUp } from '../auth';
 import SuperTokens from 'supertokens-react-native';

@@ -108,6 +108,7 @@ export default function LoginScreen() {
                             <AlertMessage
                                 message={error}
                                 severity="error"
+                                dismissible
                                 onDismiss={() => setError(null)}
                             />
                         </View>
@@ -157,7 +158,7 @@ export default function LoginScreen() {
                         <Text style={styles.footerText}>{"DON'T HAVE AN ACCOUNT? "}</Text>
                         <TextButton
                             label="SIGN UP"
-                            onPress={() => router.push('/sign-up')}
+                            onPress={() => router.replace('/sign-up')}
                             testID="signup-link"
                         />
                     </View>

@@ -1,4 +1,4 @@
-import { EthosTextInput } from '@/components/text-input';
+import { TextInput } from '@/components/text-input';
 import { colors, spacing, typography } from '@/constants/theme';
 import { forwardRef } from 'react';
 import {
@@ -38,7 +38,7 @@ export const FormField = forwardRef<RNTextInput, Props>(function FormField(
             ) : (
                 <Text style={[styles.labelText, styles.labelMargin]}>{label}</Text>
             )}
-            <EthosTextInput ref={ref} placeholder={placeholder} {...inputProps} />
+            <TextInput ref={ref} placeholder={placeholder} {...inputProps} />
         </View>
     );
 });

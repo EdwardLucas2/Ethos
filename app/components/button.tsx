@@ -8,6 +8,7 @@ type Props = {
     loading?: boolean;
     disabled?: boolean;
     showArrow?: boolean;
+    withShadow?: boolean;
     testID?: string;
     style?: ViewStyle;
 };
@@ -22,6 +23,7 @@ export function Button({
     loading = false,
     disabled = false,
     showArrow = false,
+    withShadow = true,
     testID,
     style,
 }: Props) {
@@ -29,7 +31,7 @@ export function Button({
     const isDisabled = disabled || loading;
 
     return (
-        <View style={[styles.shadow, style]}>
+        <View style={[withShadow ? styles.shadow : styles.noShadow, style]}>
             <Pressable
                 style={({ pressed }) => [
                     styles.button,
@@ -62,6 +64,7 @@ const styles = StyleSheet.create({
         marginRight: spacing.xs,
         ...shadows.sm,
     },
+    noShadow: {},
     button: {
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,

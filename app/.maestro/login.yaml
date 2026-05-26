@@ -3,6 +3,8 @@ env:
     TEST_EMAIL: test@ethos.app
     TEST_PASSWORD: TestPassword123!
 ---
+# Prerequisite: sign-up.yaml must have run first to create the test user.
+# To run in isolation: ./scripts/seed-test-user.sh then re-launch the app.
 # User was created by sign-up.yaml — test sign-out then sign back in.
 - launchApp:
       clearState: true

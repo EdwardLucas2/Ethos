@@ -146,6 +146,7 @@ export default function SignUpScreen() {
                             <AlertMessage
                                 message={error}
                                 severity="error"
+                                dismissible
                                 onDismiss={() => setError(null)}
                             />
                         </View>

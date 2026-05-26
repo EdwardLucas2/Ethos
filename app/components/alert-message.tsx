@@ -3,12 +3,14 @@ import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
 
+type DismissibleProps =
+    | { dismissible: true; onDismiss: () => void }
+    | { dismissible?: false; onDismiss?: () => void };
+
 export type AlertMessageProps = {
     message: string;
     severity?: 'error' | 'warning' | 'info';
-    dismissible?: boolean;
-    onDismiss?: () => void;
-};
+} & DismissibleProps;
 
 type SeverityConfig = {
     backgroundColor: string;
@@ -41,7 +43,7 @@ const SEVERITY_CONFIG: Record<NonNullable<AlertMessageProps['severity']>, Severi
 export function AlertMessage({
     message,
     severity = 'error',
-    dismissible = true,
+    dismissible = false,
     onDismiss,
 }: AlertMessageProps) {
     const config = SEVERITY_CONFIG[severity];

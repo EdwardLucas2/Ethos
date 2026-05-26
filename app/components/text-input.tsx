@@ -13,7 +13,7 @@ type Props = {
     testID?: string;
 };
 
-export const EthosTextInput = forwardRef<RNTextInput, Props>(function EthosTextInput(
+export const TextInput = forwardRef<RNTextInput, Props>(function TextInput(
     {
         placeholder,
         isPassword = false,
