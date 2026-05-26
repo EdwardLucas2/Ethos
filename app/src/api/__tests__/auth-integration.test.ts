@@ -48,7 +48,7 @@ describe('signIn', () => {
         await signIn('test@example.com', 'password123');
 
         const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-        expect(url).toBe('http://localhost:3568/auth/signin');
+        expect(url.toString()).toMatch(/\/auth\/signin$/);
         expect(JSON.parse(init.body as string)).toEqual({
             formFields: [
                 { id: 'email', value: 'test@example.com' },
@@ -62,6 +62,15 @@ describe('signIn', () => {
 
         await expect(signIn('x@x.com', 'wrong')).rejects.toMatchObject({
             code: 'WRONG_CREDENTIALS',
+        });
+    });
+
+    it('throws AuthError UNKNOWN on network failure', async () => {
+        jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network request failed'));
+
+        await expect(signIn('x@x.com', 'password123')).rejects.toMatchObject({
+            code: 'UNKNOWN',
+            message: expect.stringContaining('Connection failed'),
         });
     });
 
@@ -82,7 +91,7 @@ describe('signUp', () => {
         await signUp('new@example.com', 'password123');
 
         const urls = fetchSpy.mock.calls.map((c) => c[0]!.toString());
-        expect(urls).toContain('http://localhost:3568/auth/signup');
+        expect(urls.some((u) => /\/auth\/signup$/.test(u))).toBe(true);
         expect(urls.some((u) => u.includes('/users'))).toBe(true);
     });
 

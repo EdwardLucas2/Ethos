@@ -35,7 +35,6 @@ export function Button({
                     styles.button,
                     { backgroundColor },
                     pressed && !isDisabled && styles.pressed,
-                    disabled && !loading && styles.disabled,
                 ]}
                 onPress={onPress}
                 disabled={isDisabled}
@@ -51,6 +50,7 @@ export function Button({
                         ) : null}
                     </View>
                 )}
+                {disabled && !loading && <View style={styles.disabledOverlay} />}
             </Pressable>
         </View>
     );
@@ -73,8 +73,9 @@ const styles = StyleSheet.create({
         opacity: 0.9,
         transform: [{ translateX: 2 }, { translateY: 2 }],
     },
-    disabled: {
-        opacity: 0.4,
+    disabledOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(200, 200, 200, 0.5)',
     },
     inner: {
         flexDirection: 'row',

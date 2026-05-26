@@ -1,5 +1,4 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
@@ -45,21 +44,10 @@ export function AlertMessage({
     dismissible = true,
     onDismiss,
 }: AlertMessageProps) {
-    const [dismissed, setDismissed] = useState(false);
-
-    useEffect(() => {
-        setDismissed(false);
-    }, [message]);
-
-    if (dismissed) {
-        return null;
-    }
-
     const config = SEVERITY_CONFIG[severity];
 
     const handlePress = () => {
         if (!dismissible) return;
-        setDismissed(true);
         onDismiss?.();
     };
 

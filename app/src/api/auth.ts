@@ -27,11 +27,16 @@ type AuthResponse = {
 };
 
 async function authFetch(path: string, body: unknown): Promise<AuthResponse> {
-    const response = await fetch(`${AUTH_URL}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    });
+    let response: Response;
+    try {
+        response = await fetch(`${AUTH_URL}${path}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+    } catch {
+        throw new AuthError('Connection failed. Please check your network and try again.', 'UNKNOWN');
+    }
 
     if (!response.ok) {
         throw new AuthError('Request failed', 'UNKNOWN');
@@ -49,14 +54,19 @@ async function ensureUserProfile(email: string): Promise<void> {
         throw new AuthError('Session not established', 'UNKNOWN');
     }
 
-    const res = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ displayName: deriveDisplayName(email) }),
-    });
+    let res: Response;
+    try {
+        res = await fetch(`${API_URL}/users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ displayName: deriveDisplayName(email) }),
+        });
+    } catch {
+        throw new AuthError('Connection failed. Please check your network and try again.', 'UNKNOWN');
+    }
 
     if (res.ok || res.status === 409) return;
     throw new AuthError('Failed to create user profile', 'UNKNOWN');

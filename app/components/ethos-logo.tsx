@@ -1,3 +1,4 @@
+import { borderWidth, colors } from '@/constants/theme';
 import { Platform, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -17,8 +18,8 @@ export function EthosLogo({ size = 64 }: Props) {
                 <Svg width={boltSize} height={boltSize} viewBox="0 0 100 100">
                     <Path
                         d={BOLT_PATH}
-                        fill="#000000"
-                        stroke="#000000"
+                        fill={colors.ink}
+                        stroke={colors.ink}
                         strokeWidth={4}
                         strokeLinejoin="miter"
                         strokeLinecap="square"
@@ -32,20 +33,20 @@ export function EthosLogo({ size = 64 }: Props) {
 const styles = StyleSheet.create({
     shadowOffset: {
         ...(Platform.select({
-            web: { boxShadow: '4px 4px 0px #000000' } as object,
+            web: { boxShadow: `4px 4px 0px ${colors.ink}` } as object,
             ios: {
-                shadowColor: '#000000',
+                shadowColor: colors.ink,
                 shadowOffset: { width: 4, height: 4 },
                 shadowOpacity: 1,
                 shadowRadius: 0,
             },
-            default: { elevation: 4, shadowColor: '#000000' },
+            default: { elevation: 4, shadowColor: colors.ink },
         }) ?? { elevation: 4 }),
     },
     container: {
-        backgroundColor: '#FDDC00',
-        borderWidth: 3,
-        borderColor: '#000000',
+        backgroundColor: colors.yellow,
+        borderWidth: borderWidth.structural,
+        borderColor: colors.ink,
         alignItems: 'center',
         justifyContent: 'center',
     },
