@@ -125,6 +125,8 @@ cd backend && ./run-dev.sh                               # Backend on :8080
 cd app && npx expo start                                 # Expo dev server
 ```
 
+`npm run android` and `npm run ios` compile the native app via `expo run:*` and require a full Android SDK / Xcode install. Use `npx expo start` with Expo Go for quick iteration without native toolchains.
+
 # Frontend Visual Verification
 
 Keep the iOS Simulator running throughout a development session. Agents can verify the UI without human intervention using two tools:
