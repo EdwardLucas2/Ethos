@@ -41,6 +41,10 @@ jobs:
             - name: Start backend services
               run: docker compose --env-file .env.local -f docker/docker-compose.dev.yml up -d --wait
 
+            - name: Show postgres logs on failure
+              if: failure()
+              run: docker compose -f docker/docker-compose.dev.yml logs postgres
+
             - name: Install dbmate
               run: |
                   curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.33.0/dbmate-linux-amd64
