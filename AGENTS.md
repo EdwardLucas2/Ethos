@@ -143,6 +143,7 @@ Reset all auth and app data before each run:
 
 ```bash
 ./scripts/reset-test-db.sh
+./scripts/seed-test-user.sh   # re-seed test user after reset (defaults: test@email.com / Testing123)
 ```
 
 Run flows:
@@ -159,9 +160,9 @@ Flows live in `app/.maestro/` — Dev flows may add `takeScreenshot: <name>` com
 # Linting & Formatting
 
 ```bash
-npm run lint          # ESLint (frontend)
-npm run format        # Prettier fix (frontend)
-npm test              # Frontend unit tests (RNTL)
-mvn spotless:apply    # Java format fix (backend)
-mvn spotless:check    # Java format verify (backend)
+cd app && npm run lint    # ESLint (frontend)
+cd app && npm run format  # Prettier fix (frontend)
+cd app && npm test        # Frontend unit tests (RNTL)
+mvn spotless:apply        # Java format fix (backend)
+mvn spotless:check        # Java format verify (backend)
 ```

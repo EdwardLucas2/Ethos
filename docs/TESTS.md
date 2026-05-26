@@ -64,7 +64,7 @@ mvn verify
 - **Tool:** Maestro. Flows live in `app/.maestro/`, one `.yaml` file per journey.
 - **Scope:** Critical user journeys that cross multiple screens.
 
-```
+```text
 app/.maestro/
   sign-up.yaml            # create account (happy path + duplicate email error)
   login.yaml              # sign in and reach dashboard

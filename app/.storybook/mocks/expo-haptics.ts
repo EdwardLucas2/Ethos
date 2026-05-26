@@ -2,15 +2,17 @@
 // Components using it should already guard with process.env.EXPO_OS === 'ios',
 // but this prevents the import from throwing in the Vite/web context.
 export const ImpactFeedbackStyle = {
-    Light: 'Light',
-    Medium: 'Medium',
-    Heavy: 'Heavy',
+    Light: 'light',
+    Medium: 'medium',
+    Heavy: 'heavy',
+    Rigid: 'rigid',
+    Soft: 'soft',
 } as const;
 
 export const NotificationFeedbackType = {
-    Success: 'Success',
-    Warning: 'Warning',
-    Error: 'Error',
+    Success: 'success',
+    Warning: 'warning',
+    Error: 'error',
 } as const;
 
 export async function impactAsync(_style?: unknown): Promise<void> {}

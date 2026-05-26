@@ -13,7 +13,7 @@ backend_up() {
 if backend_up; then
     echo "already-running"
 else
-    cd "$BACKEND_DIR"
+    cd "$BACKEND_DIR" || { echo "error:Cannot cd to $BACKEND_DIR" >&2; exit 1; }
     ./run-dev.sh --docker > /tmp/backend-fe-dev.log 2>&1 &
     PID=$!
     TRIES=0

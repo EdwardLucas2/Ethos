@@ -48,9 +48,13 @@ jobs:
                   TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
                   TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
               run: |
+                  PAYLOAD=$(jq -cn \
+                    --arg email "$TEST_EMAIL" \
+                    --arg password "$TEST_PASSWORD" \
+                    '{formFields:[{id:"email",value:$email},{id:"password",value:$password}]}')
                   curl -sf -X POST http://localhost:3568/auth/signup \
                     -H "Content-Type: application/json" \
-                    -d "{\"formFields\":[{\"id\":\"email\",\"value\":\"${TEST_EMAIL}\"},{\"id\":\"password\",\"value\":\"${TEST_PASSWORD}\"}]}" \
+                    -d "$PAYLOAD" \
                     | grep -q '"status":"OK"'
 
             - uses: ./.github/actions/setup-maestro
