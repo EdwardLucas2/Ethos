@@ -9,10 +9,9 @@ languages:
         enabled: false
 
 engines:
-    # Run Biome and ESLint from app/ so they find app/package.json
-    # and app/eslint.config.mjs, avoiding false "dependency not found" positives
     biome:
-        base_sub_dir: "app"
+        enabled: false
+    # Run ESLint from app/ so it finds app/package.json and app/eslint.config.mjs
     eslint-8:
         base_sub_dir: "app"
     eslint-9:
