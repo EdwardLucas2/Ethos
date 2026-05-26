@@ -28,13 +28,18 @@ jobs:
               run: npm ci
 
             - name: Create CI env files
+              env:
+                  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+                  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
               run: |
-                  printf 'DATABASE_USER=ethos\nDATABASE_PASSWORD=ci_password\nDBMATE_URL=postgresql://ethos:ci_password@localhost:5432/ethos?sslmode=disable\n' > .env.local
-                  printf 'DATABASE_URL=jdbc:postgresql://postgres:5432/ethos\nDATABASE_USER=ethos\nDATABASE_PASSWORD=ci_password\nSUPERTOKENS_URL=http://supertokens:3567\n' > backend/.env
+                  printf 'DATABASE_USER=%s\nDATABASE_PASSWORD=%s\nDBMATE_URL=postgresql://%s:%s@localhost:5432/ethos?sslmode=disable\n' \
+                    "$DATABASE_USER" "$DATABASE_PASSWORD" "$DATABASE_USER" "$DATABASE_PASSWORD" > .env.local
+                  printf 'DATABASE_URL=jdbc:postgresql://postgres:5432/ethos\nDATABASE_USER=%s\nDATABASE_PASSWORD=%s\nSUPERTOKENS_URL=http://supertokens:3567\n' \
+                    "$DATABASE_USER" "$DATABASE_PASSWORD" > backend/.env
                   touch auth/.env
 
             - name: Start backend services
-              run: docker compose -f docker/docker-compose.dev.yml up -d --wait
+              run: docker compose --env-file .env.local -f docker/docker-compose.dev.yml up -d --wait
 
             - name: Install dbmate
               run: |
@@ -43,7 +48,10 @@ jobs:
                   chmod +x /usr/local/bin/dbmate
 
             - name: Migrate database
-              run: dbmate --url "postgresql://ethos:ci_password@localhost:5432/ethos?sslmode=disable" --migrations-dir backend/db/migrations migrate
+              env:
+                  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+                  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+              run: dbmate --url "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@localhost:5432/ethos?sslmode=disable" --migrations-dir backend/db/migrations migrate
 
             - name: Seed test user
               env:
