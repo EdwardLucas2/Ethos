@@ -15,7 +15,7 @@ RESPONSE=$(curl -sf -X POST http://localhost:3568/auth/signup \
 
 if echo "$RESPONSE" | grep -q '"status":"OK"'; then
     echo "Test user created: ${EMAIL}"
-elif echo "$RESPONSE" | grep -q '"This email already exists'; then
+elif echo "$RESPONSE" | grep -q 'FIELD_ERROR'; then
     echo "Test user already exists: ${EMAIL}"
 else
     echo "Unexpected response: ${RESPONSE}"
