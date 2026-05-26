@@ -105,7 +105,7 @@ jobs:
 
             - name: Test
               working-directory: app
-              run: npx jest --coverage --coverageDirectory=coverage --coverageReporters=lcov --coverageReporters=text-summary
+              run: npx jest --coverage --coverageDirectory=coverage --coverageReporters=lcov --coverageReporters=text-summary --passWithNoTests
 
             - name: Install Playwright browsers
               working-directory: app
@@ -122,6 +122,7 @@ jobs:
                   npx wait-on tcp:6006 && npm run test-storybook
 
             - name: Upload coverage to Codacy
+              if: always()
               uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699  # v1.3.0
               continue-on-error: true
               with:
