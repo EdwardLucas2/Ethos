@@ -27,7 +27,7 @@ else
     fi
     first=true
     for yaml in "${flows[@]}"; do
-        if $first; then
+        if [[ "$first" == "true" ]]; then
             "$RESET_SCRIPT"
             first=false
         fi
