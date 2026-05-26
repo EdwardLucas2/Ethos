@@ -2,22 +2,14 @@ import { signIn } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
 import { AuthHeader } from '@/components/auth-header';
+import { Button } from '@/components/button';
 import { EthosTextInput } from '@/components/text-input';
 import { OAuthButton } from '@/components/oauth-button';
 import { colors } from '@/constants/theme';
 import { styles } from './login.styles';
 import { Link, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 
 export default function LoginScreen() {
     const { refreshSession } = useAuth();
@@ -115,39 +107,21 @@ export default function LoginScreen() {
                             </View>
                         ) : null}
 
-                        {/* Continue button */}
-                        <View style={styles.buttonShadow}>
-                            <Pressable
-                                style={({ pressed }) => [
-                                    styles.button,
-                                    pressed && styles.buttonPressed,
-                                ]}
-                                onPress={handleSubmit}
-                                disabled={loading}
-                                testID="submit-button"
-                            >
-                                {loading ? (
-                                    <ActivityIndicator color={colors.white} />
-                                ) : (
-                                    <View style={styles.buttonContent}>
-                                        <Text style={styles.buttonText}>CONTINUE</Text>
-                                        <Text style={styles.buttonIcon}>→</Text>
-                                    </View>
-                                )}
-                            </Pressable>
-                        </View>
-
-                        {/* OTP button */}
-                        <View style={styles.otpButtonShadow}>
-                            <Pressable
-                                style={styles.otpButton}
-                                onPress={() => {}}
-                                disabled
-                                testID="otp-button"
-                            >
-                                <Text style={styles.otpButtonText}>SEND EMAIL OTP</Text>
-                            </Pressable>
-                        </View>
+                        <Button
+                            label="CONTINUE"
+                            onPress={handleSubmit}
+                            loading={loading}
+                            showArrow
+                            testID="submit-button"
+                            style={styles.submitButton}
+                        />
+                        <Button
+                            label="SEND EMAIL OTP"
+                            backgroundColor={colors.yellow}
+                            disabled
+                            testID="otp-button"
+                            style={styles.otpButton}
+                        />
 
                         {/* OR LOGIN WITH separator */}
                         <View style={styles.separator} testID="oauth-separator">

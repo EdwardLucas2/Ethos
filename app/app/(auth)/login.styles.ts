@@ -83,64 +83,11 @@ export const styles = StyleSheet.create({
         marginBottom: spacing.sm,
     },
 
-    // Continue button
-    buttonShadow: {
+    submitButton: {
         marginTop: spacing.lg,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    button: {
-        backgroundColor: colors.blue,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonPressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
-    },
-    buttonContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    buttonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 16,
-        color: colors.white,
-        letterSpacing: 2,
-        textTransform: 'uppercase',
-    },
-    buttonIcon: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 18,
-        color: colors.white,
-        marginLeft: spacing.sm,
-    },
-
-    // OTP button
-    otpButtonShadow: {
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
     },
     otpButton: {
-        backgroundColor: colors.yellow,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    otpButtonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 14,
-        color: colors.ink,
-        letterSpacing: 2,
-        textTransform: 'uppercase',
+        marginTop: spacing.md,
     },
 
     // OR CONNECT WITH separator

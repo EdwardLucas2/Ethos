@@ -3,22 +3,13 @@ import { signUp } from '@/src/api/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
 import { AuthHeader } from '@/components/auth-header';
+import { Button } from '@/components/button';
 import { EthosTextInput } from '@/components/text-input';
 import { OAuthButton } from '@/components/oauth-button';
-import { colors } from '@/constants/theme';
 import { styles } from './sign-up.styles';
 import { Link, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 
 const emailSchema = z.email();
 
@@ -153,27 +144,14 @@ export default function SignUpScreen() {
                             </View>
                         ) : null}
 
-                        {/* Create account button */}
-                        <View style={styles.buttonShadow}>
-                            <Pressable
-                                style={({ pressed }) => [
-                                    styles.button,
-                                    pressed && styles.buttonPressed,
-                                ]}
-                                onPress={handleSubmit}
-                                disabled={loading}
-                                testID="submit-button"
-                            >
-                                {loading ? (
-                                    <ActivityIndicator color={colors.white} />
-                                ) : (
-                                    <View style={styles.buttonContent}>
-                                        <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
-                                        <Text style={styles.buttonIcon}>→</Text>
-                                    </View>
-                                )}
-                            </Pressable>
-                        </View>
+                        <Button
+                            label="CREATE ACCOUNT"
+                            onPress={handleSubmit}
+                            loading={loading}
+                            showArrow
+                            testID="submit-button"
+                            style={styles.submitButton}
+                        />
 
                         <View style={styles.divider} />
 

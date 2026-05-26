@@ -3,10 +3,10 @@ env:
     TEST_EMAIL: test@ethos.app
     TEST_PASSWORD: TestPassword123!
 ---
-# Setup: create the account via sign-up
+# User was created by sign-up.yaml — test sign-out then sign back in.
 - launchApp:
       clearState: true
-- runFlow: subflows/_signup-user.yaml
+- runFlow: subflows/_login-user.yaml
 
 # Test: sign out, then log back in with the same credentials
 - tapOn:

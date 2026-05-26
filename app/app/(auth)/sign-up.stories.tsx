@@ -36,7 +36,9 @@ export const PasswordTooShort: Story = {
         await userEvent.type(canvas.getByTestId('password-input'), 'short');
         await userEvent.click(canvas.getByTestId('submit-button'));
         await waitFor(() =>
-            expect(canvas.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS.')).toBeTruthy()
+            expect(
+                canvas.getByText('PASSWORD MUST BE AT LEAST 8 CHARACTERS AND INCLUDE A NUMBER.')
+            ).toBeTruthy()
         );
     },
 };

@@ -25,12 +25,10 @@ else
         echo "No flows found in $MAESTRO_DIR" >&2
         exit 1
     fi
-    first=true
-    for yaml in "${flows[@]}"; do
-        if [[ "$first" == "true" ]]; then
-            "$RESET_SCRIPT"
-            first=false
-        fi
-        run_flow "$yaml"
+    # Flows run in dependency order: sign-up first (creates the user), login second.
+    ordered_flows=("sign-up" "login")
+    "$RESET_SCRIPT"
+    for name in "${ordered_flows[@]}"; do
+        run_flow "$MAESTRO_DIR/$name.yaml"
     done
 fi

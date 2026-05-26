@@ -94,40 +94,8 @@ export const styles = StyleSheet.create({
         marginTop: spacing.sm,
     },
 
-    // Button
-    buttonShadow: {
+    submitButton: {
         marginTop: spacing.lg,
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    button: {
-        backgroundColor: colors.blue,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonPressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
-    },
-    buttonContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    buttonText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 16,
-        color: colors.white,
-        letterSpacing: 2,
-    },
-    buttonIcon: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 18,
-        color: colors.white,
-        marginLeft: spacing.sm,
     },
 
     // OAuth gap
