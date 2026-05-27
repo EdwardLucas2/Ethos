@@ -27,23 +27,18 @@ jobs:
               working-directory: app
               run: npm ci
 
-            - name: Create CI env files
+            - name: Start backend services
               env:
                   DATABASE_USER: ${{ secrets.DATABASE_USER }}
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-              run: |
-                  printf 'DATABASE_USER=%s\nDATABASE_PASSWORD=%s\nDBMATE_URL=postgresql://%s:%s@localhost:5432/ethos?sslmode=disable\n' \
-                    "$DATABASE_USER" "$DATABASE_PASSWORD" "$DATABASE_USER" "$DATABASE_PASSWORD" > .env.local
-                  printf 'DATABASE_URL=jdbc:postgresql://postgres:5432/ethos\nDATABASE_USER=%s\nDATABASE_PASSWORD=%s\nSUPERTOKENS_URL=http://supertokens:3567\n' \
-                    "$DATABASE_USER" "$DATABASE_PASSWORD" > backend/.env
-                  touch auth/.env
+              run: docker compose -f docker/docker-compose.dev.yml up -d --wait
 
-            - name: Start backend services
-              run: docker compose --env-file .env.local -f docker/docker-compose.dev.yml up -d --wait
-
-            - name: Show postgres logs on failure
+            - name: Show service logs on failure
               if: failure()
-              run: docker compose -f docker/docker-compose.dev.yml logs postgres
+              env:
+                  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+                  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+              run: docker compose -f docker/docker-compose.dev.yml logs postgres backend
 
             - name: Install dbmate
               run: |
