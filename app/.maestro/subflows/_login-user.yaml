@@ -16,4 +16,4 @@ appId: com.ethos.app
       optional: true
 - extendedWaitUntil:
       visible: 'Welcome!'
-      timeout: 10000
+      timeout: 8000

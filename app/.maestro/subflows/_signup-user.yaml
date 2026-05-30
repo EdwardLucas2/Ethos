@@ -4,12 +4,12 @@ appId: com.ethos.app
 # Requires TEST_EMAIL and TEST_PASSWORD in the calling flow's env.
 - extendedWaitUntil:
       visible: 'WELCOME BACK.'
-      timeout: 5000
+      timeout: 10000
 - tapOn:
       id: 'signup-link'
 - extendedWaitUntil:
       visible: 'CREATE ACCOUNT'
-      timeout: 5000
+      timeout: 8000
 - tapOn:
       id: 'email-input'
 - inputText: ${TEST_EMAIL}
@@ -21,4 +21,4 @@ appId: com.ethos.app
       optional: true
 - extendedWaitUntil:
       visible: 'Welcome!'
-      timeout: 5000
+      timeout: 8000
