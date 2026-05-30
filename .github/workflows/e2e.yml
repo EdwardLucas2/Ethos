@@ -52,20 +52,6 @@ jobs:
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
               run: dbmate --url "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@localhost:5432/ethos?sslmode=disable" --migrations-dir backend/db/migrations migrate
 
-            - name: Seed test user
-              env:
-                  TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
-                  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-              run: |
-                  PAYLOAD=$(jq -cn \
-                    --arg email "$TEST_EMAIL" \
-                    --arg password "$TEST_PASSWORD" \
-                    '{formFields:[{id:"email",value:$email},{id:"password",value:$password}]}')
-                  curl -sf -X POST http://localhost:3568/auth/signup \
-                    -H "Content-Type: application/json" \
-                    -d "$PAYLOAD" \
-                    | grep -q '"status":"OK"'
-
             - uses: ./.github/actions/setup-maestro
               with:
                   version: "2.5.1"
@@ -91,9 +77,6 @@ jobs:
 
             - name: Run Maestro flows
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
-              env:
-                  TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
-                  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
               with:
                   api-level: 34
                   arch: x86_64
@@ -103,7 +86,4 @@ jobs:
                       timeout 120 bash -c 'until curl -sf http://localhost:8081/status > /dev/null; do sleep 2; done'
                       cd android && ./gradlew installDebug
                       cd ../..
-                      maestro test \
-                        --env TEST_EMAIL="${TEST_EMAIL}" \
-                        --env TEST_PASSWORD="${TEST_PASSWORD}" \
-                        app/.maestro/
+                      ./scripts/run-e2e.sh

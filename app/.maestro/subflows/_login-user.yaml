@@ -10,8 +10,7 @@ appId: com.ethos.app
 - inputText: ${TEST_EMAIL}
 - pressKey: enter
 - inputText: ${TEST_PASSWORD}
-- tapOn:
-      id: 'submit-button'
+- pressKey: enter
 - tapOn:
       text: 'Not Now'
       optional: true
