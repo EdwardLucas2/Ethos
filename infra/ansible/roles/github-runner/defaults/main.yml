@@ -1,0 +1,18 @@
+---
+# GitHub repository in org/repo format
+github_repo: ""  # e.g. "edwardlucas/monorepo" — required, pass via -e or vars file
+
+# Fine-grained PAT with Administration:write on the repo (used to get a registration token)
+github_pat: ""   # required, pass via -e or vars file — keep this secret!
+
+# Runner installation directory (under the ubuntu user's home)
+runner_dir: /home/ubuntu/actions-runner
+
+# Runner version — check https://github.com/actions/runner/releases
+runner_version: "2.323.0"
+
+# Labels applied to this runner (self-hosted and linux are always added automatically)
+runner_labels: "oracle,arm64"
+
+# Runner name shown in GitHub UI
+runner_name: "oracle-arm64"

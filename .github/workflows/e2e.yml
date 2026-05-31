@@ -6,7 +6,7 @@ on:
 
 jobs:
     maestro:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, linux, arm64, oracle]
         timeout-minutes: 60
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -43,8 +43,7 @@ jobs:
 
             - name: Install dbmate
               run: |
-                  curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.33.0/dbmate-linux-amd64
-                  echo "dfd4027141b6e4357158099bdfe6c02b286af70f8e49057937744cf80b38ea1c  /usr/local/bin/dbmate" | sha256sum -c
+                  curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.33.0/dbmate-linux-arm64
                   chmod +x /usr/local/bin/dbmate
 
             - name: Migrate database
@@ -84,25 +83,20 @@ jobs:
               working-directory: app/android
               run: ./gradlew assembleDebug
 
-            - name: Enable KVM
-              run: |
-                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-                  sudo udevadm control --reload-rules
-                  sudo udevadm trigger --name-match=kvm
-
             - name: Cache AVD
               id: avd-cache
               uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
               with:
                   path: ~/.android/avd/*
-                  key: avd-api34-x86_64
+                  key: avd-api34-arm64-v8a
 
             - name: Create AVD snapshot
               if: steps.avd-cache.outputs.cache-hit != 'true'
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
               with:
                   api-level: 34
-                  arch: x86_64
+                  arch: arm64-v8a
+                  target: google_apis
                   force-avd-creation: false
                   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: false
@@ -112,7 +106,8 @@ jobs:
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
               with:
                   api-level: 34
-                  arch: x86_64
+                  arch: arm64-v8a
+                  target: google_apis
                   force-avd-creation: false
                   emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: true

@@ -1,0 +1,9 @@
+---
+- name: Configure GitHub Actions runner
+  hosts: all
+  become: true
+  roles:
+    - common
+    - docker
+    - android-sdk
+    - github-runner
