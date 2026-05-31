@@ -1,0 +1,47 @@
+---
+- name: Update apt cache and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: safe
+    cache_valid_time: 3600
+
+- name: Install base packages
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - unzip
+      - zip
+      - jq
+      - htop
+      - fail2ban
+      - unattended-upgrades
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - acl
+      - rsync
+      - software-properties-common
+    state: present
+
+- name: Configure unattended-upgrades for security updates
+  copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
+
+- name: Enable fail2ban
+  service:
+    name: fail2ban
+    enabled: yes
+    state: started
+
+- name: Add ubuntu user to kvm group (for Android emulator)
+  user:
+    name: ubuntu
+    groups: kvm
+    append: yes

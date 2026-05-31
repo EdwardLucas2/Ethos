@@ -1,0 +1,10 @@
+# Copy this to backend.hcl (gitignored) and fill in your values.
+# Run: tofu init -backend-config=backend.hcl
+
+region   = "uk-london-1"
+endpoint = "https://<NAMESPACE>.compat.objectstorage.<REGION>.oraclecloud.com"
+
+# OCI Customer Secret Key (not the same as the API key).
+# Generate at: OCI Console → Identity → Users → your user → Customer Secret Keys
+access_key = "<CUSTOMER_SECRET_ACCESS_KEY>"
+secret_key = "<CUSTOMER_SECRET_SECRET_KEY>"

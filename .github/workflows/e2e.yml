@@ -6,7 +6,7 @@ on:
 
 jobs:
     maestro:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, linux, arm64, oracle]
         timeout-minutes: 60
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -28,34 +28,44 @@ jobs:
               working-directory: app
               run: npm ci
 
+            - name: Clean up previous run
+              env:
+                  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+                  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+              run: |
+                  pkill -f "expo start" || true
+                  pkill -f "metro" || true
+                  adb kill-server || true
+                  docker compose -f docker/docker-compose.dev.yml down -v --remove-orphans
+
             - name: Start backend services
               env:
                   DATABASE_USER: ${{ secrets.DATABASE_USER }}
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-              run: docker compose -f docker/docker-compose.dev.yml up -d --wait
+              run: docker compose -f docker/docker-compose.dev.yml up -d --wait --build
 
             - name: Show service logs on failure
               if: failure()
               env:
                   DATABASE_USER: ${{ secrets.DATABASE_USER }}
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-              run: docker compose -f docker/docker-compose.dev.yml logs postgres backend
+              run: docker compose -f docker/docker-compose.dev.yml logs postgres supertokens auth backend
 
-            - name: Install dbmate
-              run: |
-                  curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.33.0/dbmate-linux-amd64
-                  echo "dfd4027141b6e4357158099bdfe6c02b286af70f8e49057937744cf80b38ea1c  /usr/local/bin/dbmate" | sha256sum -c
-                  chmod +x /usr/local/bin/dbmate
-
-            - name: Migrate database
-              env:
-                  DATABASE_USER: ${{ secrets.DATABASE_USER }}
-                  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-              run: dbmate --url "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@localhost:5432/ethos?sslmode=disable" --migrations-dir backend/db/migrations migrate
+            - name: Cache Maestro
+              id: maestro-cache
+              uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+              with:
+                  path: ~/.maestro
+                  key: maestro-2.5.1
 
             - uses: ./.github/actions/setup-maestro
+              if: steps.maestro-cache.outputs.cache-hit != 'true'
               with:
                   version: "2.5.1"
+
+            - name: Add Maestro to PATH
+              if: steps.maestro-cache.outputs.cache-hit == 'true'
+              run: echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
             - name: Cache APK
               id: apk-cache
@@ -79,30 +89,32 @@ jobs:
                   key: gradle-${{ hashFiles('app/android/**/*.gradle*', 'app/android/**/gradle-wrapper.properties') }}
                   restore-keys: gradle-
 
+            - name: Configure aapt2 override for ARM64
+              if: steps.apk-cache.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p ~/.gradle
+                  grep -qxF 'android.aapt2FromMavenOverride=/opt/android-sdk/build-tools/36.0.0/aapt2' ~/.gradle/gradle.properties 2>/dev/null || \
+                      echo 'android.aapt2FromMavenOverride=/opt/android-sdk/build-tools/36.0.0/aapt2' >> ~/.gradle/gradle.properties
+
             - name: Build APK
               if: steps.apk-cache.outputs.cache-hit != 'true'
               working-directory: app/android
-              run: ./gradlew assembleDebug
-
-            - name: Enable KVM
-              run: |
-                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-                  sudo udevadm control --reload-rules
-                  sudo udevadm trigger --name-match=kvm
+              run: ./gradlew assembleDebug --no-daemon
 
             - name: Cache AVD
               id: avd-cache
               uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
               with:
                   path: ~/.android/avd/*
-                  key: avd-api34-x86_64
+                  key: avd-api34-arm64-v8a
 
             - name: Create AVD snapshot
               if: steps.avd-cache.outputs.cache-hit != 'true'
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
               with:
                   api-level: 34
-                  arch: x86_64
+                  arch: arm64-v8a
+                  target: google_apis
                   force-avd-creation: false
                   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: false
@@ -112,7 +124,8 @@ jobs:
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
               with:
                   api-level: 34
-                  arch: x86_64
+                  arch: arm64-v8a
+                  target: google_apis
                   force-avd-creation: false
                   emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
                   disable-animations: true
@@ -120,4 +133,5 @@ jobs:
                       cd app && npx expo start &
                       timeout 120 bash -c 'until curl -sf http://localhost:8081/status > /dev/null; do sleep 2; done'
                       adb install app/android/app/build/outputs/apk/debug/app-debug.apk
+                      adb reverse tcp:8081 tcp:8081
                       ./scripts/run-e2e.sh

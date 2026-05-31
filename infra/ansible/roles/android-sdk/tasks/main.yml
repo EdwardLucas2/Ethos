@@ -1,0 +1,88 @@
+---
+# Java 17 is required by sdkmanager and the emulator
+- name: Install OpenJDK 17 (required by Android SDK tools)
+  apt:
+    name:
+      - openjdk-17-jdk
+      - libgl1
+      - libpulse0
+      - libc6
+    state: present
+
+- name: Create Android SDK directory
+  file:
+    path: "{{ android_sdk_root }}/cmdline-tools"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Download Android cmdline-tools
+  get_url:
+    url: "{{ android_cmdline_tools_url }}"
+    dest: /tmp/cmdline-tools.zip
+    mode: "0644"
+  become_user: ubuntu
+
+- name: Extract cmdline-tools
+  unarchive:
+    src: /tmp/cmdline-tools.zip
+    dest: /tmp/
+    remote_src: yes
+  become_user: ubuntu
+
+- name: Install cmdline-tools to SDK (creates the expected 'latest' layout)
+  command: rsync -a /tmp/cmdline-tools/ "{{ android_sdk_root }}/cmdline-tools/latest/"
+  args:
+    creates: "{{ android_sdk_root }}/cmdline-tools/latest/bin/sdkmanager"
+  become_user: ubuntu
+
+- name: Set Android SDK environment variables system-wide
+  copy:
+    dest: /etc/profile.d/android-sdk.sh
+    content: |
+      export ANDROID_HOME={{ android_sdk_root }}
+      export ANDROID_SDK_ROOT={{ android_sdk_root }}
+      export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
+    mode: "0644"
+
+- name: Accept Android SDK licenses
+  shell: |
+    yes | {{ android_sdk_root }}/cmdline-tools/latest/bin/sdkmanager --licenses
+  environment:
+    ANDROID_HOME: "{{ android_sdk_root }}"
+    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-arm64
+  become_user: ubuntu
+  changed_when: false
+
+# Pre-install only packages that don't depend on the emulator.
+# The android-emulator-runner action installs the emulator + system images during CI.
+- name: Install Android SDK packages (platform-tools, platforms, build-tools)
+  shell: |
+    {{ android_sdk_root }}/cmdline-tools/latest/bin/sdkmanager \
+      "platform-tools" \
+      "platforms;android-{{ android_api_level }}" \
+      "build-tools;{{ android_build_tools_version }}"
+  environment:
+    ANDROID_HOME: "{{ android_sdk_root }}"
+    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-arm64
+  become_user: ubuntu
+  args:
+    creates: "{{ android_sdk_root }}/platform-tools/adb"
+
+- name: Set aapt2 override for ARM64 in global Gradle properties
+  lineinfile:
+    path: /home/ubuntu/.gradle/gradle.properties
+    line: "android.aapt2FromMavenOverride={{ android_sdk_root }}/build-tools/{{ android_build_tools_version }}/aapt2"
+    create: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+  become_user: ubuntu
+
+- name: Set Android SDK ownership
+  file:
+    path: "{{ android_sdk_root }}"
+    owner: ubuntu
+    group: ubuntu
+    recurse: yes

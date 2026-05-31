@@ -1,0 +1,78 @@
+---
+- name: Create runner directory
+  file:
+    path: "{{ runner_dir }}"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Download GitHub Actions runner
+  get_url:
+    url: "https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-arm64-{{ runner_version }}.tar.gz"
+    dest: /tmp/actions-runner.tar.gz
+    mode: "0644"
+  become_user: ubuntu
+
+- name: Extract runner archive
+  unarchive:
+    src: /tmp/actions-runner.tar.gz
+    dest: "{{ runner_dir }}"
+    remote_src: yes
+    creates: "{{ runner_dir }}/run.sh"
+  become_user: ubuntu
+
+- name: Check if runner is already configured
+  stat:
+    path: "{{ runner_dir }}/.runner"
+  register: runner_config
+
+# Fetch a short-lived registration token from GitHub using the local gh CLI.
+# Runs on the Ansible controller (your Mac) where gh is already authenticated.
+- name: Fetch runner registration token via gh CLI
+  command: gh api repos/{{ github_repo }}/actions/runners/registration-token --method POST --jq '.token'
+  delegate_to: localhost
+  become: false
+  register: registration_token
+  when: not runner_config.stat.exists
+  no_log: true
+
+- name: Configure runner
+  command: >
+    ./config.sh
+    --url "https://github.com/{{ github_repo }}"
+    --token "{{ registration_token.stdout }}"
+    --name "{{ runner_name }}"
+    --labels "{{ runner_labels }}"
+    --work _work
+    --unattended
+    --replace
+  args:
+    chdir: "{{ runner_dir }}"
+  become_user: ubuntu
+  when: not runner_config.stat.exists
+  no_log: true
+
+- name: Set ANDROID_HOME in runner environment file
+  lineinfile:
+    path: "{{ runner_dir }}/.env"
+    line: "{{ item }}"
+    create: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
+  loop:
+    - "ANDROID_HOME=/opt/android-sdk"
+    - "ANDROID_SDK_ROOT=/opt/android-sdk"
+
+- name: Install runner as systemd service
+  command: ./svc.sh install ubuntu
+  args:
+    chdir: "{{ runner_dir }}"
+    creates: /etc/systemd/system/actions.runner.*.service
+
+- name: Enable and start runner service
+  shell: ./svc.sh start
+  args:
+    chdir: "{{ runner_dir }}"
+  changed_when: false

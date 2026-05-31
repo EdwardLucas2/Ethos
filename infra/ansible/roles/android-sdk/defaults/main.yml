@@ -1,0 +1,8 @@
+---
+android_sdk_root: /opt/android-sdk
+android_cmdline_tools_url: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+android_api_level: 34
+android_build_tools_version: "36.0.0"
+
+# System image for arm64-v8a (matches the self-hosted runner architecture)
+android_system_image: "system-images;android-{{ android_api_level }};google_apis;arm64-v8a"

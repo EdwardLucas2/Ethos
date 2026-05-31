@@ -1,0 +1,7 @@
+all:
+  hosts:
+    runner:
+      # Update ansible_host with the IP from: cd infra/tofu/runner && tofu output runner_public_ip
+      ansible_host: "152.67.156.113"
+      ansible_user: ubuntu
+      ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
