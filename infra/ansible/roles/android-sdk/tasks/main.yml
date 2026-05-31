@@ -55,13 +55,13 @@
   become_user: ubuntu
   changed_when: false
 
-- name: Install Android SDK packages
+# Pre-install only packages that don't depend on the emulator.
+# The android-emulator-runner action installs the emulator + system images during CI.
+- name: Install Android SDK packages (platform-tools, platforms, build-tools)
   shell: |
     {{ android_sdk_root }}/cmdline-tools/latest/bin/sdkmanager \
       "platform-tools" \
-      "emulator" \
       "platforms;android-{{ android_api_level }}" \
-      "{{ android_system_image }}" \
       "build-tools;{{ android_build_tools_version }}"
   environment:
     ANDROID_HOME: "{{ android_sdk_root }}"

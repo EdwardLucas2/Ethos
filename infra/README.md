@@ -63,12 +63,15 @@ Generate a dedicated key for the runner VM:
 ssh-keygen -t ed25519 -C "ethos-runner" -f ~/.ssh/ethos-runner
 ```
 
-## Step 4 — GitHub Fine-Grained PAT (for runner registration)
+## Step 4 — GitHub CLI authentication
 
-1. GitHub → Settings → Developer settings → **Fine-grained personal access tokens** → **Generate new token**
-2. Set **Repository access** to this repository only
-3. Under **Permissions** → **Repository** → **Self-hosted runners**: Read and write
-4. Generate and copy the token
+The playbook fetches a runner registration token automatically using the `gh` CLI on your local machine. Make sure you're authenticated:
+
+```bash
+gh auth status   # should show your account
+```
+
+If not: `gh auth login`
 
 ## Step 5 — Bootstrap the state bucket (run once)
 
@@ -143,8 +146,8 @@ Edit `infra/ansible/inventory.yml` and replace `REPLACE_WITH_TOFU_OUTPUT` with t
 ```bash
 cd infra/ansible
 ansible-playbook playbooks/site.yml \
-  -e "github_repo=<ORG>/<REPO>" \
-  -e "github_pat=<YOUR_FINE_GRAINED_PAT>"
+  --private-key ~/.ssh/ethos-runner \
+  -e "github_repo=EdwardLucas2/Ethos"
 ```
 
 This installs Docker, the Android SDK (API 34 arm64-v8a), and registers the GitHub Actions runner. The runner will appear in **GitHub → repo → Settings → Actions → Runners** when complete.
@@ -157,7 +160,7 @@ To update the runner binary to a new version:
 # Update runner_version in infra/ansible/roles/github-runner/defaults/main.yml
 # Then re-run (idempotent — skips already-installed SDK components):
 cd infra/ansible
-ansible-playbook playbooks/site.yml -e "github_repo=... github_pat=..."
+ansible-playbook playbooks/site.yml --private-key ~/.ssh/ethos-runner -e "github_repo=EdwardLucas2/Ethos"
 ```
 
 ## Re-provisioning from scratch
@@ -167,7 +170,7 @@ cd infra/tofu/runner
 tofu destroy   # destroys the VM — data is lost
 tofu apply     # new VM, same IP type (new public IP will be assigned)
 # Update inventory.yml with new IP, then:
-cd infra/ansible && ansible-playbook playbooks/site.yml -e "github_repo=... github_pat=..."
+cd infra/ansible && ansible-playbook playbooks/site.yml --private-key ~/.ssh/ethos-runner -e "github_repo=EdwardLucas2/Ethos"
 ```
 
 ## Phase 2 — App hosting (planned)

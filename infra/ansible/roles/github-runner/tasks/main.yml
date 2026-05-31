@@ -27,16 +27,13 @@
     path: "{{ runner_dir }}/.runner"
   register: runner_config
 
-- name: Get runner registration token from GitHub API
-  uri:
-    url: "https://api.github.com/repos/{{ github_repo }}/actions/runners/registration-token"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ github_pat }}"
-      Accept: "application/vnd.github+json"
-      X-GitHub-Api-Version: "2022-11-28"
-    status_code: 201
-  register: registration_token_response
+# Fetch a short-lived registration token from GitHub using the local gh CLI.
+# Runs on the Ansible controller (your Mac) where gh is already authenticated.
+- name: Fetch runner registration token via gh CLI
+  command: gh api repos/{{ github_repo }}/actions/runners/registration-token --method POST --jq '.token'
+  delegate_to: localhost
+  become: false
+  register: registration_token
   when: not runner_config.stat.exists
   no_log: true
 
@@ -44,7 +41,7 @@
   command: >
     ./config.sh
     --url "https://github.com/{{ github_repo }}"
-    --token "{{ registration_token_response.json.token }}"
+    --token "{{ registration_token.stdout }}"
     --name "{{ runner_name }}"
     --labels "{{ runner_labels }}"
     --work _work
@@ -73,8 +70,6 @@
   args:
     chdir: "{{ runner_dir }}"
     creates: /etc/systemd/system/actions.runner.*.service
-  environment:
-    RUNNER_ALLOW_RUNASROOT: "0"
 
 - name: Enable and start runner service
   shell: ./svc.sh start
