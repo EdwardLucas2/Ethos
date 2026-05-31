@@ -28,11 +28,14 @@ jobs:
               working-directory: app
               run: npm ci
 
+            - name: Clean up previous run
+              run: docker compose -f docker/docker-compose.dev.yml down -v --remove-orphans
+
             - name: Start backend services
               env:
                   DATABASE_USER: ${{ secrets.DATABASE_USER }}
                   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-              run: docker compose -f docker/docker-compose.dev.yml up -d --wait
+              run: docker compose -f docker/docker-compose.dev.yml up -d --wait --build
 
             - name: Show service logs on failure
               if: failure()
