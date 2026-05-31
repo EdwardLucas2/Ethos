@@ -89,6 +89,13 @@ jobs:
                   key: gradle-${{ hashFiles('app/android/**/*.gradle*', 'app/android/**/gradle-wrapper.properties') }}
                   restore-keys: gradle-
 
+            - name: Configure aapt2 override for ARM64
+              if: steps.apk-cache.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p ~/.gradle
+                  grep -qxF 'android.aapt2FromMavenOverride=/opt/android-sdk/build-tools/36.0.0/aapt2' ~/.gradle/gradle.properties 2>/dev/null || \
+                      echo 'android.aapt2FromMavenOverride=/opt/android-sdk/build-tools/36.0.0/aapt2' >> ~/.gradle/gradle.properties
+
             - name: Build APK
               if: steps.apk-cache.outputs.cache-hit != 'true'
               working-directory: app/android

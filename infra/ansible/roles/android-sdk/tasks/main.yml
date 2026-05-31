@@ -70,6 +70,16 @@
   args:
     creates: "{{ android_sdk_root }}/platform-tools/adb"
 
+- name: Set aapt2 override for ARM64 in global Gradle properties
+  lineinfile:
+    path: /home/ubuntu/.gradle/gradle.properties
+    line: "android.aapt2FromMavenOverride={{ android_sdk_root }}/build-tools/{{ android_build_tools_version }}/aapt2"
+    create: yes
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+  become_user: ubuntu
+
 - name: Set Android SDK ownership
   file:
     path: "{{ android_sdk_root }}"
