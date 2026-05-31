@@ -11,7 +11,9 @@ FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 RUN apk add --no-cache curl postgresql-client dumb-init
 
-RUN curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64 \
+ARG TARGETARCH
+RUN curl -fsSL -o /usr/local/bin/dbmate \
+    "https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-${TARGETARCH}" \
     && chmod +x /usr/local/bin/dbmate
 
 COPY --from=builder /app/target/ethos-backend-1.0-SNAPSHOT.jar app.jar
