@@ -1,0 +1,10 @@
+appId: com.ethos.app
+---
+- runScript: seed-api.js
+- launchApp:
+      clearState: true
+- runFlow:
+      file: _login-user.yaml
+      env:
+          TEST_EMAIL: ${output.TEST_EMAIL}
+          TEST_PASSWORD: ${output.TEST_PASSWORD}

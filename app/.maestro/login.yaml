@@ -1,0 +1,18 @@
+appId: com.ethos.app
+---
+# Test: seed a user, log in, sign out, log in again with the same credentials
+- runScript: subflows/seed-api.js
+- launchApp:
+      clearState: true
+- runFlow:
+      file: subflows/_login-user.yaml
+      env:
+          TEST_EMAIL: ${output.TEST_EMAIL}
+          TEST_PASSWORD: ${output.TEST_PASSWORD}
+- tapOn:
+      id: 'sign-out-button'
+- runFlow:
+      file: subflows/_login-user.yaml
+      env:
+          TEST_EMAIL: ${output.TEST_EMAIL}
+          TEST_PASSWORD: ${output.TEST_PASSWORD}

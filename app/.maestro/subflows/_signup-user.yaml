@@ -1,0 +1,24 @@
+appId: com.ethos.app
+---
+# Sub-flow: navigate from the login screen through sign-up and land on home.
+# Requires TEST_EMAIL and TEST_PASSWORD in the calling flow's env.
+- extendedWaitUntil:
+      visible: 'WELCOME BACK.'
+      timeout: 10000
+- tapOn:
+      id: 'signup-link'
+- extendedWaitUntil:
+      visible: 'CREATE ACCOUNT'
+      timeout: 8000
+- tapOn:
+      id: 'email-input'
+- inputText: ${TEST_EMAIL}
+- pressKey: enter
+- inputText: ${TEST_PASSWORD}
+- pressKey: enter
+- tapOn:
+      text: 'Not Now'
+      optional: true
+- extendedWaitUntil:
+      visible: 'Welcome!'
+      timeout: 8000

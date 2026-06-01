@@ -6,31 +6,35 @@ MAESTRO_DIR="$MONOREPO_DIR/app/.maestro"
 RESET_SCRIPT="$MONOREPO_DIR/scripts/reset-test-db.sh"
 FLOW="${1:-}"
 
-run_flow() {
-    local yaml="$1"
-    local name
-    name="$(basename "$yaml" .yaml)"
+banner() {
     echo "──────────────────────────────"
-    echo "▶  $name"
+    echo "▶  $1"
     echo "──────────────────────────────"
-    maestro test "$yaml"
 }
 
-if [ -n "$FLOW" ]; then
+run_signup() {
+    banner "sign-up"
+    maestro test "$MAESTRO_DIR/sign-up.yaml"
+}
+
+run_login() {
+    banner "login"
+    maestro test "$MAESTRO_DIR/login.yaml"
+}
+
+if [ -f "$MONOREPO_DIR/.env.local" ]; then
     "$RESET_SCRIPT"
-    run_flow "$MAESTRO_DIR/$FLOW.yaml"
-else
-    flows=("$MAESTRO_DIR"/*.yaml)
-    if [ ! -f "${flows[0]:-}" ]; then
-        echo "No flows found in $MAESTRO_DIR" >&2
-        exit 1
-    fi
-    first=true
-    for yaml in "${flows[@]}"; do
-        if [[ "$first" == "true" ]]; then
-            "$RESET_SCRIPT"
-            first=false
-        fi
-        run_flow "$yaml"
-    done
 fi
+
+case "$FLOW" in
+    sign-up) run_signup ;;
+    login)   run_login ;;
+    "")
+        run_signup
+        run_login
+        ;;
+    *)
+        echo "Unknown flow: $FLOW" >&2
+        exit 1
+        ;;
+esac

@@ -1,8 +1,6 @@
 services:
     postgres:
         image: postgres:18.3
-        env_file:
-            - ../.env.local
         environment:
             POSTGRES_DB: ethos
             POSTGRES_USER: ${DATABASE_USER}
@@ -10,7 +8,7 @@ services:
         ports:
             - "5432:5432"
         volumes:
-            - postgres_data:/var/lib/postgresql/data
+            - postgres_data:/var/lib/postgresql
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U ethos"]
             interval: 5s
@@ -19,8 +17,6 @@ services:
 
     supertokens:
         image: registry.supertokens.io/supertokens/supertokens-postgresql:11.4.4
-        env_file:
-            - ../.env.local
         depends_on:
             postgres:
                 condition: service_healthy
@@ -45,8 +41,8 @@ services:
         build:
             context: ../auth
         env_file:
-            - ../.env.local
-            - ../auth/.env
+            - path: ../auth/.env
+              required: false
         depends_on:
             supertokens:
                 condition: service_healthy
@@ -67,8 +63,14 @@ services:
             context: ../backend
             dockerfile: Dockerfile
         env_file:
-            - ../.env.local
-            - ../backend/.env
+            - path: ../backend/.env
+              required: false
+        environment:
+            DATABASE_URL: jdbc:postgresql://postgres:5432/ethos
+            DATABASE_USER: ${DATABASE_USER}
+            DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+            SUPERTOKENS_URL: http://supertokens:3567
+            DBMATE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/ethos?sslmode=disable
         depends_on:
             postgres:
                 condition: service_healthy
