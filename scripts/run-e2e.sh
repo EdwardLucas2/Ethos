@@ -22,7 +22,9 @@ run_login() {
     maestro test "$MAESTRO_DIR/login.yaml"
 }
 
-"$RESET_SCRIPT"
+if [ -f "$MONOREPO_DIR/.env.local" ]; then
+    "$RESET_SCRIPT"
+fi
 
 case "$FLOW" in
     sign-up) run_signup ;;
