@@ -81,6 +81,7 @@ export default function LoginScreen() {
                         onChangeText={setEmail}
                         returnKeyType="next"
                         keyboardType="email-address"
+                        autoComplete="email"
                         onSubmitEditing={() => passwordRef.current?.focus()}
                         testID="email-input"
                     />
@@ -90,6 +91,7 @@ export default function LoginScreen() {
                         label="PASSWORD"
                         placeholder="Enter your password"
                         containerStyle={{ marginTop: spacing.md }}
+                        autoComplete="current-password"
                         rightElement={
                             <Text style={styles.forgot} testID="forgot-button">
                                 FORGOT?

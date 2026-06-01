@@ -124,6 +124,7 @@ export default function SignUpScreen() {
                         onChangeText={setEmail}
                         returnKeyType="next"
                         keyboardType="email-address"
+                        autoComplete="email"
                         onSubmitEditing={() => passwordRef.current?.focus()}
                         testID="email-input"
                     />
@@ -133,6 +134,7 @@ export default function SignUpScreen() {
                         label="PASSWORD"
                         placeholder="Enter a password"
                         containerStyle={{ marginTop: spacing.md }}
+                        autoComplete="new-password"
                         isPassword
                         value={password}
                         onChangeText={setPassword}
@@ -168,7 +170,7 @@ export default function SignUpScreen() {
                         <Text style={styles.footerText}>ALREADY HAVE AN ACCOUNT? </Text>
                         <TextButton
                             label="LOGIN"
-                            onPress={() => router.push('/login')}
+                            onPress={() => router.replace('/login')}
                             testID="login-link"
                         />
                     </View>

@@ -1,4 +1,4 @@
-import SuperTokens from 'supertokens-react-native';
+import SuperTokens from '@/src/lib/supertokens';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 const API_URL = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:8080';

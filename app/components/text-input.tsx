@@ -1,10 +1,16 @@
 import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import { forwardRef } from 'react';
-import { KeyboardTypeOptions, TextInput as RNTextInput, StyleSheet } from 'react-native';
+import {
+    KeyboardTypeOptions,
+    TextInput as RNTextInput,
+    TextInputProps,
+    StyleSheet,
+} from 'react-native';
 
 type Props = {
     placeholder: string;
     isPassword?: boolean;
+    autoComplete?: TextInputProps['autoComplete'];
     value: string;
     onChangeText: (text: string) => void;
     onSubmitEditing?: () => void;
@@ -17,6 +23,7 @@ export const TextInput = forwardRef<RNTextInput, Props>(function TextInput(
     {
         placeholder,
         isPassword = false,
+        autoComplete,
         value,
         onChangeText,
         onSubmitEditing,
@@ -34,6 +41,7 @@ export const TextInput = forwardRef<RNTextInput, Props>(function TextInput(
             placeholderTextColor={colors.inkSecondary}
             autoCapitalize="none"
             autoCorrect={false}
+            autoComplete={autoComplete}
             keyboardType={keyboardType}
             secureTextEntry={isPassword}
             returnKeyType={returnKeyType}

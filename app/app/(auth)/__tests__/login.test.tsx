@@ -16,6 +16,7 @@ jest.mock('@/src/api/auth', () => ({
 }));
 
 const mockRefreshSession = jest.fn();
+const mockReplace = jest.fn();
 jest.mock('@/src/context/AuthContext', () => ({
     useAuth: jest.fn(),
 }));
@@ -32,7 +33,7 @@ jest.mock('expo-router', () => {
             testID?: string;
             href?: unknown;
         }) => React.createElement(View, { testID }, children),
-        useRouter: () => ({ replace: jest.fn() }),
+        useRouter: () => ({ replace: mockReplace }),
     };
 });
 
@@ -121,5 +122,11 @@ describe('LoginScreen', () => {
         await waitFor(() => {
             expect(mockRefreshSession).toHaveBeenCalledTimes(1);
         });
+    });
+
+    it('navigates to sign-up when the header SIGN UP button is pressed', () => {
+        render(<LoginScreen />);
+        fireEvent.press(screen.getByTestId('header-signup-button'));
+        expect(mockReplace).toHaveBeenCalledWith('/sign-up');
     });
 });

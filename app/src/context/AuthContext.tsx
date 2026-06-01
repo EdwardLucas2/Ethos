@@ -1,13 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import SuperTokens from 'supertokens-react-native';
-
-const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
-
-SuperTokens.init({
-    apiDomain: AUTH_URL,
-    apiBasePath: '/auth',
-    tokenTransferMethod: 'header',
-});
+import SuperTokens from '@/src/lib/supertokens';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
