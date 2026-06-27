@@ -7,17 +7,20 @@ jest.mock('@/src/context/AuthContext', () => ({
     useAuth: jest.fn(),
 }));
 
-const mockSignOut = jest.fn();
+let mockSignOut: jest.Mock;
 
 beforeEach(() => {
-    jest.clearAllMocks();
+    mockSignOut = jest.fn().mockResolvedValue(undefined);
     jest.mocked(useAuth).mockReturnValue({
         signOut: mockSignOut,
         session: null,
         isLoading: false,
         refreshSession: jest.fn(),
     });
-    mockSignOut.mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+    jest.clearAllMocks();
 });
 
 describe('SignOutButton', () => {

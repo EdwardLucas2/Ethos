@@ -1,4 +1,4 @@
-import { signIn } from '@/src/api/auth';
+import { signIn } from '@/src/services/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
 import { AuthHeader } from '@/components/auth-header';
@@ -31,6 +31,7 @@ export default function LoginScreen() {
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit() {
+        if (loading) return;
         if (!email.trim() || !password) {
             setError('Please enter your email and password.');
             return;

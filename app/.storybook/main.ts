@@ -17,7 +17,7 @@ const config: StorybookConfig = {
                 alias: {
                     // App-specific mocks — must appear before vite-tsconfig-paths resolves
                     // @/* from tsconfig, so the real modules are never imported here.
-                    '@/src/api/auth': path.resolve(__dirname, 'mocks/auth-api.ts'),
+                    '@/src/services/auth': path.resolve(__dirname, 'mocks/auth-api.ts'),
                     '@/src/context/AuthContext': path.resolve(__dirname, 'mocks/auth-context.tsx'),
                     // expo-router has no standalone web context
                     'expo-router': path.resolve(__dirname, 'mocks/expo-router.tsx'),

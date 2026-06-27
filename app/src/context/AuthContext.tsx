@@ -36,18 +36,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const refreshSession = useCallback(async () => {
-        const exists = await SuperTokens.doesSessionExist();
-        if (exists) {
-            const token = await SuperTokens.getAccessToken();
-            setSession(token ?? null);
-        } else {
+        try {
+            const exists = await SuperTokens.doesSessionExist();
+            if (exists) {
+                const token = await SuperTokens.getAccessToken();
+                setSession(token ?? null);
+            } else {
+                setSession(null);
+            }
+        } catch {
             setSession(null);
         }
     }, []);
 
     const signOut = useCallback(async () => {
-        await SuperTokens.signOut();
-        setSession(null);
+        try {
+            await SuperTokens.signOut();
+        } finally {
+            setSession(null);
+        }
     }, []);
 
     return (

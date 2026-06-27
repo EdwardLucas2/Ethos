@@ -45,7 +45,7 @@ function RootRedirect() {
 // ─── Root layout ──────────────────────────────────────────────────────────────
 
 export default function RootLayout() {
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
         PublicSans_400Regular,
         PublicSans_500Medium,
         PublicSans_700Bold,
@@ -54,12 +54,12 @@ export default function RootLayout() {
     });
 
     useEffect(() => {
-        if (fontsLoaded) {
+        if (fontsLoaded || fontError) {
             SplashScreen.hideAsync();
         }
-    }, [fontsLoaded]);
+    }, [fontsLoaded, fontError]);
 
-    if (!fontsLoaded) {
+    if (!fontsLoaded && !fontError) {
         return null;
     }
 
