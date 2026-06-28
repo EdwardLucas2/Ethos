@@ -6,6 +6,7 @@ import {
     StyleSheet,
     Text,
     TextInput as RNTextInput,
+    TextInputProps,
     View,
     ViewStyle,
 } from 'react-native';
@@ -16,6 +17,7 @@ type Props = {
     rightElement?: React.ReactNode;
     containerStyle?: ViewStyle;
     isPassword?: boolean;
+    autoComplete?: TextInputProps['autoComplete'];
     value: string;
     onChangeText: (text: string) => void;
     onSubmitEditing?: () => void;

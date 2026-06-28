@@ -1,4 +1,4 @@
-import { signIn } from '@/src/api/auth';
+import { signIn } from '@/src/services/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
 import { AuthHeader } from '@/components/auth-header';
@@ -31,6 +31,7 @@ export default function LoginScreen() {
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit() {
+        if (loading) return;
         if (!email.trim() || !password) {
             setError('Please enter your email and password.');
             return;
@@ -81,6 +82,7 @@ export default function LoginScreen() {
                         onChangeText={setEmail}
                         returnKeyType="next"
                         keyboardType="email-address"
+                        autoComplete="email"
                         onSubmitEditing={() => passwordRef.current?.focus()}
                         testID="email-input"
                     />
@@ -90,6 +92,7 @@ export default function LoginScreen() {
                         label="PASSWORD"
                         placeholder="Enter your password"
                         containerStyle={{ marginTop: spacing.md }}
+                        autoComplete="current-password"
                         rightElement={
                             <Text style={styles.forgot} testID="forgot-button">
                                 FORGOT?

@@ -3,7 +3,7 @@
  * Both fetch and supertokens-react-native are mocked — no network or token
  * storage is exercised. The full auth handshake is covered by Maestro E2E.
  */
-import { signIn, signUp } from '../auth';
+import { signIn, signUp } from '../../services/auth';
 import SuperTokens from 'supertokens-react-native';
 
 // Returns a fetch implementation that responds to the auth endpoint and the backend

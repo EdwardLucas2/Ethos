@@ -1,4 +1,4 @@
-import SuperTokens from 'supertokens-react-native';
+import SuperTokens from '@/src/lib/supertokens';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 const API_URL = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:8080';
@@ -23,19 +23,40 @@ function deriveDisplayName(email: string): string {
 
 type AuthResponse = {
     status: string;
-    formFields?: Array<{ id: string; error: string }>;
+    formFields?: { id: string; error: string }[];
 };
+
+const REQUEST_TIMEOUT_MS = 10_000;
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+        return await fetch(input, { ...init, signal: controller.signal });
+    } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+            throw new AuthError('Request timed out. Please try again.', 'UNKNOWN');
+        }
+        throw e;
+    } finally {
+        clearTimeout(timer);
+    }
+}
 
 async function authFetch(path: string, body: unknown): Promise<AuthResponse> {
     let response: Response;
     try {
-        response = await fetch(`${AUTH_URL}${path}`, {
+        response = await fetchWithTimeout(`${AUTH_URL}${path}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
         });
-    } catch {
-        throw new AuthError('Connection failed. Please check your network and try again.', 'UNKNOWN');
+    } catch (e) {
+        if (e instanceof AuthError) throw e;
+        throw new AuthError(
+            'Connection failed. Please check your network and try again.',
+            'UNKNOWN'
+        );
     }
 
     if (!response.ok) {
@@ -56,7 +77,7 @@ async function ensureUserProfile(email: string): Promise<void> {
 
     let res: Response;
     try {
-        res = await fetch(`${API_URL}/users`, {
+        res = await fetchWithTimeout(`${API_URL}/users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -64,8 +85,12 @@ async function ensureUserProfile(email: string): Promise<void> {
             },
             body: JSON.stringify({ displayName: deriveDisplayName(email) }),
         });
-    } catch {
-        throw new AuthError('Connection failed. Please check your network and try again.', 'UNKNOWN');
+    } catch (e) {
+        if (e instanceof AuthError) throw e;
+        throw new AuthError(
+            'Connection failed. Please check your network and try again.',
+            'UNKNOWN'
+        );
     }
 
     if (res.ok || res.status === 409) return;

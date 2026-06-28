@@ -47,17 +47,11 @@ describe('Button', () => {
 
     it('uses white text on blue background', () => {
         render(<Button label="GO" backgroundColor={colors.blue} testID="btn" />);
-        const label = screen.getByText('GO');
-        expect(label.props.style).toEqual(
-            expect.arrayContaining([expect.objectContaining({ color: colors.white })])
-        );
+        expect(screen.getByText('GO')).toHaveStyle({ color: colors.white });
     });
 
     it('uses ink text on yellow background', () => {
         render(<Button label="GO" backgroundColor={colors.yellow} testID="btn" />);
-        const label = screen.getByText('GO');
-        expect(label.props.style).toEqual(
-            expect.arrayContaining([expect.objectContaining({ color: colors.ink })])
-        );
+        expect(screen.getByText('GO')).toHaveStyle({ color: colors.ink });
     });
 });

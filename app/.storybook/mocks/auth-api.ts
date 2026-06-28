@@ -1,4 +1,4 @@
-// Spy replacements for @/src/api/auth.
+// Spy replacements for @/src/services/auth.
 // AuthError is kept real so stories can construct and throw it.
 import { fn } from 'storybook/test';
 

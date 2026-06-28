@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { signUp } from '@/src/api/auth';
+import { signUp } from '@/src/services/auth';
 import { useAuth } from '@/src/context/AuthContext';
 import { AlertMessage } from '@/components/alert-message';
 import { AuthHeader } from '@/components/auth-header';
@@ -35,6 +35,7 @@ export default function SignUpScreen() {
     const [showComingSoon, setShowComingSoon] = useState(false);
 
     async function handleSubmit() {
+        if (loading) return;
         if (!email.trim() || !password) {
             setError('Please enter your email and password.');
             return;
@@ -124,6 +125,7 @@ export default function SignUpScreen() {
                         onChangeText={setEmail}
                         returnKeyType="next"
                         keyboardType="email-address"
+                        autoComplete="email"
                         onSubmitEditing={() => passwordRef.current?.focus()}
                         testID="email-input"
                     />
@@ -133,6 +135,7 @@ export default function SignUpScreen() {
                         label="PASSWORD"
                         placeholder="Enter a password"
                         containerStyle={{ marginTop: spacing.md }}
+                        autoComplete="new-password"
                         isPassword
                         value={password}
                         onChangeText={setPassword}
@@ -168,7 +171,7 @@ export default function SignUpScreen() {
                         <Text style={styles.footerText}>ALREADY HAVE AN ACCOUNT? </Text>
                         <TextButton
                             label="LOGIN"
-                            onPress={() => router.push('/login')}
+                            onPress={() => router.replace('/login')}
                             testID="login-link"
                         />
                     </View>

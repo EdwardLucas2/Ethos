@@ -9,7 +9,7 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-source "$ENV_FILE"
+set -a; source "$ENV_FILE"; set +a
 
 echo "Resetting all data in auth and app database..."
 

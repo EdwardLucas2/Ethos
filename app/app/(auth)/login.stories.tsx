@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { signIn, AuthError } from '@/src/api/auth';
+import { signIn, AuthError } from '@/src/services/auth';
 import LoginScreen from './login';
 
 const meta: Meta<typeof LoginScreen> = {
