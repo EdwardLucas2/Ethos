@@ -39,9 +39,3 @@
     name: fail2ban
     enabled: yes
     state: started
-
-- name: Add ubuntu user to kvm group (for Android emulator)
-  user:
-    name: ubuntu
-    groups: kvm
-    append: yes

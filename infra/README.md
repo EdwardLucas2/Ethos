@@ -11,9 +11,8 @@ infra/
     runner/      # GitHub Actions runner VM (VCN + subnet + A1.Flex compute)
   ansible/
     roles/
-      common/        # Base packages, fail2ban, KVM group
+      common/        # Base packages, fail2ban
       docker/        # Docker CE + Compose plugin
-      android-sdk/   # Android SDK, emulator, arm64-v8a system image (API 34)
       github-runner/ # GitHub Actions runner daemon
     playbooks/
       site.yml       # Full runner configuration
@@ -150,7 +149,7 @@ ansible-playbook playbooks/site.yml \
   -e "github_repo=EdwardLucas2/Ethos"
 ```
 
-This installs Docker, the Android SDK (API 34 arm64-v8a), and registers the GitHub Actions runner. The runner will appear in **GitHub → repo → Settings → Actions → Runners** when complete.
+This installs Docker and registers the GitHub Actions runner. The runner will appear in **GitHub → repo → Settings → Actions → Runners** when complete.
 
 ## Updating the runner
 
@@ -158,7 +157,7 @@ To update the runner binary to a new version:
 
 ```bash
 # Update runner_version in infra/ansible/roles/github-runner/defaults/main.yml
-# Then re-run (idempotent — skips already-installed SDK components):
+# Then re-run (idempotent — skips already-installed components):
 cd infra/ansible
 ansible-playbook playbooks/site.yml --private-key ~/.ssh/ethos-runner -e "github_repo=EdwardLucas2/Ethos"
 ```

@@ -6,7 +6,7 @@ on:
 
 jobs:
     maestro:
-        runs-on: [self-hosted, linux, arm64, oracle]
+        runs-on: ubuntu-latest
         timeout-minutes: 60
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -89,31 +89,30 @@ jobs:
                   key: gradle-${{ hashFiles('app/android/**/*.gradle*', 'app/android/**/gradle-wrapper.properties') }}
                   restore-keys: gradle-
 
-            - name: Configure aapt2 override for ARM64
-              if: steps.apk-cache.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p ~/.gradle
-                  grep -qxF 'android.aapt2FromMavenOverride=/opt/android-sdk/build-tools/36.0.0/aapt2' ~/.gradle/gradle.properties 2>/dev/null || \
-                      echo 'android.aapt2FromMavenOverride=/opt/android-sdk/build-tools/36.0.0/aapt2' >> ~/.gradle/gradle.properties
-
             - name: Build APK
               if: steps.apk-cache.outputs.cache-hit != 'true'
               working-directory: app/android
               run: ./gradlew assembleDebug --no-daemon
+
+            - name: Enable KVM
+              run: |
+                  echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+                  sudo udevadm control --reload-rules
+                  sudo udevadm trigger --name-match=kvm
 
             - name: Cache AVD
               id: avd-cache
               uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
               with:
                   path: ~/.android/avd/*
-                  key: avd-api34-arm64-v8a
+                  key: avd-api34-x86_64
 
             - name: Create AVD snapshot
               if: steps.avd-cache.outputs.cache-hit != 'true'
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
               with:
                   api-level: 34
-                  arch: arm64-v8a
+                  arch: x86_64
                   target: google_apis
                   force-avd-creation: false
                   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -124,7 +123,7 @@ jobs:
               uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
               with:
                   api-level: 34
-                  arch: arm64-v8a
+                  arch: x86_64
                   target: google_apis
                   force-avd-creation: false
                   emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none

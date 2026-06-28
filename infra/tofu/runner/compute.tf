@@ -15,15 +15,6 @@ data "oci_core_images" "ubuntu_22_04_arm64" {
 locals {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[var.availability_domain_index].name
   ubuntu_image_id     = data.oci_core_images.ubuntu_22_04_arm64.images[0].id
-
-  # cloud-init: enable KVM device for Android emulator and add ubuntu user to kvm group
-  cloud_init = <<-EOT
-    #!/bin/bash
-    echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' > /etc/udev/rules.d/99-kvm4all.rules
-    udevadm control --reload-rules
-    udevadm trigger --name-match=kvm
-    usermod -aG kvm ubuntu
-  EOT
 }
 
 resource "oci_core_instance" "runner" {
@@ -52,7 +43,6 @@ resource "oci_core_instance" "runner" {
 
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
-    user_data           = base64encode(local.cloud_init)
   }
 
   # Prevent accidental replacement of a running runner

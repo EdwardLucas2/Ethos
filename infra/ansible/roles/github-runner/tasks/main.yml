@@ -53,18 +53,6 @@
   when: not runner_config.stat.exists
   no_log: true
 
-- name: Set ANDROID_HOME in runner environment file
-  lineinfile:
-    path: "{{ runner_dir }}/.env"
-    line: "{{ item }}"
-    create: yes
-    owner: ubuntu
-    group: ubuntu
-    mode: "0600"
-  loop:
-    - "ANDROID_HOME=/opt/android-sdk"
-    - "ANDROID_SDK_ROOT=/opt/android-sdk"
-
 - name: Install runner as systemd service
   command: ./svc.sh install ubuntu
   args:
