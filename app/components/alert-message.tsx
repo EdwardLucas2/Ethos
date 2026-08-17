@@ -23,8 +23,8 @@ type SeverityConfig = {
 const SEVERITY_CONFIG: Record<NonNullable<AlertMessageProps['severity']>, SeverityConfig> = {
     error: {
         backgroundColor: colors.red,
-        textColor: colors.white,
-        iconColor: colors.white,
+        textColor: colors.surfaceRaised,
+        iconColor: colors.surfaceRaised,
         iconName: 'warning',
     },
     warning: {
@@ -35,8 +35,8 @@ const SEVERITY_CONFIG: Record<NonNullable<AlertMessageProps['severity']>, Severi
     },
     info: {
         backgroundColor: colors.blue,
-        textColor: colors.white,
-        iconColor: colors.white,
+        textColor: colors.surfaceRaised,
+        iconColor: colors.surfaceRaised,
         iconName: 'info-circle',
     },
 };

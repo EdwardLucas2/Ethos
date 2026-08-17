@@ -27,7 +27,7 @@ export function Button({
     testID,
     style,
 }: ButtonProps) {
-    const textColor = LIGHT_BACKGROUNDS.has(backgroundColor) ? colors.ink : colors.white;
+    const textColor = LIGHT_BACKGROUNDS.has(backgroundColor) ? colors.ink : colors.surfaceRaised;
     const isDisabled = disabled || loading;
 
     return (

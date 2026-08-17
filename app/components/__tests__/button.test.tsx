@@ -47,7 +47,7 @@ describe('Button', () => {
 
     it('uses white text on blue background', () => {
         render(<Button label="GO" backgroundColor={colors.blue} testID="btn" />);
-        expect(screen.getByText('GO')).toHaveStyle({ color: colors.white });
+        expect(screen.getByText('GO')).toHaveStyle({ color: colors.surfaceRaised });
     });
 
     it('uses ink text on yellow background', () => {

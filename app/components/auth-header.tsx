@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     actionButtonText: {
         fontFamily: typography.fonts.bold,
         fontSize: 13,
-        color: colors.white,
+        color: colors.surfaceRaised,
         letterSpacing: 1,
     },
 });
