@@ -20,24 +20,30 @@ const queryClient = new QueryClient();
 
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 
+// Top-level route groups reachable without a session. Everything else is
+// treated as protected — list new public groups here explicitly (e.g. an
+// onboarding or public marketing flow) rather than inferring "protected"
+// from "not (auth)", which would silently misclassify them as protected.
+const PUBLIC_ROUTE_GROUPS: ReadonlySet<string> = new Set(['(auth)']);
+
 function RootRedirect() {
     const { session, isLoading } = useAuth();
     const segments = useSegments();
     const router = useRouter();
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const inPublicGroup = PUBLIC_ROUTE_GROUPS.has(segments[0] ?? '');
 
     useEffect(() => {
         if (isLoading) return;
 
-        if (!session && !inAuthGroup) {
+        if (!session && !inPublicGroup) {
             router.replace('/login');
-        } else if (session && inAuthGroup) {
+        } else if (session && inPublicGroup) {
             router.replace('/(tabs)');
         }
         // useRouter() returns a stable instance; depending on it would re-run on every render
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session, isLoading, inAuthGroup]);
+    }, [session, isLoading, inPublicGroup]);
 
     return null;
 }
@@ -59,23 +65,29 @@ export default function RootLayout() {
         }
     }, [fontsLoaded, fontError]);
 
-    if (!fontsLoaded && !fontError) {
-        return null;
-    }
+    const fontsReady = fontsLoaded || fontError;
 
     return (
         <QueryClientProvider client={queryClient}>
+            {/* AuthProvider mounts unconditionally so its session read (SecureStore)
+                runs concurrently with font loading instead of starting only after
+                the splash screen hides — otherwise a slow session check can flash
+                the wrong screen before RootRedirect fires. */}
             <AuthProvider>
-                <RootRedirect />
-                <Stack>
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen
-                        name="modal"
-                        options={{ presentation: 'modal', title: 'Modal' }}
-                    />
-                </Stack>
-                <StatusBar style="dark" />
+                {fontsReady ? (
+                    <>
+                        <RootRedirect />
+                        <Stack>
+                            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen
+                                name="modal"
+                                options={{ presentation: 'modal', title: 'Modal' }}
+                            />
+                        </Stack>
+                        <StatusBar style="dark" />
+                    </>
+                ) : null}
             </AuthProvider>
         </QueryClientProvider>
     );

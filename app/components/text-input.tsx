@@ -3,14 +3,14 @@ import { forwardRef } from 'react';
 import {
     KeyboardTypeOptions,
     TextInput as RNTextInput,
-    TextInputProps,
+    TextInputProps as RNTextInputProps,
     StyleSheet,
 } from 'react-native';
 
-type Props = {
+type TextInputProps = {
     placeholder: string;
     isPassword?: boolean;
-    autoComplete?: TextInputProps['autoComplete'];
+    autoComplete?: RNTextInputProps['autoComplete'];
     value: string;
     onChangeText: (text: string) => void;
     onSubmitEditing?: () => void;
@@ -19,7 +19,7 @@ type Props = {
     testID?: string;
 };
 
-export const TextInput = forwardRef<RNTextInput, Props>(function TextInput(
+export const TextInput = forwardRef<RNTextInput, TextInputProps>(function TextInput(
     {
         placeholder,
         isPassword = false,

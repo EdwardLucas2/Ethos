@@ -1,17 +1,29 @@
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
-type Props = {
+type OAuthButtonProps = {
     provider: 'google' | 'apple';
     onPress?: () => void;
+    disabled?: boolean;
     testID?: string;
     style?: ViewStyle;
 };
 
-export function OAuthButton({ provider, onPress, testID, style }: Props) {
+export function OAuthButton({
+    provider,
+    onPress,
+    disabled = false,
+    testID,
+    style,
+}: OAuthButtonProps) {
     return (
         <View style={[styles.shadow, style]}>
-            <Pressable style={styles.button} onPress={onPress} testID={testID}>
+            <Pressable
+                style={[styles.button, disabled && styles.disabled]}
+                onPress={onPress}
+                disabled={disabled}
+                testID={testID}
+            >
                 <View style={styles.inner}>
                     <Text style={styles.icon}>{provider === 'google' ? 'G' : 'iOS'}</Text>
                     <Text style={styles.label}>{provider === 'google' ? 'GOOGLE' : 'APPLE'}</Text>
@@ -33,6 +45,9 @@ const styles = StyleSheet.create({
         borderColor: colors.ink,
         paddingVertical: spacing.sm + 2,
         paddingHorizontal: spacing.md,
+    },
+    disabled: {
+        opacity: 0.5,
     },
     inner: {
         flexDirection: 'row',

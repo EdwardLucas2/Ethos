@@ -3,7 +3,7 @@ import { Button } from '@/components/button';
 import { useAuth } from '@/src/context/AuthContext';
 import { colors, spacing } from '@/constants/theme';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 export function SignOutButton() {
     const { signOut } = useAuth();
@@ -25,7 +25,7 @@ export function SignOutButton() {
     return (
         <View>
             {error ? (
-                <View style={{ marginBottom: spacing.sm }}>
+                <View style={styles.alertWrapper}>
                     <AlertMessage
                         message={error}
                         severity="error"
@@ -44,3 +44,9 @@ export function SignOutButton() {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    alertWrapper: {
+        marginBottom: spacing.sm,
+    },
+});

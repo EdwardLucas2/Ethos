@@ -2,14 +2,14 @@ import { borderWidth, colors, shadows, spacing } from '@/constants/theme';
 import { ReactNode } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 
-type Props = {
+type CardProps = {
     children: ReactNode;
     shadow?: 'sm' | 'md' | 'lg';
     style?: ViewStyle;
     testID?: string;
 };
 
-export function Card({ children, shadow = 'sm', style, testID }: Props) {
+export function Card({ children, shadow = 'sm', style, testID }: CardProps) {
     return (
         <View style={[styles.outer, shadows[shadow]]}>
             <View style={[styles.inner, style]} testID={testID}>

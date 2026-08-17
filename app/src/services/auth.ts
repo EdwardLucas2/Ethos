@@ -1,7 +1,7 @@
+import { customFetch } from '@/src/api/client';
 import SuperTokens from '@/src/lib/supertokens';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
-const API_URL = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:8080';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,35 +66,52 @@ async function authFetch(path: string, body: unknown): Promise<AuthResponse> {
     return response.json() as Promise<AuthResponse>;
 }
 
+// Emails already confirmed to have a backend user row this app session — lets
+// signIn skip the redundant POST /users call on repeat logins instead of
+// paying for it every time (see ensureUserProfile below).
+const profileConfirmed = new Set<string>();
+
+// Test-only: clears the session cache so tests reusing an email don't leak
+// state across cases. Not used by app code.
+export function __resetProfileConfirmedCache(): void {
+    profileConfirmed.clear();
+}
+
 // Idempotent: POSTs to /users; treats 409 (row already exists) as success.
-// Called after both signup and signin so a signup that crashed between the
-// SuperTokens write and the /users write is recovered on the user's next login.
+// Called after signup, and after the first signin per session, so a signup
+// that crashed between the SuperTokens write and the /users write is
+// recovered without paying this extra round trip on every subsequent login.
 async function ensureUserProfile(email: string): Promise<void> {
+    if (profileConfirmed.has(email)) return;
+
     const token = await SuperTokens.getAccessToken();
     if (!token) {
         throw new AuthError('Session not established', 'UNKNOWN');
     }
 
-    let res: Response;
     try {
-        res = await fetchWithTimeout(`${API_URL}/users`, {
+        // Routed through the shared Orval mutator (src/api/client.ts) rather
+        // than a second hand-rolled fetch client — /users is this backend's
+        // own OpenAPI-documented endpoint, not the external SuperTokens
+        // service that authFetch above legitimately talks to directly.
+        await customFetch('/users', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
             body: JSON.stringify({ displayName: deriveDisplayName(email) }),
         });
     } catch (e) {
-        if (e instanceof AuthError) throw e;
-        throw new AuthError(
-            'Connection failed. Please check your network and try again.',
-            'UNKNOWN'
-        );
+        if (isApiErrorWithStatus(e, 409)) {
+            profileConfirmed.add(email);
+            return;
+        }
+        throw new AuthError('Failed to create user profile', 'UNKNOWN');
     }
 
-    if (res.ok || res.status === 409) return;
-    throw new AuthError('Failed to create user profile', 'UNKNOWN');
+    profileConfirmed.add(email);
+}
+
+function isApiErrorWithStatus(e: unknown, status: number): boolean {
+    return typeof e === 'object' && e !== null && 'status' in e && e.status === status;
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────

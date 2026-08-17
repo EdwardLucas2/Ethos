@@ -8,18 +8,10 @@ import { Card } from '@/components/card';
 import { TextButton } from '@/components/text-button';
 import { FormField } from '@/components/form-field';
 import { OAuthButton } from '@/components/oauth-button';
-import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { styles } from './sign-up.styles';
 
 const emailSchema = z.email();
 
@@ -103,6 +95,7 @@ export default function SignUpScreen() {
                     {showComingSoon ? (
                         <View style={styles.alertWrapper}>
                             <AlertMessage
+                                testID="coming-soon-alert"
                                 message="Coming soon"
                                 severity="info"
                                 dismissible
@@ -134,7 +127,7 @@ export default function SignUpScreen() {
                         ref={passwordRef}
                         label="PASSWORD"
                         placeholder="Enter a password"
-                        containerStyle={{ marginTop: spacing.md }}
+                        containerStyle={styles.passwordField}
                         autoComplete="new-password"
                         isPassword
                         value={password}
@@ -147,6 +140,7 @@ export default function SignUpScreen() {
                     {error ? (
                         <View style={styles.alertWrapper}>
                             <AlertMessage
+                                testID="error-alert"
                                 message={error}
                                 severity="error"
                                 dismissible
@@ -180,73 +174,3 @@ export default function SignUpScreen() {
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    flex: {
-        flex: 1,
-        backgroundColor: colors.surface,
-    },
-    container: {
-        flexGrow: 1,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: 0,
-    },
-    heading: {
-        fontFamily: typography.fonts.black,
-        fontSize: 32,
-        color: colors.ink,
-        marginBottom: spacing.xs,
-    },
-    subheading: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.inkSecondary,
-        letterSpacing: 1,
-        marginBottom: spacing.md,
-    },
-    divider: {
-        height: borderWidth.structural,
-        backgroundColor: colors.ink,
-        marginVertical: spacing.md,
-    },
-    alertWrapper: {
-        marginTop: spacing.sm,
-    },
-    separator: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: spacing.md,
-    },
-    separatorLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: colors.inkSecondary,
-        opacity: 0.4,
-    },
-    separatorText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.inkSecondary,
-        letterSpacing: 1,
-        marginHorizontal: spacing.sm,
-    },
-    submitButton: {
-        marginTop: spacing.lg,
-    },
-    oauthGap: {
-        marginTop: spacing.sm,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-    },
-    footerText: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 11,
-        color: colors.ink,
-        letterSpacing: 1,
-    },
-});
