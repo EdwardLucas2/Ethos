@@ -1,6 +1,7 @@
 # Backend
 backend/target/
 backend/data/
+backend/dependency-reduced-pom.xml
 *.class
 
 # App

@@ -62,6 +62,12 @@ services:
         build:
             context: ../backend
             dockerfile: Dockerfile
+        # backend/.env is written for running `run-dev.sh` directly on the host
+        # (postgres/supertokens reachable at localhost) — those hostnames would
+        # be wrong inside this container's network, so `environment:` below
+        # deliberately overrides DATABASE_URL/USER/PASSWORD, SUPERTOKENS_URL,
+        # and DBMATE_URL with container-network values. env_file still applies
+        # for any other var backend/.env sets (e.g. feature flags, secrets).
         env_file:
             - path: ../backend/.env
               required: false

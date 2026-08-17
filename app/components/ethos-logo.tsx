@@ -2,7 +2,7 @@ import { borderWidth, colors } from '@/constants/theme';
 import { Platform, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-type Props = {
+type EthosLogoProps = {
     size?: number;
 };
 
@@ -10,7 +10,7 @@ type Props = {
 // Wider x spread (18→78) makes it chunky; tighter y range (8→92) keeps it squat.
 const BOLT_PATH = 'M 62 8 L 18 56 L 46 56 L 34 92 L 78 44 L 50 44 Z';
 
-export function EthosLogo({ size = 64 }: Props) {
+export function EthosLogo({ size = 64 }: EthosLogoProps) {
     const boltSize = size * 0.6;
     return (
         <View style={[styles.shadowOffset, { width: size, height: size }]}>
@@ -32,7 +32,7 @@ export function EthosLogo({ size = 64 }: Props) {
 
 const styles = StyleSheet.create({
     shadowOffset: {
-        ...(Platform.select({
+        ...Platform.select({
             web: { boxShadow: `4px 4px 0px ${colors.ink}` } as object,
             ios: {
                 shadowColor: colors.ink,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
                 shadowRadius: 0,
             },
             default: { elevation: 4, shadowColor: colors.ink },
-        }) ?? { elevation: 4 }),
+        }),
     },
     container: {
         backgroundColor: colors.yellow,

@@ -1,0 +1,18 @@
+name: Setup dbmate
+description: Install a checksum-verified dbmate binary and add it to PATH
+inputs:
+    version:
+        description: dbmate version to install (e.g. "2.33.0")
+        required: true
+    sha256:
+        description: Expected sha256 checksum of the linux-amd64 binary for this version
+        required: true
+runs:
+    using: composite
+    steps:
+        - name: Install dbmate
+          shell: bash
+          run: |
+              curl -fsSL -o /usr/local/bin/dbmate "https://github.com/amacneil/dbmate/releases/download/v${{ inputs.version }}/dbmate-linux-amd64"
+              echo "${{ inputs.sha256 }}  /usr/local/bin/dbmate" | sha256sum -c
+              chmod +x /usr/local/bin/dbmate

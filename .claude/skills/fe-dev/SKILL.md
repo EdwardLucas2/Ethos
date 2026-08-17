@@ -137,12 +137,12 @@ Wait for the sub-agent. Store its summary.
 Run the helper script to ensure Storybook is running:
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/ensure-storybook.sh"
+bash ".claude/skills/fe-dev/scripts/ensure-storybook.sh"
 ```
 
 The script outputs `already-running`, `started:<pid>`, or exits non-zero with an `error:` message on stderr.
 
-- If the output starts with `started:`, extract the PID — you will need it for cleanup.
+- If the output starts with `started:`, extract the PID — you will need it for cleanup in Phase 8.
 - If the script exits with an error, report the message to the user and stop here.
 
 ---
@@ -200,7 +200,7 @@ Before spawning, run these prerequisite checks and stop immediately if any fail:
 **1. Ensure backend is running:**
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/ensure-backend.sh"
+bash ".claude/skills/fe-dev/scripts/ensure-backend.sh"
 ```
 
 The script outputs `already-running`, `started:<pid>`, or exits non-zero with an `error:` message on stderr.
@@ -232,7 +232,7 @@ Spawn a general-purpose sub-agent:
 > **Screen file:** `app/(auth)/<screen>.tsx` (relative to `app/`)
 > **Screenshots:** saved to `app/maestro-screenshots/` in the monorepo
 > **Maestro binary:** `~/.maestro/bin/maestro`
-> **Credentials:** stored in `.maestro/.env` — maestro auto-loads this when running from `app/`
+> **Credentials:** `TEST_EMAIL`/`TEST_PASSWORD` are defined inline in each top-level flow's `env:` block — no `.env` file needed. Use `runFlow: subflows/_signup-user.yaml` or `subflows/_login-user.yaml` as a one-line setup step if the flow needs an authenticated user.
 >
 > **Implementation summary:**
 > <paste Phase 4 summary verbatim>
@@ -271,7 +271,13 @@ Spawn a general-purpose sub-agent:
 If you started Storybook in Phase 5 (output was `started:<pid>`), stop it:
 
 ```bash
-kill <pid> 2>/dev/null || true
+kill <storybook-pid> 2>/dev/null || true
+```
+
+If you started the backend in Phase 7 (output was `started:<pid>`), stop it too — otherwise it (and its Docker containers) keep running on port 8080 after this skill finishes:
+
+```bash
+kill <backend-pid> 2>/dev/null || true
 ```
 
 Report to the user:

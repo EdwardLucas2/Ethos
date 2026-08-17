@@ -54,3 +54,13 @@ export const Loading: Story = {
         await userEvent.click(canvas.getByTestId('submit-button'));
     },
 };
+
+// ── OAuth coming soon ─────────────────────────────────────────────────────────
+
+export const ComingSoon: Story = {
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await userEvent.click(canvas.getByTestId('google-button'));
+        await waitFor(() => expect(canvas.getByText('COMING SOON')).toBeTruthy());
+    },
+};

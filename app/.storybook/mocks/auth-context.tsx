@@ -38,3 +38,8 @@ export function MockAuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth(): AuthContextValue {
     return useContext(MockAuthContext);
 }
+
+// The real module exports `AuthProvider`; alias it here so a story that
+// pulls in a screen importing `AuthProvider` (e.g. via `_layout.tsx`) still
+// resolves against this mock instead of throwing an undefined-export error.
+export const AuthProvider = MockAuthProvider;

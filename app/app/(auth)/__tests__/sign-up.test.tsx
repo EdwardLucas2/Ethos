@@ -145,7 +145,7 @@ describe('SignUpScreen', () => {
         fireEvent.press(screen.getByTestId('submit-button'));
 
         await waitFor(() => {
-            expect(screen.queryByTestId('alert-message')).toBeNull();
+            expect(screen.queryByTestId('error-alert')).toBeNull();
         });
     });
 

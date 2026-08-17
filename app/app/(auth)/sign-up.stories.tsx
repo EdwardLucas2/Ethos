@@ -22,7 +22,7 @@ export const EmptyFieldsError: Story = {
     play: async ({ canvasElement }) => {
         const canvas = within(canvasElement);
         await userEvent.click(canvas.getByTestId('submit-button'));
-        await waitFor(() => expect(canvas.getByTestId('alert-message-text')).toBeTruthy());
+        await waitFor(() => expect(canvas.getByTestId('error-alert-text')).toBeTruthy());
         await waitFor(() =>
             expect(canvas.getByText('PLEASE ENTER YOUR EMAIL AND PASSWORD.')).toBeTruthy()
         );
@@ -111,7 +111,7 @@ export const Success: Story = {
         await userEvent.type(canvas.getByTestId('password-input'), 'password123');
         await userEvent.click(canvas.getByTestId('submit-button'));
         // refreshSession is called — no error alert should be visible
-        await waitFor(() => expect(canvas.queryByTestId('alert-message')).toBeNull());
+        await waitFor(() => expect(canvas.queryByTestId('error-alert')).toBeNull());
     },
 };
 

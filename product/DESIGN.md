@@ -91,7 +91,7 @@ Use the **AntDesign** icon set from `@expo/vector-icons` — outline variants on
 import { AntDesign } from "@expo/vector-icons";
 ```
 
-- Outline variants use an `"o"` suffix (e.g. `checkcircleo`, `hearto`, `staro`)
+- Icon names are kebab-case (e.g. `check-circle`, `heart`, `star`) — verify the exact name via the [Expo icon explorer](https://icons.expo.fyi) before using it; there's no consistent outline-suffix convention across the set
 - Never use emoji as icons in the UI
 - Size icons relative to the text they accompany
 

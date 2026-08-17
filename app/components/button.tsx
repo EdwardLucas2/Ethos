@@ -1,7 +1,7 @@
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
-type Props = {
+type ButtonProps = {
     label: string;
     onPress?: () => void;
     backgroundColor?: string;
@@ -26,8 +26,8 @@ export function Button({
     withShadow = true,
     testID,
     style,
-}: Props) {
-    const textColor = LIGHT_BACKGROUNDS.has(backgroundColor) ? colors.ink : colors.white;
+}: ButtonProps) {
+    const textColor = LIGHT_BACKGROUNDS.has(backgroundColor) ? colors.ink : colors.surfaceRaised;
     const isDisabled = disabled || loading;
 
     return (

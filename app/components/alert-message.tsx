@@ -10,6 +10,7 @@ type DismissibleProps =
 export type AlertMessageProps = {
     message: string;
     severity?: 'error' | 'warning' | 'info';
+    testID?: string;
 } & DismissibleProps;
 
 type SeverityConfig = {
@@ -22,8 +23,8 @@ type SeverityConfig = {
 const SEVERITY_CONFIG: Record<NonNullable<AlertMessageProps['severity']>, SeverityConfig> = {
     error: {
         backgroundColor: colors.red,
-        textColor: colors.white,
-        iconColor: colors.white,
+        textColor: colors.surfaceRaised,
+        iconColor: colors.surfaceRaised,
         iconName: 'warning',
     },
     warning: {
@@ -34,8 +35,8 @@ const SEVERITY_CONFIG: Record<NonNullable<AlertMessageProps['severity']>, Severi
     },
     info: {
         backgroundColor: colors.blue,
-        textColor: colors.white,
-        iconColor: colors.white,
+        textColor: colors.surfaceRaised,
+        iconColor: colors.surfaceRaised,
         iconName: 'info-circle',
     },
 };
@@ -45,6 +46,7 @@ export function AlertMessage({
     severity = 'error',
     dismissible = false,
     onDismiss,
+    testID = 'alert-message',
 }: AlertMessageProps) {
     const config = SEVERITY_CONFIG[severity];
 
@@ -55,19 +57,19 @@ export function AlertMessage({
 
     return (
         <TouchableOpacity
-            testID="alert-message"
+            testID={testID}
             activeOpacity={dismissible ? 0.8 : 1}
             onPress={handlePress}
             style={[styles.container, { backgroundColor: config.backgroundColor }]}
         >
             <AntDesign
-                testID="alert-message-icon"
+                testID={`${testID}-icon`}
                 name={config.iconName}
                 size={20}
                 color={config.iconColor}
                 style={styles.icon}
             />
-            <Text testID="alert-message-text" style={[styles.text, { color: config.textColor }]}>
+            <Text testID={`${testID}-text`} style={[styles.text, { color: config.textColor }]}>
                 {message.toUpperCase()}
             </Text>
         </TouchableOpacity>

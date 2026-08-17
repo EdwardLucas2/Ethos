@@ -10,7 +10,6 @@ export const colors = {
     blue: '#3B82F6',
     yellow: '#FDDC00',
     red: '#FF3E3E',
-    white: '#FFFFFF',
 } as const;
 
 // ─── Shadows ─────────────────────────────────────────────────────────────────

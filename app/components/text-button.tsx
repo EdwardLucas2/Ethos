@@ -1,14 +1,14 @@
 import { colors, spacing, typography } from '@/constants/theme';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-type Props = {
+type TextButtonProps = {
     label: string;
     onPress?: () => void;
     disabled?: boolean;
     testID?: string;
 };
 
-export function TextButton({ label, onPress, disabled = false, testID }: Props) {
+export function TextButton({ label, onPress, disabled = false, testID }: TextButtonProps) {
     return (
         <Pressable onPress={onPress} disabled={disabled} testID={testID}>
             <Text style={[styles.label, disabled && styles.disabled]}>{label}</Text>

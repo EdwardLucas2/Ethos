@@ -11,7 +11,7 @@ import {
     ViewStyle,
 } from 'react-native';
 
-type Props = {
+type FormFieldProps = {
     label: string;
     placeholder: string;
     rightElement?: React.ReactNode;
@@ -26,7 +26,7 @@ type Props = {
     testID?: string;
 };
 
-export const FormField = forwardRef<RNTextInput, Props>(function FormField(
+export const FormField = forwardRef<RNTextInput, FormFieldProps>(function FormField(
     { label, placeholder, rightElement, containerStyle, ...inputProps },
     ref
 ) {

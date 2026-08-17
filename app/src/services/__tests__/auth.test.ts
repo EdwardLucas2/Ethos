@@ -3,14 +3,14 @@
  * Both fetch and supertokens-react-native are mocked — no network or token
  * storage is exercised. The full auth handshake is covered by Maestro E2E.
  */
-import { signIn, signUp } from '../../services/auth';
+import { signIn, signUp, __resetProfileConfirmedCache } from '../auth';
 import SuperTokens from 'supertokens-react-native';
 
 // Returns a fetch implementation that responds to the auth endpoint and the backend
 // /users endpoint independently. Either side can be set to ok/conflict/error.
 function mockFetchFor(opts: {
     authStatus: string;
-    authFormFields?: Array<{ id: string; error: string }>;
+    authFormFields?: { id: string; error: string }[];
     usersStatus: number;
 }) {
     return jest.spyOn(global, 'fetch').mockImplementation(async (url: RequestInfo | URL) => {
@@ -24,9 +24,14 @@ function mockFetchFor(opts: {
                 }),
             } as unknown as Response;
         }
+        const ok = opts.usersStatus >= 200 && opts.usersStatus < 300;
         return {
-            ok: opts.usersStatus >= 200 && opts.usersStatus < 300,
+            ok,
             status: opts.usersStatus,
+            // customFetch calls json() to build its error on failure, text()
+            // to parse the body on success — both need to resolve here.
+            json: async () => ({ message: 'users request failed' }),
+            text: async () => (ok ? '' : ''),
         } as unknown as Response;
     });
 }
@@ -34,6 +39,7 @@ function mockFetchFor(opts: {
 beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    __resetProfileConfirmedCache();
     // Both signIn and signUp call ensureUserProfile, which needs a valid token.
     (SuperTokens.getAccessToken as jest.Mock).mockResolvedValue('fake-token');
 });
@@ -79,6 +85,17 @@ describe('signIn', () => {
         const urls = fetchSpy.mock.calls.map((c) => c[0]!.toString());
         expect(urls.some((u) => u.includes('/users'))).toBe(true);
     });
+
+    it('skips the redundant /users call on a second login for an already-confirmed email', async () => {
+        const fetchSpy = mockFetchFor({ authStatus: 'OK', usersStatus: 201 });
+
+        await signIn('repeat@example.com', 'password123');
+        expect(fetchSpy.mock.calls.some((c) => c[0]!.toString().includes('/users'))).toBe(true);
+
+        fetchSpy.mockClear();
+        await signIn('repeat@example.com', 'password123');
+        expect(fetchSpy.mock.calls.some((c) => c[0]!.toString().includes('/users'))).toBe(false);
+    });
 });
 
 describe('signUp', () => {
@@ -109,6 +126,6 @@ describe('signUp', () => {
     it('treats a 409 from /users as success (signup already partially completed)', async () => {
         mockFetchFor({ authStatus: 'OK', usersStatus: 409 });
 
-        await expect(signUp('new@example.com', 'password123')).resolves.toBeUndefined();
+        await expect(signUp('conflicted@example.com', 'password123')).resolves.toBeUndefined();
     });
 });
