@@ -6,6 +6,7 @@ import {
     PublicSans_800ExtraBold,
     PublicSans_900Black,
 } from '@expo-google-fonts/public-sans';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -77,15 +78,18 @@ export default function RootLayout() {
                 {fontsReady ? (
                     <>
                         <RootRedirect />
-                        <Stack>
-                            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                            <Stack.Screen
-                                name="modal"
-                                options={{ presentation: 'modal', title: 'Modal' }}
-                            />
-                        </Stack>
-                        <StatusBar style="dark" />
+                        {/* Ethos is light-only — see app/hooks/use-theme-color.ts */}
+                        <ThemeProvider value={DefaultTheme}>
+                            <Stack>
+                                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                                <Stack.Screen
+                                    name="modal"
+                                    options={{ presentation: 'modal', title: 'Modal' }}
+                                />
+                            </Stack>
+                            <StatusBar style="dark" />
+                        </ThemeProvider>
                     </>
                 ) : null}
             </AuthProvider>
