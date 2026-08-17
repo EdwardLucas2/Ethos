@@ -1,5 +1,12 @@
 data "oci_identity_availability_domains" "ads" {
   compartment_id = local.compartment_ocid
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.availability_domains) > var.availability_domain_index
+      error_message = "Compartment ${local.compartment_ocid} only has ${length(self.availability_domains)} availability domain(s), but availability_domain_index=${var.availability_domain_index} was requested."
+    }
+  }
 }
 
 # Latest Ubuntu 22.04 ARM64 image for A1.Flex
@@ -10,6 +17,13 @@ data "oci_core_images" "ubuntu_22_04_arm64" {
   shape                    = "VM.Standard.A1.Flex"
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.images) > 0
+      error_message = "No Ubuntu 22.04 ARM64 image found for shape VM.Standard.A1.Flex — Canonical may have deprecated this image in this region, or the filter needs updating."
+    }
+  }
 }
 
 locals {

@@ -45,24 +45,9 @@ resource "oci_core_security_list" "runner" {
     }
   }
 
-  # HTTP/HTTPS inbound — needed for future app hosting
-  ingress_security_rules {
-    protocol = "6"
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 80
-      max = 80
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "6"
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 443
-      max = 443
-    }
-  }
+  # HTTP/HTTPS are intentionally not opened here — nothing listens on this VM
+  # yet (it's a CI runner, not an app host). Add these rules when Phase 2 app
+  # hosting actually ships, not ahead of it.
 }
 
 resource "oci_core_subnet" "runner" {

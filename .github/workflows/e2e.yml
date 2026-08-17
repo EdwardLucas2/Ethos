@@ -8,6 +8,11 @@ jobs:
     maestro:
         runs-on: ubuntu-latest
         timeout-minutes: 60
+        env:
+            # Single source of truth for both the cache key and setup-maestro's
+            # version input below — previously two independent hardcoded "2.5.1"
+            # literals that could silently drift apart on a version bump.
+            MAESTRO_VERSION: "2.5.1"
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
@@ -28,6 +33,12 @@ jobs:
               working-directory: app
               run: npm ci
 
+            # This step and --build below are no-ops on ubuntu-latest's ephemeral
+            # runners (nothing to clean, nothing to keep in sync) — they're
+            # leftovers from running on the self-hosted Oracle runner (infra/),
+            # which doesn't have the resources to run Maestro/Android-emulator
+            # jobs. Left in place (rather than deleted) since they're harmless
+            # here and become relevant again if a persistent runner is used.
             - name: Clean up previous run
               env:
                   DATABASE_USER: ${{ secrets.DATABASE_USER }}
@@ -36,7 +47,7 @@ jobs:
                   pkill -f "expo start" || true
                   pkill -f "metro" || true
                   adb kill-server || true
-                  docker compose -f docker/docker-compose.dev.yml down -v --remove-orphans
+                  docker compose -f docker/docker-compose.dev.yml down -v --remove-orphans || true
 
             - name: Start backend services
               env:
@@ -56,12 +67,12 @@ jobs:
               uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
               with:
                   path: ~/.maestro
-                  key: maestro-2.5.1
+                  key: maestro-${{ env.MAESTRO_VERSION }}
 
             - uses: ./.github/actions/setup-maestro
               if: steps.maestro-cache.outputs.cache-hit != 'true'
               with:
-                  version: "2.5.1"
+                  version: ${{ env.MAESTRO_VERSION }}
 
             - name: Add Maestro to PATH
               if: steps.maestro-cache.outputs.cache-hit == 'true'
@@ -105,7 +116,10 @@ jobs:
               uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
               with:
                   path: ~/.android/avd/*
-                  key: avd-api34-x86_64
+                  # Includes target (google_apis) — bump this whenever the AVD
+                  # config below changes, or a stale cache hit silently keeps
+                  # serving an AVD built with the old config.
+                  key: avd-api34-google_apis-x86_64
 
             - name: Create AVD snapshot
               if: steps.avd-cache.outputs.cache-hit != 'true'
