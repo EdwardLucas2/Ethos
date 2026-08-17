@@ -5,7 +5,7 @@ COPY db ./db
 RUN apk add --no-cache maven
 RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn package -DskipTests -Ddocker.skip=true -B
+RUN mvn package -DskipTests -Ddocker.skip=true -P release -B
 
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
