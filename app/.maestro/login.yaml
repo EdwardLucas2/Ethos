@@ -4,6 +4,9 @@ appId: com.ethos.app
 - runScript: subflows/seed-api.js
 - launchApp:
       clearState: true
+      # clearState doesn't touch the iOS Keychain, where expo-secure-store
+      # keeps auth tokens — without this a prior run leaves the app logged in.
+      clearKeychain: true
 - runFlow:
       file: subflows/_login-user.yaml
       env:

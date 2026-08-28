@@ -1,16 +1,15 @@
 appId: com.ethos.app
-env:
-    TEST_PASSWORD: TestPassword123!
 ---
 # Happy path: create a new account
 - runScript: gen-test-email.js
 - launchApp:
       clearState: true
+      # See login.yaml for why clearKeychain is needed too.
+      clearKeychain: true
 - runFlow:
       file: subflows/_signup-user.yaml
       env:
           TEST_EMAIL: ${output.TEST_EMAIL}
-          TEST_PASSWORD: ${TEST_PASSWORD}
 
 # Error path: same email again → email already exists error
 - tapOn:
@@ -26,9 +25,15 @@ env:
 - tapOn:
       id: 'email-input'
 - inputText: ${output.TEST_EMAIL}
-- pressKey: enter
-- inputText: ${TEST_PASSWORD}
-- pressKey: enter
+# See subflows/_signup-user.yaml for why the password field is filled via
+# the OS's own "Use Strong Password?" suggestion rather than typed directly.
+- hideKeyboard
+- tapOn:
+      id: 'password-input'
+- tapOn:
+      point: "50%, 84%"
+- tapOn:
+      id: 'submit-button'
 - extendedWaitUntil:
       visible: 'AN ACCOUNT WITH THIS EMAIL ALREADY EXISTS'
       timeout: 10000
