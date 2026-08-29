@@ -29,7 +29,7 @@ appId: com.ethos.app
 - tapOn:
       id: 'password-input'
 - tapOn:
-      point: "50%, 84%"
+      point: '50%, 84%'
 - tapOn:
       id: 'submit-button'
 - extendedWaitUntil:

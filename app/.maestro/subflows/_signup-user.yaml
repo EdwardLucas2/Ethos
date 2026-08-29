@@ -23,7 +23,7 @@ appId: com.ethos.app
 # Coordinate tap: the sheet's button isn't in the accessibility tree
 # (1206x2622 iPhone 17 simulator).
 - tapOn:
-      point: "50%, 84%"
+      point: '50%, 84%'
 - tapOn:
       id: 'submit-button'
 - tapOn:
