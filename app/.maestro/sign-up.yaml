@@ -1,6 +1,5 @@
 appId: com.ethos.app
 ---
-# Happy path: create a new account
 - runScript: gen-test-email.js
 - launchApp:
       clearState: true
@@ -25,8 +24,7 @@ appId: com.ethos.app
 - tapOn:
       id: 'email-input'
 - inputText: ${output.TEST_EMAIL}
-# See subflows/_signup-user.yaml for why the password field is filled via
-# the OS's own "Use Strong Password?" suggestion rather than typed directly.
+# See subflows/_signup-user.yaml for why this uses the OS's autofill sheet.
 - hideKeyboard
 - tapOn:
       id: 'password-input'

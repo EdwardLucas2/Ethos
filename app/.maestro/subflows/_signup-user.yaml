@@ -1,8 +1,6 @@
 appId: com.ethos.app
 ---
-# Sub-flow: navigate from the login screen through sign-up and land on home.
-# Requires TEST_EMAIL in the calling flow's env (see below for why no
-# TEST_PASSWORD is needed).
+# Requires TEST_EMAIL in the calling flow's env (no TEST_PASSWORD — see below).
 - extendedWaitUntil:
       visible: 'WELCOME BACK.'
       timeout: 10000
@@ -14,18 +12,16 @@ appId: com.ethos.app
 - tapOn:
       id: 'email-input'
 - inputText: ${TEST_EMAIL}
-# autoComplete="new-password" makes any tap here trigger iOS's "Use Strong
-# Password?" sheet — a system overlay outside the accessibility tree, so it
-# can't be dismissed and typed past (it eats input while shown, and losing
-# it drops focus, so retrying just re-triggers it). hideKeyboard first,
-# since tapping this field while another is focused silently no-ops.
+# autoComplete="new-password" triggers iOS's "Use Strong Password?" sheet on
+# tap. It's outside the accessibility tree and eats input while shown, so we
+# can't dismiss and type past it — instead we accept its suggestion, since no
+# test depends on the actual password value. hideKeyboard first: tapping this
+# field while another is focused otherwise silently no-ops.
 - hideKeyboard
 - tapOn:
       id: 'password-input'
-# Accept the sheet's suggestion instead of fighting it — no test depends on
-# the actual value, and Apple's generated passwords satisfy our validation.
-# Coordinate tap since the button isn't in the accessibility tree (1206x2622
-# iPhone 17 simulator).
+# Coordinate tap: the sheet's button isn't in the accessibility tree
+# (1206x2622 iPhone 17 simulator).
 - tapOn:
       point: "50%, 84%"
 - tapOn:
