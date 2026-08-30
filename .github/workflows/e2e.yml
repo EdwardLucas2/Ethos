@@ -1,4 +1,0 @@
-# Disabled: Android emulator E2E doesn't match the iOS-specific sign-up
-# flow fix (Maestro "Use Strong Password?" sheet handling). Re-enable once
-# the flow is made cross-platform. Previous workflow content is available
-# in git history (git log -p -- .github/workflows/e2e.yml).
