@@ -168,20 +168,19 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 **Purpose** — Persistent sticky header present on every screen. Provides app identity and contextual actions.
 
-**Canonical design** — Yellow (`#FDDC00`) background, 4px bottom border. Left: hamburger menu icon. Centre-left: "ETHOS" wordmark. Right: user avatar (square, 2px border). Reference: ContractBuilder_Invitee mockup.
+**Note on mockups** — Stitch mockups show inconsistent headers across screens (hamburger icons, avatar/settings swaps, a "3-dot" overflow menu on PayUp/YouAreOwed, differing icon sets on contract overview screens). None of those extra affordances map to anything specified in the PRD — there is no drawer/menu screen, and no documented use for an overflow menu. The variants below are the reconciled, intentional design: two non-auth variants, chosen by whether the screen is a tab root (identity + shortcut) or a pushed screen (needs back navigation).
 
 **Variants**
 
-- _Default_ — canonical yellow header described above. Used on tab screens (Dashboard, Friends, Profile).
-- _Stack_ — back arrow (`arrow_back`) on the left, "ETHOS" wordmark centre-left, hamburger icon on the right (avatar dropped). Used on all stack screens navigated into from the tabs: contract lobby, contract overview, evidence, unsettled, and settled screens.
-- _Back_ — back arrow (`arrow_back`) on the left, "ETHOS" wordmark centre-left, avatar on the right (no hamburger). Used on fully focused screens that sit above all navigation: PayUp, YouAreOwed.
+- _Tab_ — yellow (`#FDDC00`) background, 4px bottom border. "ETHOS" wordmark left, user avatar right (square, 2px border; tapping it navigates to the Profile tab). Used on the three tab-root screens: Dashboard, Friends, Profile.
+- _Stack_ — yellow background, 4px bottom border. Back arrow (`arrow_back`) left, "ETHOS" wordmark centre-left, nothing on the right. Used on every screen pushed off the tab bar: contract build/join, active/unsettled/settled overview, evidence upload/review/detail, pay-up, owed.
 - _Auth_ — white background, gavel icon + "ETHOS" wordmark on the left, "LOGIN" or "SIGN UP" link on the right. Used on auth screens only.
 
 **Props**
 
-- `variant` — `"default"` | `"stack"` | `"back"` | `"auth"`
-- `onBack` — back navigation callback for `"stack"` and `"back"` variants
-- `avatarUri` — user avatar image for `"default"` and `"back"` variants
+- `variant` — `"tab"` | `"stack"` | `"auth"`
+- `onBack` — back navigation callback for the `"stack"` variant
+- `avatarUri` — user avatar image for the `"tab"` variant
 
 **Design notes** — 4px bottom border, `shadow-sm`. Sticky, `z-50`. The "ETHOS" wordmark is italic, Black weight, tracking tighter, ALL CAPS. Avatar is square (not circular), 2px border, 40×40.
 
@@ -191,7 +190,9 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 ## BottomTabBar
 
-**Purpose** — Fixed bottom navigation bar present on all main screens. Suppressed on focused task screens (Evidence Approval, PayUp).
+**Purpose** — Fixed bottom navigation bar present only on the three tab-root screens. Suppressed everywhere else — every contract, evidence, and settlement screen is a plain stack screen with no tab bar (see `docs/ROUTING.md`).
+
+**Tabs** — fixed, three total, per PRD §4: **HOME** (`grid_view`, `/dashboard`), **FRIENDS** (`group`, `/friends`), **PROFILE** (`person`, `/profile`). Not configurable per-screen beyond which is active.
 
 **Props**
 

@@ -16,7 +16,7 @@ Basic account information and logout. MVP placeholder — minimal functionality.
 ## Sections
 
 ### TopBar
-`default` variant.
+`tab` variant.
 
 ### User Card
 White card, 3px border, `shadow-md`. Centred layout:

@@ -21,7 +21,10 @@ A victory screen reminding the winner they are owed a forfeit, with tools to pes
 ## Sections
 
 ### TopBar
-`back` variant. Back navigates to `/dashboard`.
+`stack` variant. Back navigates to `/dashboard`.
+
+### BottomTabBar
+None — suppressed, per `docs/ROUTING.md` (settlement screens are not tab roots). The mockup's tab bar (CYCLES/VAULT/SOCIAL/PROFILE) is stale and does not apply.
 
 ### Hero Stamp
 `HeroStamp` component, `victory` variant — "YOU'RE OWED", large neon-green stamp, rotated ~−10°, centred. `shadow-lg`.
