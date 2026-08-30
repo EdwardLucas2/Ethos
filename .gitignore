@@ -1,6 +1,7 @@
 # Backend
 backend/target/
 backend/data/
+backend/dependency-reduced-pom.xml
 *.class
 
 # App
@@ -25,7 +26,13 @@ auth/.env
 .idea/
 *.iml
 .vscode/
-.claude/
+.claude/settings.local.json
 
 # macOS
 .DS_Store
+
+storybook-screenshots/
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

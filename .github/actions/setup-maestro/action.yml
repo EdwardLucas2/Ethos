@@ -1,0 +1,14 @@
+name: Setup Maestro
+description: Install Maestro CLI at a pinned version and add it to PATH
+inputs:
+    version:
+        description: Maestro version to install (e.g. "1.40.0")
+        required: true
+runs:
+    using: composite
+    steps:
+        - name: Install Maestro
+          shell: bash
+          run: |
+              curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION=${{ inputs.version }} bash
+              echo "$HOME/.maestro/bin" >> $GITHUB_PATH
