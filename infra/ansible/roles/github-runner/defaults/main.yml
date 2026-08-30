@@ -1,0 +1,27 @@
+---
+# GitHub repository in org/repo format
+github_repo: ""  # e.g. "edwardlucas/monorepo" — required, pass via -e or vars file
+
+# Optional: skip the automatic `gh api` token fetch (which runs on the Ansible
+# controller and requires gh to be authenticated there) and use this token
+# instead. Get one with:
+#   gh api repos/OWNER/REPO/actions/runners/registration-token --method POST --jq '.token'
+# Tokens expire after 1 hour. Pass via: -e "runner_token=TOKEN"
+runner_token: ""
+
+# Force re-registration even if the runner already appears configured locally
+# (.runner file present) — needed if the runner was deregistered on GitHub's
+# side without also removing that file. Pass via: -e force_reconfigure=true
+force_reconfigure: false
+
+# Runner installation directory (under the ubuntu user's home)
+runner_dir: /home/ubuntu/actions-runner
+
+# Runner version — check https://github.com/actions/runner/releases
+runner_version: "2.323.0"
+
+# Labels applied to this runner (self-hosted and linux are always added automatically)
+runner_labels: "oracle,arm64"
+
+# Runner name shown in GitHub UI
+runner_name: "oracle-arm64"

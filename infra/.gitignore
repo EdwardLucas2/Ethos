@@ -1,0 +1,5 @@
+*.pem
+*.key
+oci.config
+terraform.tfvars
+backend.hcl

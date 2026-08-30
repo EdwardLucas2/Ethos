@@ -1,0 +1,94 @@
+---
+- name: Create runner directory
+  file:
+    path: "{{ runner_dir }}"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Download GitHub Actions runner
+  get_url:
+    url: "https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-arm64-{{ runner_version }}.tar.gz"
+    dest: /tmp/actions-runner.tar.gz
+    mode: "0644"
+  become_user: ubuntu
+
+- name: Extract runner archive
+  # Keyed on the version, not just run.sh's presence — otherwise bumping
+  # runner_version and re-running (the documented upgrade procedure) silently
+  # keeps the old binary, since run.sh already exists from the first install.
+  unarchive:
+    src: /tmp/actions-runner.tar.gz
+    dest: "{{ runner_dir }}"
+    remote_src: yes
+    creates: "{{ runner_dir }}/.installed-{{ runner_version }}"
+  become_user: ubuntu
+
+- name: Record installed runner version
+  file:
+    path: "{{ runner_dir }}/.installed-{{ runner_version }}"
+    state: touch
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+  become_user: ubuntu
+
+- name: Check if runner is already configured
+  stat:
+    path: "{{ runner_dir }}/.runner"
+  register: runner_config
+
+# force_reconfigure re-runs registration even if .runner already exists —
+# needed if the runner was deregistered/deleted on GitHub's side (token
+# revoked, runner removed from repo settings) while the local .runner file
+# is still present, since --replace below only ever fires when this guard
+# lets the task run at all. Pass with: -e force_reconfigure=true
+- name: Set registration guard fact
+  set_fact:
+    needs_registration: "{{ not runner_config.stat.exists or (force_reconfigure | default(false) | bool) }}"
+
+# Fetch a short-lived registration token from GitHub using the local gh CLI,
+# unless one was already supplied via runner_token (-e runner_token=TOKEN) —
+# e.g. for environments without gh CLI available on the controller.
+# Runs on the Ansible controller (your Mac) where gh is already authenticated.
+#
+# no_log hides the token from Ansible's output, including on failure — if
+# this task fails, temporarily comment out no_log (or re-run with the same
+# command by hand) to see the actual gh/API error.
+- name: Fetch runner registration token via gh CLI
+  command: gh api repos/{{ github_repo }}/actions/runners/registration-token --method POST --jq '.token'
+  delegate_to: localhost
+  become: false
+  register: registration_token
+  when: needs_registration and runner_token == ""
+  no_log: true
+
+- name: Configure runner
+  # no_log hides the token from output, including on failure — see above.
+  command: >
+    ./config.sh
+    --url "https://github.com/{{ github_repo }}"
+    --token "{{ runner_token if runner_token != '' else registration_token.stdout }}"
+    --name "{{ runner_name }}"
+    --labels "{{ runner_labels }}"
+    --work _work
+    --unattended
+    --replace
+  args:
+    chdir: "{{ runner_dir }}"
+  become_user: ubuntu
+  when: needs_registration
+  no_log: true
+
+- name: Install runner as systemd service
+  command: ./svc.sh install ubuntu
+  args:
+    chdir: "{{ runner_dir }}"
+    creates: /etc/systemd/system/actions.runner.*.service
+
+- name: Enable and start runner service
+  shell: ./svc.sh start
+  args:
+    chdir: "{{ runner_dir }}"
+  changed_when: false
