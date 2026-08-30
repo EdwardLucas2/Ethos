@@ -23,33 +23,61 @@ export interface ErrorResponse {
   message?: string;
 }
 
+export interface NotificationResponse {
+  resolutionId?: string;
+  winnerNames?: string[];
+  forfeit?: string;
+  type?: string;
+  inviterName?: string;
+  loserNames?: string[];
+  createdAt?: string;
+  evidenceId?: string;
+  contractId?: string;
+  fromName?: string;
+  contractName?: string;
+  id?: string;
+  submitterName?: string;
+  cycleNumber?: number;
+}
+
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type getTestResponse200 = {
-  data: ErrorResponse
+/**
+ * Returns all unread notifications for the caller, enriched server-side with the display context needed to render each Dashboard alert. Only unread (read_at IS NULL) rows are returned. Frontend is responsible for ordering by urgency (verify, challenge, settle, owed, pay-up).
+ * @summary List unread notifications
+ */
+export type getNotificationsResponse200 = {
+  data: NotificationResponse[]
   status: 200
 }
 
-export type getTestResponseSuccess = (getTestResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getTestResponse = (getTestResponseSuccess)
-
-export const getGetTestUrl = () => {
-
-
-
-
-  return `/test`
+export type getNotificationsResponse401 = {
+  data: ErrorResponse
+  status: 401
 }
 
-export const getTest = async ( options?: RequestInit): Promise<getTestResponse> => {
+export type getNotificationsResponseSuccess = (getNotificationsResponse200) & {
+  headers: Headers;
+};
+export type getNotificationsResponseError = (getNotificationsResponse401) & {
+  headers: Headers;
+};
 
-  return customFetch<getTestResponse>(getGetTestUrl(),
+export type getNotificationsResponse = (getNotificationsResponseSuccess | getNotificationsResponseError)
+
+export const getGetNotificationsUrl = () => {
+
+
+
+
+  return `/notifications`
+}
+
+export const getNotifications = async ( options?: RequestInit): Promise<getNotificationsResponse> => {
+
+  return customFetch<getNotificationsResponse>(getGetNotificationsUrl(),
   {
     ...options,
     method: 'GET'
@@ -62,66 +90,69 @@ export const getTest = async ( options?: RequestInit): Promise<getTestResponse> 
 
 
 
-export const getGetTestQueryKey = () => {
+export const getGetNotificationsQueryKey = () => {
     return [
-    `/test`
+    `/notifications`
     ] as const;
     }
 
 
-export const getGetTestQueryOptions = <TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTestQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetNotificationsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTest>>> = ({ signal }) => getTest({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotifications>>> = ({ signal }) => getNotifications({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetTestQueryResult = NonNullable<Awaited<ReturnType<typeof getTest>>>
-export type GetTestQueryError = unknown
+export type GetNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof getNotifications>>>
+export type GetNotificationsQueryError = ErrorResponse
 
 
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>> & Pick<
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTest>>,
+          Awaited<ReturnType<typeof getNotifications>>,
           TError,
-          Awaited<ReturnType<typeof getTest>>
+          Awaited<ReturnType<typeof getNotifications>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>> & Pick<
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTest>>,
+          Awaited<ReturnType<typeof getNotifications>>,
           TError,
-          Awaited<ReturnType<typeof getTest>>
+          Awaited<ReturnType<typeof getNotifications>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List unread notifications
+ */
 
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetTestQueryOptions(options)
+  const queryOptions = getGetNotificationsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
