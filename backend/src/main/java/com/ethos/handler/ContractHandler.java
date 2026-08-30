@@ -3,6 +3,7 @@ package com.ethos.handler;
 import com.ethos.RequestAttributes;
 import com.ethos.dto.ActiveContractResponse;
 import com.ethos.dto.ContractResponse;
+import com.ethos.dto.ContractSummaryResponse;
 import com.ethos.dto.ErrorResponse;
 import com.ethos.dto.PendingResolutionContractResponse;
 import com.ethos.service.ContractService;
@@ -43,6 +44,31 @@ public class ContractHandler {
     public void createContract(Context ctx) {
         UUID userId = ctx.attribute(RequestAttributes.USER_ID);
         ctx.status(201).json(contractService.createContract(userId));
+    }
+
+    @OpenApi(
+            path = "/contracts/me",
+            methods = {HttpMethod.GET},
+            summary = "List the caller's contracts",
+            description = "Returns every contract the caller is or was a participant in — active,"
+                    + " pending_resolution, and settled — most recent first. Backs the Contracts tab's full"
+                    + " list/history, distinct from GET /contracts/me/active and"
+                    + " GET /contracts/me/pending-resolution, which the Dashboard uses for its curated,"
+                    + " needs-attention view and only cover active/pending_resolution.",
+            tags = {"contracts"},
+            responses = {
+                @OpenApiResponse(
+                        status = "200",
+                        content = @OpenApiContent(from = ContractSummaryResponse[].class),
+                        description = "All contracts"),
+                @OpenApiResponse(
+                        status = "401",
+                        content = @OpenApiContent(from = ErrorResponse.class),
+                        description = "JWT missing or invalid")
+            })
+    public void getMyContracts(Context ctx) {
+        UUID userId = ctx.attribute(RequestAttributes.USER_ID);
+        ctx.json(contractService.listContracts(userId));
     }
 
     @OpenApi(

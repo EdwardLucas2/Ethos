@@ -4,6 +4,7 @@ import com.ethos.dto.ActiveContractResponse;
 import com.ethos.dto.ActiveParticipantResponse;
 import com.ethos.dto.ContractParticipantResponse;
 import com.ethos.dto.ContractResponse;
+import com.ethos.dto.ContractSummaryResponse;
 import com.ethos.dto.PendingParticipantResponse;
 import com.ethos.dto.PendingResolutionContractResponse;
 import com.ethos.dto.ProgressResponse;
@@ -77,6 +78,19 @@ public class ContractService {
                 2,
                 3,
                 List.of(new PendingParticipantResponse("Edward", 3, 3), new PendingParticipantResponse("Alex", 1, 3))));
+    }
+
+    /**
+     * Dummy data — backs the Contracts tab's full list/history. Real implementation needs a
+     * store query spanning all statuses (active, pending_resolution, settled), which doesn't
+     * exist yet; ContractStore's dashboard methods only cover active/pending_resolution.
+     */
+    public List<ContractSummaryResponse> listContracts(UUID userId) {
+        return List.of(
+                new ContractSummaryResponse(UUID.randomUUID(), "Gym 3x/Week", "active", 3, List.of("Alex")),
+                new ContractSummaryResponse(UUID.randomUUID(), "No Sugar", "active", 1, List.of("Sarah", "Mike")),
+                new ContractSummaryResponse(UUID.randomUUID(), "Morning Run", "pending_resolution", 2, List.of("Alex")),
+                new ContractSummaryResponse(UUID.randomUUID(), "Deep Work", "settled", 41, List.of("Sarah", "James")));
     }
 
     private static ContractResponse toResponse(ContractDetail detail) {

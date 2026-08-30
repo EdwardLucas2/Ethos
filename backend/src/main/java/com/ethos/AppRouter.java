@@ -79,6 +79,7 @@ public class AppRouter {
         routes.delete("/contacts/{targetUserId}", userHandler::removeContact);
 
         routes.post("/contracts", contractHandler::createContract);
+        routes.get("/contracts/me", contractHandler::getMyContracts);
         routes.get("/contracts/me/active", contractHandler::getActiveContracts);
         routes.get("/contracts/me/pending-resolution", contractHandler::getPendingResolutionContracts);
 
