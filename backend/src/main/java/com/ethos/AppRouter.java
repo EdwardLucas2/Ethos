@@ -9,6 +9,8 @@ import com.ethos.exception.DuplicateAccountException;
 import com.ethos.exception.ForbiddenException;
 import com.ethos.exception.NotFoundException;
 import com.ethos.exception.RegistrationIncompleteException;
+import com.ethos.handler.ContractHandler;
+import com.ethos.handler.NotificationHandler;
 import com.ethos.handler.UserHandler;
 import com.ethos.model.User;
 import com.ethos.router.Role;
@@ -26,11 +28,20 @@ public class AppRouter {
     private final JwtVerifier jwtVerifier;
     private final UserStore userStore;
     private final UserHandler userHandler;
+    private final ContractHandler contractHandler;
+    private final NotificationHandler notificationHandler;
 
-    public AppRouter(JwtVerifier jwtVerifier, UserStore userStore, UserHandler userHandler) {
+    public AppRouter(
+            JwtVerifier jwtVerifier,
+            UserStore userStore,
+            UserHandler userHandler,
+            ContractHandler contractHandler,
+            NotificationHandler notificationHandler) {
         this.jwtVerifier = jwtVerifier;
         this.userStore = userStore;
         this.userHandler = userHandler;
+        this.contractHandler = contractHandler;
+        this.notificationHandler = notificationHandler;
     }
 
     public void configure(JavalinDefaultRoutingApi routes) {
@@ -66,10 +77,20 @@ public class AppRouter {
         routes.get("/contacts", userHandler::listContacts);
         routes.post("/contacts", userHandler::addContact);
         routes.delete("/contacts/{targetUserId}", userHandler::removeContact);
+
+        routes.post("/contracts", contractHandler::createContract);
+        routes.get("/contracts/me/active", contractHandler::getActiveContracts);
+        routes.get("/contracts/me/pending-resolution", contractHandler::getPendingResolutionContracts);
+
+        routes.get("/notifications", notificationHandler::getNotifications);
     }
 
     private void registerBeforeHandlers(JavalinDefaultRoutingApi routes) {
         routes.beforeMatched(ctx -> {
+            // The OpenApiPlugin registers this route itself, outside registerRoutes(), so it
+            // carries no Role and can't be exempted via Role.ANYONE like our own routes.
+            if (ctx.path().equals("/openapi.json")) return;
+
             Set<RouteRole> roles = ctx.routeRoles();
             if (roles.contains(Role.ANYONE)) return;
             if (roles.contains(Role.JWT_ONLY)) {
