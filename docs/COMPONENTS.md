@@ -168,17 +168,18 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 **Purpose** — Persistent sticky header present on every screen. Provides app identity and contextual actions.
 
-**Note on mockups** — Stitch mockups show inconsistent headers across screens (hamburger icons, avatar/settings swaps, a "3-dot" overflow menu on PayUp/YouAreOwed, differing icon sets on contract overview screens). None of those extra affordances map to anything specified in the PRD — there is no drawer/menu screen, and no documented use for an overflow menu. The variants below are the reconciled, intentional design: two non-auth variants, chosen by whether the screen is a tab root (identity + shortcut) or a pushed screen (needs back navigation).
+**Note on mockups** — Stitch mockups show inconsistent headers across screens (hamburger icons, avatar/settings swaps, a "3-dot" overflow menu on PayUp/YouAreOwed, differing icon sets on contract overview screens). None of those extra affordances map to anything specified in the PRD — there is no drawer/menu screen, and no documented use for an overflow menu. The variants below are the reconciled, intentional design: chosen by whether the screen is a tab root (identity + shortcut) or a pushed screen (needs back navigation).
+
+**Not used on auth screens** — Login and Sign Up already have their own dedicated header, `AuthHeader` (`app/components/auth-header.tsx`), built independently of this component. `TopBar` has no `auth` variant; do not add one.
 
 **Variants**
 
-- _Tab_ — yellow (`#FDDC00`) background, 4px bottom border. "ETHOS" wordmark left, user avatar right (square, 2px border; tapping it navigates to the Profile tab). Used on the three tab-root screens: Dashboard, Friends, Profile.
-- _Stack_ — yellow background, 4px bottom border. Back arrow (`arrow_back`) left, "ETHOS" wordmark centre-left, nothing on the right. Used on every screen pushed off the tab bar: contract build/join, active/unsettled/settled overview, evidence upload/review/detail, pay-up, owed.
-- _Auth_ — white background, gavel icon + "ETHOS" wordmark on the left, "LOGIN" or "SIGN UP" link on the right. Used on auth screens only.
+- _Tab_ — yellow (`#FDDC00`) background, 4px bottom border. "ETHOS" wordmark left, user avatar right (square, 2px border; tapping it navigates to `/profile`, which is a pushed `stack`-variant screen, not a tab — see BottomTabBar below). Used on the three tab-root screens: Dashboard, Contracts, Friends.
+- _Stack_ — yellow background, 4px bottom border. Back arrow (`arrow_back`) left, "ETHOS" wordmark centre-left, nothing on the right. Used on every screen pushed off the tab bar: contract build/join, active/unsettled/settled overview, evidence upload/review/detail, pay-up, owed, and Profile.
 
 **Props**
 
-- `variant` — `"tab"` | `"stack"` | `"auth"`
+- `variant` — `"tab"` | `"stack"`
 - `onBack` — back navigation callback for the `"stack"` variant
 - `avatarUri` — user avatar image for the `"tab"` variant
 
@@ -190,9 +191,11 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 ## BottomTabBar
 
-**Purpose** — Fixed bottom navigation bar present only on the three tab-root screens. Suppressed everywhere else — every contract, evidence, and settlement screen is a plain stack screen with no tab bar (see `docs/ROUTING.md`).
+**Purpose** — Fixed bottom navigation bar present only on the three tab-root screens. Suppressed everywhere else — every contract, evidence, settlement, and Profile screen is a plain stack screen with no tab bar (see `docs/ROUTING.md`).
 
-**Tabs** — fixed, three total, per PRD §4: **HOME** (`grid_view`, `/dashboard`), **FRIENDS** (`group`, `/friends`), **PROFILE** (`person`, `/profile`). Not configurable per-screen beyond which is active.
+**Tabs** — fixed, three total, per PRD §4: **HOME** (`grid_view`, `/dashboard`), **CONTRACTS** (`description`, `/contracts`), **FRIENDS** (`group`, `/friends`). Not configurable per-screen beyond which is active.
+
+Profile is deliberately not a tab — every tab-root screen's TopBar already has an avatar shortcut to it (see TopBar above), and a dedicated tab would just duplicate that path. Contracts takes the third slot instead: a full list/history of the caller's contracts (active, pending-resolution, and settled), distinct from Dashboard's curated alert-driven view of only what needs attention right now. This needs its own backend endpoint (an all-contracts list) that doesn't exist yet — see the Contracts page spec once written.
 
 **Props**
 

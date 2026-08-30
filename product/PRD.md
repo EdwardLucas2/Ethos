@@ -106,13 +106,15 @@ At the end of a cycle, once all evidence is resolved (voted on or auto-approved)
 
 ### Bottom Tab Bar
 
-Three tabs, visible only on the main tab screens. Suppressed on contract, evidence, and settlement screens.
+Three tabs, visible only on the main tab screens. Suppressed on contract, evidence, settlement, and Profile screens.
 
-| Tab         | Icon      | Destination                                                    |
-| ----------- | --------- | -------------------------------------------------------------- |
-| **Home**    | grid_view | Home Dashboard — alerts, active contracts, pending resolutions |
-| **Friends** | group     | Contacts — search and manage people you challenge              |
-| **Profile** | person    | Placeholder for MVP — name, email, logout                      |
+| Tab           | Icon        | Destination                                                       |
+| ------------- | ----------- | ------------------------------------------------------------------ |
+| **Home**      | grid_view   | Home Dashboard — alerts, active contracts, pending resolutions     |
+| **Contracts** | description | Full contract list/history — active, pending-resolution, settled   |
+| **Friends**   | group       | Contacts — search and manage people you challenge                  |
+
+Profile (name, email, logout) is not a tab — every tab-root screen's TopBar carries an avatar shortcut to it, so a dedicated tab would just duplicate that path. It's reached as a pushed screen instead.
 
 ### Global Action
 
@@ -875,7 +877,7 @@ Each card shows:
 
 **Purpose:** Basic account management for MVP.
 
-**Entry points:** Bottom tab "Profile".
+**Entry points:** Avatar on the TopBar (Home, Contracts, or Friends). Not a bottom tab — see §4.
 
 **Features (MVP minimal):**
 
@@ -912,6 +914,27 @@ Each card shows:
 - **Loading:** Button shows spinner on submit
 - **Success:** "Password updated. You can now log in." with "Go to Login" link
 - **Error:** Invalid or expired token — "This reset link has expired. Request a new one." with link back to Login
+
+---
+
+### 5.17 Contracts
+
+**Purpose:** Full list/history of every contract the caller is or was a participant in — active, pending-resolution, and settled. Distinct from Home Dashboard, which surfaces only what needs attention right now.
+
+**Entry points:** Bottom tab "Contracts".
+
+**Features (MVP minimal):**
+
+- List of all contracts, most recent first, each showing name, status (active / pending resolution / settled), and opponent(s)
+- Tapping a contract navigates to its overview screen (active, unsettled, or settled, matching current status)
+
+**States:**
+
+- **Loading:** Skeleton rows
+- **Empty:** No contracts yet — same onboarding prompt as Home Dashboard's empty state
+- **Populated:** Full list
+
+**Note:** No mockup exists — design to match the established style. Needs a new backend endpoint (an all-contracts list); `GET /contracts/me/active` and `GET /contracts/me/pending-resolution` alone aren't sufficient since this screen also needs settled contracts.
 
 ---
 
