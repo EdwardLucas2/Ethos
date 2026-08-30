@@ -1,0 +1,12 @@
+appId: com.ethos.app
+---
+- runScript: seed-api.js
+- launchApp:
+      clearState: true
+      # See login.yaml/sign-up.yaml for why clearKeychain is needed too.
+      clearKeychain: true
+- runFlow:
+      file: _login-user.yaml
+      env:
+          TEST_EMAIL: ${output.TEST_EMAIL}
+          TEST_PASSWORD: ${output.TEST_PASSWORD}

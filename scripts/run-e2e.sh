@@ -7,30 +7,34 @@ RESET_SCRIPT="$MONOREPO_DIR/scripts/reset-test-db.sh"
 FLOW="${1:-}"
 
 run_flow() {
-    local yaml="$1"
-    local name
-    name="$(basename "$yaml" .yaml)"
+    local name="$1"
     echo "──────────────────────────────"
     echo "▶  $name"
     echo "──────────────────────────────"
-    maestro test "$yaml"
+    maestro test "$MAESTRO_DIR/$name.yaml"
 }
 
-if [ -n "$FLOW" ]; then
+if [ -f "$MONOREPO_DIR/.env.local" ]; then
     "$RESET_SCRIPT"
-    run_flow "$MAESTRO_DIR/$FLOW.yaml"
+fi
+
+if [ -n "$FLOW" ]; then
+    if [ ! -f "$MAESTRO_DIR/$FLOW.yaml" ]; then
+        echo "Unknown flow: $FLOW" >&2
+        exit 1
+    fi
+    run_flow "$FLOW"
 else
-    flows=("$MAESTRO_DIR"/*.yaml)
-    if [ ! -f "${flows[0]:-}" ]; then
+    # Auto-discovers every top-level flow in app/.maestro/ (not subflows/) so a
+    # newly added flow runs automatically instead of needing a hardcoded entry.
+    shopt -s nullglob
+    yamls=("$MAESTRO_DIR"/*.yaml)
+    shopt -u nullglob
+    if [ ${#yamls[@]} -eq 0 ]; then
         echo "No flows found in $MAESTRO_DIR" >&2
         exit 1
     fi
-    first=true
-    for yaml in "${flows[@]}"; do
-        if [[ "$first" == "true" ]]; then
-            "$RESET_SCRIPT"
-            first=false
-        fi
-        run_flow "$yaml"
+    for yaml in "${yamls[@]}"; do
+        run_flow "$(basename "$yaml" .yaml)"
     done
 fi

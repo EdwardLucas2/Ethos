@@ -120,7 +120,7 @@ cd app && npm run test:e2e        # Frontend — Maestro E2E (requires running s
 # Local Development
 
 ```bash
-docker compose -f docker/docker-compose.dev.yml up -d   # PostgreSQL + SuperTokens Core + auth server
+docker compose --env-file .env.local -f docker/docker-compose.dev.yml up -d   # PostgreSQL + SuperTokens Core + auth server
 cd backend && ./run-dev.sh                               # Backend on :8080
 cd app && npx expo start                                 # Expo dev server
 ```
