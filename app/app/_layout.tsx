@@ -33,18 +33,26 @@ function RootRedirect() {
     const router = useRouter();
 
     const inPublicGroup = PUBLIC_ROUTE_GROUPS.has(segments[0] ?? '');
+    // The bare root ("/", app/index.tsx) has no group segment at all — it's
+    // neither public nor protected by the check above, it's just a landing
+    // spot Expo Router needs to resolve the initial deep link (see
+    // app/index.tsx). A signed-in user landing there needs the same
+    // redirect-to-dashboard treatment as one who lands in the public group,
+    // otherwise they're stuck: !session-branch doesn't match (there IS a
+    // session) and the original session-branch only fired for inPublicGroup.
+    const atRoot = segments[0] === undefined;
 
     useEffect(() => {
         if (isLoading) return;
 
         if (!session && !inPublicGroup) {
             router.replace('/login');
-        } else if (session && inPublicGroup) {
+        } else if (session && (inPublicGroup || atRoot)) {
             router.replace('/dashboard');
         }
         // useRouter() returns a stable instance; depending on it would re-run on every render
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session, isLoading, inPublicGroup]);
+    }, [session, isLoading, inPublicGroup, atRoot]);
 
     return null;
 }
