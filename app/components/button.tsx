@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
         paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
         alignItems: 'center',
         justifyContent: 'center',
     },

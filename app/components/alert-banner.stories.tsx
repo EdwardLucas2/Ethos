@@ -1,5 +1,6 @@
 import { fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react';
+import { View } from 'react-native';
 import { AlertBanner } from './alert-banner';
 
 const meta: Meta<typeof AlertBanner> = {
@@ -10,6 +11,15 @@ const meta: Meta<typeof AlertBanner> = {
         message: 'Alex uploaded proof. [VERIFY]',
         onPress: fn(),
     },
+    // AlertBanner is width: '100%' — without a concrete width to resolve
+    // against, Storybook's centered layout collapses it to content width.
+    decorators: [
+        (Story) => (
+            <View style={{ width: 390 }}>
+                <Story />
+            </View>
+        ),
+    ],
 };
 
 export default meta;

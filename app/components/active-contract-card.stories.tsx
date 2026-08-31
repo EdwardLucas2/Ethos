@@ -1,5 +1,6 @@
 import { fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react';
+import { View } from 'react-native';
 import { ActiveContractCard } from './active-contract-card';
 
 const meta: Meta<typeof ActiveContractCard> = {
@@ -17,6 +18,16 @@ const meta: Meta<typeof ActiveContractCard> = {
         onPress: fn(),
         onCta: fn(),
     },
+    // ActiveContractCard is width: '100%' — without a concrete width to
+    // resolve against, each story's differing content collapses to a
+    // different content-driven width in Storybook's centered layout.
+    decorators: [
+        (Story) => (
+            <View style={{ width: 390 }}>
+                <Story />
+            </View>
+        ),
+    ],
 };
 
 export default meta;
@@ -34,9 +45,9 @@ export const ReviewNeeded: Story = {
         ctaLabel: "REVIEW ALEX'S PROOF",
         contractName: 'No Sugar',
         opponentLabel: 'SQUAD BATTLE',
-        verified: 0,
-        pending: 2,
-        total: 1,
+        verified: 1,
+        pending: 0,
+        total: 3,
     },
 };
 

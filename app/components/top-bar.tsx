@@ -83,6 +83,10 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surfaceRaised,
     },
     spacer: {
+        // Matches the avatar's footprint exactly so the stack and tab variants
+        // render at the same height — a width-only spacer collapses to 0
+        // height, leaving the row's height governed only by the back icon.
         width: AVATAR_SIZE,
+        height: AVATAR_SIZE,
     },
 });

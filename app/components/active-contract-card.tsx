@@ -75,7 +75,6 @@ export function ActiveContractCard({
                 disabled={caughtUp}
                 backgroundColor={CTA_BACKGROUND[ctaState]}
                 icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
-                withShadow={false}
                 labelStyle={styles.ctaLabel}
             />
         </Pressable>

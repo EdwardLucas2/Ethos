@@ -20,62 +20,81 @@ const TABS: {
     icon: React.ComponentProps<typeof AntDesign>['name'];
     href: Href;
 }[] = [
-    { name: 'home', label: 'HOME', icon: 'dashboard', href: '/dashboard' as Href },
+    { name: 'home', label: 'HOME', icon: 'home', href: '/dashboard' as Href },
     { name: 'contracts', label: 'CONTRACTS', icon: 'file-text', href: '/contracts' as Href },
     { name: 'friends', label: 'FRIENDS', icon: 'team', href: '/friends' as Href },
 ];
+
+const BAR_HEIGHT = 80;
 
 export function BottomTabBar({ activeTab, testID = 'bottom-tab-bar' }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
     const router = useRouter();
 
     return (
-        <View style={[styles.bar, { paddingBottom: insets.bottom }]} testID={testID}>
-            {TABS.map((tab) => {
-                const active = tab.name === activeTab;
-                return (
-                    <Pressable
-                        key={tab.name}
-                        style={[styles.tab, active && styles.tabActive]}
-                        onPress={() => !active && router.push(tab.href)}
-                        testID={`${testID}-${tab.name}`}
-                    >
-                        <AntDesign
-                            name={tab.icon}
-                            size={22}
-                            color={active ? colors.ink : colors.inkSecondary}
-                        />
-                        <Text style={[styles.label, active && styles.labelActive]}>
-                            {tab.label}
-                        </Text>
-                    </Pressable>
-                );
-            })}
+        <View style={[styles.container, { paddingBottom: insets.bottom }]} testID={testID}>
+            <View style={styles.bar}>
+                {TABS.map((tab, index) => {
+                    const active = tab.name === activeTab;
+                    return (
+                        <Pressable
+                            key={tab.name}
+                            style={({ pressed }) => [
+                                styles.tab,
+                                index > 0 && styles.tabDivider,
+                                active && styles.tabActive,
+                                pressed && styles.pressed,
+                            ]}
+                            onPress={() => !active && router.push(tab.href)}
+                            testID={`${testID}-${tab.name}`}
+                        >
+                            <AntDesign
+                                name={tab.icon}
+                                size={22}
+                                color={active ? colors.ink : colors.inkSecondary}
+                            />
+                            <Text style={[styles.label, active && styles.labelActive]}>
+                                {tab.label}
+                            </Text>
+                        </Pressable>
+                    );
+                })}
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    bar: {
-        flexDirection: 'row',
+    container: {
         width: '100%',
         backgroundColor: colors.surfaceRaised,
         borderTopWidth: borderWidth.accent,
         borderTopColor: colors.ink,
     },
+    bar: {
+        flexDirection: 'row',
+        height: BAR_HEIGHT,
+    },
     tab: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.sm,
         gap: spacing.xs,
+    },
+    tabDivider: {
+        borderLeftWidth: borderWidth.accent,
+        borderLeftColor: colors.ink,
     },
     tabActive: {
         backgroundColor: colors.yellow,
     },
+    pressed: {
+        opacity: 0.9,
+        transform: [{ translateX: 2 }, { translateY: 2 }],
+    },
     label: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 9,
+        fontFamily: typography.fonts.black,
+        fontSize: 10,
         letterSpacing: 0.5,
         color: colors.inkSecondary,
     },

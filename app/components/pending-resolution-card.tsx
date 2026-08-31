@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
-        padding: spacing.md,
+        padding: spacing.lg,
         marginBottom: spacing.sm,
         marginRight: spacing.xs,
         opacity: 0.85,

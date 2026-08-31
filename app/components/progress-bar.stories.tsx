@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { View } from 'react-native';
 import { ProgressBar } from './progress-bar';
 
 const meta: Meta<typeof ProgressBar> = {
@@ -10,6 +11,15 @@ const meta: Meta<typeof ProgressBar> = {
         total: 3,
         size: 'compact',
     },
+    // ProgressBar is width: '100%' — without a concrete width to resolve
+    // against, Storybook's centered layout collapses it to a sliver.
+    decorators: [
+        (Story) => (
+            <View style={{ width: 390 }}>
+                <Story />
+            </View>
+        ),
+    ],
 };
 
 export default meta;
