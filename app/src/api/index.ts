@@ -4,52 +4,195 @@
  * OpenAPI spec version: 0.0.1
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import { customFetch } from './client';
+export interface ProgressResponse {
+  completed: number;
+  pending: number;
+  total: number;
+}
+
+export interface ActiveParticipantResponse {
+  displayName?: string;
+  avatarUrl?: string;
+  completed: number;
+  pending: number;
+  total: number;
+}
+
+export interface ActiveContractResponse {
+  contractId?: string;
+  name?: string;
+  cycleNumber: number;
+  startDate?: string;
+  endDate?: string;
+  myProgress?: ProgressResponse;
+  unreviewedEvidenceCount: number;
+  participants?: ActiveParticipantResponse[];
+}
+
+export interface AddContactRequest {
+  targetUserId?: string;
+}
+
+export interface ContactResponse {
+  id?: string;
+  displayName?: string;
+  tag?: string;
+  avatarUrl?: string;
+}
+
+export interface ContractParticipantResponse {
+  id?: string;
+  userId?: string;
+  habit?: string;
+  frequency?: number;
+  signStatus?: string;
+  optedOutOfNextCycle: boolean;
+}
+
+export interface ContractResponse {
+  id?: string;
+  name?: string;
+  forfeit?: string;
+  period?: string;
+  startDate?: string;
+  status?: string;
+  currentCycleNumber?: number;
+  creatorId?: string;
+  createdAt?: string;
+  participants?: ContractParticipantResponse[];
+}
+
+export interface ContractSummaryResponse {
+  contractId?: string;
+  name?: string;
+  status?: string;
+  cycleNumber?: number;
+  opponentNames?: string[];
+}
+
+export interface CreateUserRequest {
+  displayName?: string;
+}
+
 export interface ErrorResponse {
   message?: string;
 }
+
+export interface NotificationResponse {
+  id?: string;
+  type?: string;
+  createdAt?: string;
+  submitterName?: string;
+  contractId?: string;
+  contractName?: string;
+  cycleNumber?: number;
+  evidenceId?: string;
+  inviterName?: string;
+  resolutionId?: string;
+  forfeit?: string;
+  loserNames?: string[];
+  winnerNames?: string[];
+  fromName?: string;
+}
+
+export interface PendingParticipantResponse {
+  displayName?: string;
+  completed: number;
+  total: number;
+}
+
+export interface PendingResolutionContractResponse {
+  contractId?: string;
+  contractName?: string;
+  cycleNumber: number;
+  unreviewedEvidenceCount: number;
+  participants?: PendingParticipantResponse[];
+}
+
+export interface UpdateUserRequest {
+  displayName?: string;
+}
+
+export interface UserResponse {
+  id?: string;
+  displayName?: string;
+  tag?: string;
+  email?: string;
+  avatarUrl?: string;
+}
+
+export interface UserSearchResponse {
+  id?: string;
+  displayName?: string;
+  tag?: string;
+  avatarUrl?: string;
+  isContact: boolean;
+}
+
+export type GetUsersSearchParams = {
+/**
+ * Tag prefix to search. Minimum 2 characters.
+ */
+tag: string;
+};
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type getTestResponse200 = {
-  data: ErrorResponse
+/**
+ * Returns the calling user's contacts ordered alphabetically by display name.
+ * @summary List contacts
+ */
+export type getContactsResponse200 = {
+  data: ContactResponse[]
   status: 200
 }
 
-export type getTestResponseSuccess = (getTestResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getTestResponse = (getTestResponseSuccess)
-
-export const getGetTestUrl = () => {
-
-
-
-
-  return `/test`
+export type getContactsResponse401 = {
+  data: ErrorResponse
+  status: 401
 }
 
-export const getTest = async ( options?: RequestInit): Promise<getTestResponse> => {
+export type getContactsResponseSuccess = (getContactsResponse200) & {
+  headers: Headers;
+};
+export type getContactsResponseError = (getContactsResponse401) & {
+  headers: Headers;
+};
 
-  return customFetch<getTestResponse>(getGetTestUrl(),
+export type getContactsResponse = (getContactsResponseSuccess | getContactsResponseError)
+
+export const getGetContactsUrl = () => {
+
+
+
+
+  return `/contacts`
+}
+
+export const getContacts = async ( options?: RequestInit): Promise<getContactsResponse> => {
+
+  return customFetch<getContactsResponse>(getGetContactsUrl(),
   {
     ...options,
     method: 'GET'
@@ -62,66 +205,1295 @@ export const getTest = async ( options?: RequestInit): Promise<getTestResponse> 
 
 
 
-export const getGetTestQueryKey = () => {
+export const getGetContactsQueryKey = () => {
     return [
-    `/test`
+    `/contacts`
     ] as const;
     }
 
 
-export const getGetTestQueryOptions = <TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetContactsQueryOptions = <TData = Awaited<ReturnType<typeof getContacts>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContacts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTestQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetContactsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTest>>> = ({ signal }) => getTest({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContacts>>> = ({ signal }) => getContacts({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContacts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetTestQueryResult = NonNullable<Awaited<ReturnType<typeof getTest>>>
-export type GetTestQueryError = unknown
+export type GetContactsQueryResult = NonNullable<Awaited<ReturnType<typeof getContacts>>>
+export type GetContactsQueryError = ErrorResponse
 
 
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>> & Pick<
+export function useGetContacts<TData = Awaited<ReturnType<typeof getContacts>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContacts>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTest>>,
+          Awaited<ReturnType<typeof getContacts>>,
           TError,
-          Awaited<ReturnType<typeof getTest>>
+          Awaited<ReturnType<typeof getContacts>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>> & Pick<
+export function useGetContacts<TData = Awaited<ReturnType<typeof getContacts>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContacts>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTest>>,
+          Awaited<ReturnType<typeof getContacts>>,
           TError,
-          Awaited<ReturnType<typeof getTest>>
+          Awaited<ReturnType<typeof getContacts>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetContacts<TData = Awaited<ReturnType<typeof getContacts>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContacts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List contacts
+ */
 
-export function useGetTest<TData = Awaited<ReturnType<typeof getTest>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetContacts<TData = Awaited<ReturnType<typeof getContacts>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContacts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetTestQueryOptions(options)
+  const queryOptions = getGetContactsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * Adds a user to the caller's contacts list. userId comes from a prior tag search result. Returns 400 if userId is the caller's own ID, 404 if the user does not exist, 409 if they are already a contact.
+ * @summary Add a contact
+ */
+export type postContactsResponse201 = {
+  data: ContactResponse
+  status: 201
+}
+
+export type postContactsResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postContactsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postContactsResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postContactsResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type postContactsResponseSuccess = (postContactsResponse201) & {
+  headers: Headers;
+};
+export type postContactsResponseError = (postContactsResponse400 | postContactsResponse401 | postContactsResponse404 | postContactsResponse409) & {
+  headers: Headers;
+};
+
+export type postContactsResponse = (postContactsResponseSuccess | postContactsResponseError)
+
+export const getPostContactsUrl = () => {
+
+
+
+
+  return `/contacts`
+}
+
+export const postContacts = async (addContactRequest: AddContactRequest, options?: RequestInit): Promise<postContactsResponse> => {
+
+  return customFetch<postContactsResponse>(getPostContactsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      addContactRequest,)
+  }
+);}
+
+
+
+
+export const getPostContactsMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postContacts>>, TError,{data: AddContactRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postContacts>>, TError,{data: AddContactRequest}, TContext> => {
+
+const mutationKey = ['postContacts'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postContacts>>, {data: AddContactRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postContacts(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostContactsMutationResult = NonNullable<Awaited<ReturnType<typeof postContacts>>>
+    export type PostContactsMutationBody = AddContactRequest
+    export type PostContactsMutationError = ErrorResponse
+
+    /**
+ * @summary Add a contact
+ */
+export const usePostContacts = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postContacts>>, TError,{data: AddContactRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postContacts>>,
+        TError,
+        {data: AddContactRequest},
+        TContext
+      > => {
+      return useMutation(getPostContactsMutationOptions(options), queryClient);
+    }
+
+/**
+ * Removes a user from the caller's contacts. Path param is the target user's ID, not the contact row ID. Returns 404 if the user is not in the caller's contacts.
+ * @summary Remove a contact
+ */
+export type deleteContactsTargetUserIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteContactsTargetUserIdResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type deleteContactsTargetUserIdResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type deleteContactsTargetUserIdResponseSuccess = (deleteContactsTargetUserIdResponse204) & {
+  headers: Headers;
+};
+export type deleteContactsTargetUserIdResponseError = (deleteContactsTargetUserIdResponse401 | deleteContactsTargetUserIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteContactsTargetUserIdResponse = (deleteContactsTargetUserIdResponseSuccess | deleteContactsTargetUserIdResponseError)
+
+export const getDeleteContactsTargetUserIdUrl = (targetUserId: string,) => {
+
+
+
+
+  return `/contacts/${targetUserId}`
+}
+
+export const deleteContactsTargetUserId = async (targetUserId: string, options?: RequestInit): Promise<deleteContactsTargetUserIdResponse> => {
+
+  return customFetch<deleteContactsTargetUserIdResponse>(getDeleteContactsTargetUserIdUrl(targetUserId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteContactsTargetUserIdMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteContactsTargetUserId>>, TError,{targetUserId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteContactsTargetUserId>>, TError,{targetUserId: string}, TContext> => {
+
+const mutationKey = ['deleteContactsTargetUserId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteContactsTargetUserId>>, {targetUserId: string}> = (props) => {
+          const {targetUserId} = props ?? {};
+
+          return  deleteContactsTargetUserId(targetUserId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteContactsTargetUserIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteContactsTargetUserId>>>
+
+    export type DeleteContactsTargetUserIdMutationError = ErrorResponse
+
+    /**
+ * @summary Remove a contact
+ */
+export const useDeleteContactsTargetUserId = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteContactsTargetUserId>>, TError,{targetUserId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteContactsTargetUserId>>,
+        TError,
+        {targetUserId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteContactsTargetUserIdMutationOptions(options), queryClient);
+    }
+
+/**
+ * Called on FAB tap. Creates a contract with default values (name and forfeit empty, period weekly, start date tomorrow UTC, status draft) and a participant row for the caller with sign_status drafting. Everything stays mutable until POST /contracts/{contractId}/start.
+ * @summary Create contract
+ */
+export type postContractsResponse201 = {
+  data: ContractResponse
+  status: 201
+}
+
+export type postContractsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postContractsResponseSuccess = (postContractsResponse201) & {
+  headers: Headers;
+};
+export type postContractsResponseError = (postContractsResponse401) & {
+  headers: Headers;
+};
+
+export type postContractsResponse = (postContractsResponseSuccess | postContractsResponseError)
+
+export const getPostContractsUrl = () => {
+
+
+
+
+  return `/contracts`
+}
+
+export const postContracts = async ( options?: RequestInit): Promise<postContractsResponse> => {
+
+  return customFetch<postContractsResponse>(getPostContractsUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getPostContractsMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postContracts>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postContracts>>, TError,void, TContext> => {
+
+const mutationKey = ['postContracts'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postContracts>>, void> = () => {
+
+
+          return  postContracts(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostContractsMutationResult = NonNullable<Awaited<ReturnType<typeof postContracts>>>
+
+    export type PostContractsMutationError = ErrorResponse
+
+    /**
+ * @summary Create contract
+ */
+export const usePostContracts = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postContracts>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postContracts>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostContractsMutationOptions(options), queryClient);
+    }
+
+/**
+ * Returns every contract the caller is or was a participant in — active, pending_resolution, and settled — most recent first. Backs the Contracts tab's full list/history, distinct from GET /contracts/me/active and GET /contracts/me/pending-resolution, which the Dashboard uses for its curated, needs-attention view and only cover active/pending_resolution.
+ * @summary List the caller's contracts
+ */
+export type getContractsMeResponse200 = {
+  data: ContractSummaryResponse[]
+  status: 200
+}
+
+export type getContractsMeResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getContractsMeResponseSuccess = (getContractsMeResponse200) & {
+  headers: Headers;
+};
+export type getContractsMeResponseError = (getContractsMeResponse401) & {
+  headers: Headers;
+};
+
+export type getContractsMeResponse = (getContractsMeResponseSuccess | getContractsMeResponseError)
+
+export const getGetContractsMeUrl = () => {
+
+
+
+
+  return `/contracts/me`
+}
+
+export const getContractsMe = async ( options?: RequestInit): Promise<getContractsMeResponse> => {
+
+  return customFetch<getContractsMeResponse>(getGetContractsMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContractsMeQueryKey = () => {
+    return [
+    `/contracts/me`
+    ] as const;
+    }
+
+
+export const getGetContractsMeQueryOptions = <TData = Awaited<ReturnType<typeof getContractsMe>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContractsMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContractsMe>>> = ({ signal }) => getContractsMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContractsMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetContractsMeQueryResult = NonNullable<Awaited<ReturnType<typeof getContractsMe>>>
+export type GetContractsMeQueryError = ErrorResponse
+
+
+export function useGetContractsMe<TData = Awaited<ReturnType<typeof getContractsMe>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContractsMe>>,
+          TError,
+          Awaited<ReturnType<typeof getContractsMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContractsMe<TData = Awaited<ReturnType<typeof getContractsMe>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContractsMe>>,
+          TError,
+          Awaited<ReturnType<typeof getContractsMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContractsMe<TData = Awaited<ReturnType<typeof getContractsMe>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List the caller's contracts
+ */
+
+export function useGetContractsMe<TData = Awaited<ReturnType<typeof getContractsMe>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetContractsMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * Returns contracts where status is active and the caller is a signed participant, carrying all data needed for the Dashboard contract card: current cycle progress, per-participant progress, and unreviewed evidence count.
+ * @summary List the caller's active contracts
+ */
+export type getContractsMeActiveResponse200 = {
+  data: ActiveContractResponse[]
+  status: 200
+}
+
+export type getContractsMeActiveResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getContractsMeActiveResponseSuccess = (getContractsMeActiveResponse200) & {
+  headers: Headers;
+};
+export type getContractsMeActiveResponseError = (getContractsMeActiveResponse401) & {
+  headers: Headers;
+};
+
+export type getContractsMeActiveResponse = (getContractsMeActiveResponseSuccess | getContractsMeActiveResponseError)
+
+export const getGetContractsMeActiveUrl = () => {
+
+
+
+
+  return `/contracts/me/active`
+}
+
+export const getContractsMeActive = async ( options?: RequestInit): Promise<getContractsMeActiveResponse> => {
+
+  return customFetch<getContractsMeActiveResponse>(getGetContractsMeActiveUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContractsMeActiveQueryKey = () => {
+    return [
+    `/contracts/me/active`
+    ] as const;
+    }
+
+
+export const getGetContractsMeActiveQueryOptions = <TData = Awaited<ReturnType<typeof getContractsMeActive>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMeActive>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContractsMeActiveQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContractsMeActive>>> = ({ signal }) => getContractsMeActive({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContractsMeActive>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetContractsMeActiveQueryResult = NonNullable<Awaited<ReturnType<typeof getContractsMeActive>>>
+export type GetContractsMeActiveQueryError = ErrorResponse
+
+
+export function useGetContractsMeActive<TData = Awaited<ReturnType<typeof getContractsMeActive>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMeActive>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContractsMeActive>>,
+          TError,
+          Awaited<ReturnType<typeof getContractsMeActive>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContractsMeActive<TData = Awaited<ReturnType<typeof getContractsMeActive>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMeActive>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContractsMeActive>>,
+          TError,
+          Awaited<ReturnType<typeof getContractsMeActive>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContractsMeActive<TData = Awaited<ReturnType<typeof getContractsMeActive>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMeActive>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List the caller's active contracts
+ */
+
+export function useGetContractsMeActive<TData = Awaited<ReturnType<typeof getContractsMeActive>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMeActive>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetContractsMeActiveQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * Returns contracts where the caller is a signed participant and a cycle has status pending_resolution. A contract can appear here and in GET /contracts/me/active simultaneously during the overlap period — they represent different cycles.
+ * @summary List the caller's pending-resolution contracts
+ */
+export type getContractsMePendingResolutionResponse200 = {
+  data: PendingResolutionContractResponse[]
+  status: 200
+}
+
+export type getContractsMePendingResolutionResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getContractsMePendingResolutionResponseSuccess = (getContractsMePendingResolutionResponse200) & {
+  headers: Headers;
+};
+export type getContractsMePendingResolutionResponseError = (getContractsMePendingResolutionResponse401) & {
+  headers: Headers;
+};
+
+export type getContractsMePendingResolutionResponse = (getContractsMePendingResolutionResponseSuccess | getContractsMePendingResolutionResponseError)
+
+export const getGetContractsMePendingResolutionUrl = () => {
+
+
+
+
+  return `/contracts/me/pending-resolution`
+}
+
+export const getContractsMePendingResolution = async ( options?: RequestInit): Promise<getContractsMePendingResolutionResponse> => {
+
+  return customFetch<getContractsMePendingResolutionResponse>(getGetContractsMePendingResolutionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContractsMePendingResolutionQueryKey = () => {
+    return [
+    `/contracts/me/pending-resolution`
+    ] as const;
+    }
+
+
+export const getGetContractsMePendingResolutionQueryOptions = <TData = Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContractsMePendingResolutionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContractsMePendingResolution>>> = ({ signal }) => getContractsMePendingResolution({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetContractsMePendingResolutionQueryResult = NonNullable<Awaited<ReturnType<typeof getContractsMePendingResolution>>>
+export type GetContractsMePendingResolutionQueryError = ErrorResponse
+
+
+export function useGetContractsMePendingResolution<TData = Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContractsMePendingResolution>>,
+          TError,
+          Awaited<ReturnType<typeof getContractsMePendingResolution>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContractsMePendingResolution<TData = Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContractsMePendingResolution>>,
+          TError,
+          Awaited<ReturnType<typeof getContractsMePendingResolution>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContractsMePendingResolution<TData = Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List the caller's pending-resolution contracts
+ */
+
+export function useGetContractsMePendingResolution<TData = Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContractsMePendingResolution>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetContractsMePendingResolutionQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * Returns all unread notifications for the caller, enriched server-side with the display context needed to render each Dashboard alert. Only unread (read_at IS NULL) rows are returned. Frontend is responsible for ordering by urgency (verify, challenge, settle, owed, pay-up).
+ * @summary List unread notifications
+ */
+export type getNotificationsResponse200 = {
+  data: NotificationResponse[]
+  status: 200
+}
+
+export type getNotificationsResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getNotificationsResponseSuccess = (getNotificationsResponse200) & {
+  headers: Headers;
+};
+export type getNotificationsResponseError = (getNotificationsResponse401) & {
+  headers: Headers;
+};
+
+export type getNotificationsResponse = (getNotificationsResponseSuccess | getNotificationsResponseError)
+
+export const getGetNotificationsUrl = () => {
+
+
+
+
+  return `/notifications`
+}
+
+export const getNotifications = async ( options?: RequestInit): Promise<getNotificationsResponse> => {
+
+  return customFetch<getNotificationsResponse>(getGetNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNotificationsQueryKey = () => {
+    return [
+    `/notifications`
+    ] as const;
+    }
+
+
+export const getGetNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotifications>>> = ({ signal }) => getNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof getNotifications>>>
+export type GetNotificationsQueryError = ErrorResponse
+
+
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotifications>>,
+          TError,
+          Awaited<ReturnType<typeof getNotifications>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotifications>>,
+          TError,
+          Awaited<ReturnType<typeof getNotifications>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List unread notifications
+ */
+
+export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotifications>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotifications>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * Creates the users row after SuperTokens has created the auth account. Called once per signup. supertokens_user_id and email are derived from the verified JWT. Returns 409 if a users row already exists for this account.
+ * @summary Register a new user
+ */
+export type postUsersResponse201 = {
+  data: UserResponse
+  status: 201
+}
+
+export type postUsersResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type postUsersResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type postUsersResponse409 = {
+  data: ErrorResponse
+  status: 409
+}
+
+export type postUsersResponseSuccess = (postUsersResponse201) & {
+  headers: Headers;
+};
+export type postUsersResponseError = (postUsersResponse400 | postUsersResponse401 | postUsersResponse409) & {
+  headers: Headers;
+};
+
+export type postUsersResponse = (postUsersResponseSuccess | postUsersResponseError)
+
+export const getPostUsersUrl = () => {
+
+
+
+
+  return `/users`
+}
+
+export const postUsers = async (createUserRequest: CreateUserRequest, options?: RequestInit): Promise<postUsersResponse> => {
+
+  return customFetch<postUsersResponse>(getPostUsersUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createUserRequest,)
+  }
+);}
+
+
+
+
+export const getPostUsersMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsers>>, TError,{data: CreateUserRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUsers>>, TError,{data: CreateUserRequest}, TContext> => {
+
+const mutationKey = ['postUsers'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsers>>, {data: CreateUserRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postUsers(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostUsersMutationResult = NonNullable<Awaited<ReturnType<typeof postUsers>>>
+    export type PostUsersMutationBody = CreateUserRequest
+    export type PostUsersMutationError = ErrorResponse
+
+    /**
+ * @summary Register a new user
+ */
+export const usePostUsers = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsers>>, TError,{data: CreateUserRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postUsers>>,
+        TError,
+        {data: CreateUserRequest},
+        TContext
+      > => {
+      return useMutation(getPostUsersMutationOptions(options), queryClient);
+    }
+
+/**
+ * Returns the authenticated user's profile.
+ * @summary Get current user
+ */
+export type getUsersMeResponse200 = {
+  data: UserResponse
+  status: 200
+}
+
+export type getUsersMeResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getUsersMeResponseSuccess = (getUsersMeResponse200) & {
+  headers: Headers;
+};
+export type getUsersMeResponseError = (getUsersMeResponse401) & {
+  headers: Headers;
+};
+
+export type getUsersMeResponse = (getUsersMeResponseSuccess | getUsersMeResponseError)
+
+export const getGetUsersMeUrl = () => {
+
+
+
+
+  return `/users/me`
+}
+
+export const getUsersMe = async ( options?: RequestInit): Promise<getUsersMeResponse> => {
+
+  return customFetch<getUsersMeResponse>(getGetUsersMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUsersMeQueryKey = () => {
+    return [
+    `/users/me`
+    ] as const;
+    }
+
+
+export const getGetUsersMeQueryOptions = <TData = Awaited<ReturnType<typeof getUsersMe>>, TError = ErrorResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersMe>>> = ({ signal }) => getUsersMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUsersMeQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersMe>>>
+export type GetUsersMeQueryError = ErrorResponse
+
+
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = ErrorResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersMe>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersMe>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get current user
+ */
+
+export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TError = ErrorResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUsersMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+/**
+ * Updates the authenticated user's display name. At least one field required. MVP: displayName only; avatar upload is out of scope.
+ * @summary Update current user's profile
+ */
+export type patchUsersMeResponse200 = {
+  data: UserResponse
+  status: 200
+}
+
+export type patchUsersMeResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type patchUsersMeResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type patchUsersMeResponseSuccess = (patchUsersMeResponse200) & {
+  headers: Headers;
+};
+export type patchUsersMeResponseError = (patchUsersMeResponse400 | patchUsersMeResponse401) & {
+  headers: Headers;
+};
+
+export type patchUsersMeResponse = (patchUsersMeResponseSuccess | patchUsersMeResponseError)
+
+export const getPatchUsersMeUrl = () => {
+
+
+
+
+  return `/users/me`
+}
+
+export const patchUsersMe = async (updateUserRequest: UpdateUserRequest, options?: RequestInit): Promise<patchUsersMeResponse> => {
+
+  return customFetch<patchUsersMeResponse>(getPatchUsersMeUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateUserRequest,)
+  }
+);}
+
+
+
+
+export const getPatchUsersMeMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchUsersMe>>, TError,{data: UpdateUserRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchUsersMe>>, TError,{data: UpdateUserRequest}, TContext> => {
+
+const mutationKey = ['patchUsersMe'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchUsersMe>>, {data: UpdateUserRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  patchUsersMe(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchUsersMeMutationResult = NonNullable<Awaited<ReturnType<typeof patchUsersMe>>>
+    export type PatchUsersMeMutationBody = UpdateUserRequest
+    export type PatchUsersMeMutationError = ErrorResponse
+
+    /**
+ * @summary Update current user's profile
+ */
+export const usePatchUsersMe = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchUsersMe>>, TError,{data: UpdateUserRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchUsersMe>>,
+        TError,
+        {data: UpdateUserRequest},
+        TContext
+      > => {
+      return useMutation(getPatchUsersMeMutationOptions(options), queryClient);
+    }
+
+/**
+ * Prefix-matches against users.tag. Excludes the calling user. isContact is true if the result user is already in the caller's contacts. Returns up to 20 results ordered by tag ascending.
+ * @summary Search users by tag prefix
+ */
+export type getUsersSearchResponse200 = {
+  data: UserSearchResponse[]
+  status: 200
+}
+
+export type getUsersSearchResponse400 = {
+  data: ErrorResponse
+  status: 400
+}
+
+export type getUsersSearchResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getUsersSearchResponseSuccess = (getUsersSearchResponse200) & {
+  headers: Headers;
+};
+export type getUsersSearchResponseError = (getUsersSearchResponse400 | getUsersSearchResponse401) & {
+  headers: Headers;
+};
+
+export type getUsersSearchResponse = (getUsersSearchResponseSuccess | getUsersSearchResponseError)
+
+export const getGetUsersSearchUrl = (params: GetUsersSearchParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/users/search?${stringifiedParams}` : `/users/search`
+}
+
+export const getUsersSearch = async (params: GetUsersSearchParams, options?: RequestInit): Promise<getUsersSearchResponse> => {
+
+  return customFetch<getUsersSearchResponse>(getGetUsersSearchUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUsersSearchQueryKey = (params?: GetUsersSearchParams,) => {
+    return [
+    `/users/search`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetUsersSearchQueryOptions = <TData = Awaited<ReturnType<typeof getUsersSearch>>, TError = ErrorResponse>(params: GetUsersSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUsersSearchQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersSearch>>> = ({ signal }) => getUsersSearch(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUsersSearchQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersSearch>>>
+export type GetUsersSearchQueryError = ErrorResponse
+
+
+export function useGetUsersSearch<TData = Awaited<ReturnType<typeof getUsersSearch>>, TError = ErrorResponse>(
+ params: GetUsersSearchParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersSearch>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersSearch>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUsersSearch<TData = Awaited<ReturnType<typeof getUsersSearch>>, TError = ErrorResponse>(
+ params: GetUsersSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersSearch>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersSearch>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUsersSearch<TData = Awaited<ReturnType<typeof getUsersSearch>>, TError = ErrorResponse>(
+ params: GetUsersSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Search users by tag prefix
+ */
+
+export function useGetUsersSearch<TData = Awaited<ReturnType<typeof getUsersSearch>>, TError = ErrorResponse>(
+ params: GetUsersSearchParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUsersSearchQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

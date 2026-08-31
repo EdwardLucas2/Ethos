@@ -16,7 +16,7 @@ Basic account information and logout. MVP placeholder — minimal functionality.
 ## Sections
 
 ### TopBar
-`default` variant.
+`stack` variant. Not a tab root — pushed from the avatar on any tab screen's TopBar. Back navigates to whichever tab screen it was opened from.
 
 ### User Card
 White card, 3px border, `shadow-md`. Centred layout:
@@ -35,4 +35,4 @@ For MVP these are display-only. No edit functionality.
 "LOG OUT" — full-width, outlined button (white background, 3px `red` border, `red` text, `shadow-sm`). Tap shows confirmation dialog: "You'll need to log in again. Continue?". On confirm: clears session, navigates to `/login`.
 
 ### BottomTabBar
-`profile` tab active.
+None — suppressed, per `docs/ROUTING.md` (Profile is a pushed screen, not a tab root).

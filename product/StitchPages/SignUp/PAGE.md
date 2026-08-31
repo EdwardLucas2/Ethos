@@ -18,7 +18,7 @@ None — unauthenticated screen.
 ## Sections
 
 ### TopBar
-`auth` variant — white background, gavel icon + "ETHOS" wordmark left, "LOGIN" text link right.
+Not `TopBar` — auth screens use the separate, already-built `AuthHeader` component (`app/components/auth-header.tsx`): white background, "ETHOS" wordmark left, "LOGIN" text link right. `TopBar` has no `auth` variant.
 
 ### Hero
 Same gavel + "ETHOS" wordmark treatment as Login.

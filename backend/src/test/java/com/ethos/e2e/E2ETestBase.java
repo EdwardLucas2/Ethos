@@ -3,8 +3,13 @@ package com.ethos.e2e;
 import com.ethos.AppRouter;
 import com.ethos.Main;
 import com.ethos.auth.JwtVerifier;
+import com.ethos.handler.ContractHandler;
+import com.ethos.handler.NotificationHandler;
 import com.ethos.handler.UserHandler;
+import com.ethos.service.ContractService;
+import com.ethos.service.NotificationService;
 import com.ethos.service.UserService;
+import com.ethos.store.ContractStore;
 import com.ethos.store.UserStore;
 import com.ethos.testutil.Dbmate;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,7 +100,13 @@ public abstract class E2ETestBase {
         AUTH_URL = authServerUrl;
         var jwtVerifier = JwtVerifier.fromJwksUrl(supertokensUrl + "/.well-known/jwks.json");
         var userStore = new UserStore(JDBI);
-        var appRouter = new AppRouter(jwtVerifier, userStore, new UserHandler(new UserService(userStore)));
+        ContractStore contractStore = new ContractStore(JDBI);
+        var appRouter = new AppRouter(
+                jwtVerifier,
+                userStore,
+                new UserHandler(new UserService(userStore)),
+                new ContractHandler(new ContractService(contractStore)),
+                new NotificationHandler(new NotificationService()));
 
         Javalin app = Main.buildJavalin(appRouter).start(0);
         APP_URL = "http://localhost:" + app.port();

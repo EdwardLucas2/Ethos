@@ -233,6 +233,30 @@ Called on FAB tap. Creates a contract with default values and the creator's part
 
 ---
 
+### `GET /contracts/me` — List the caller's contracts
+
+Returns every contract the caller is or was a participant in — `active`, `pending_resolution`, and `settled` — most recent first. Backs the Contracts tab's full list/history, distinct from `GET /contracts/me/active` and `GET /contracts/me/pending-resolution` (see Dashboard section below), which cover only `active`/`pending_resolution` for the Dashboard's curated, needs-attention view.
+
+`status` here is derived from the contract's cycles, not `contracts.status` (which is only `draft`/`active`/`ended`/`cancelled`): a contract with any cycle in an unsettled state maps to `pending_resolution`; a contract whose most recent cycle is settled with no unsettled cycles maps to `settled`; otherwise it maps to `active`. If a contract has both an active cycle and a pending-resolution cycle at once (the overlap window described under `GET /contracts/me/pending-resolution` below), `pending_resolution` takes precedence.
+
+**Auth:** `requireAuth`
+
+**Response `200`:**
+
+```json
+[
+    {
+        "contractId": "uuid",
+        "name": "Gym Bros",
+        "status": "active",
+        "cycleNumber": 3,
+        "opponentNames": ["Alex", "Sarah"]
+    }
+]
+```
+
+---
+
 ### `GET /contracts/{contractId}` — Get contract
 
 Polled by both lobby screens to reflect real-time changes.
