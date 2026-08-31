@@ -4,6 +4,7 @@ import com.ethos.dto.NotificationResponse;
 import com.ethos.dto.NotificationType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class NotificationService {
@@ -29,7 +30,7 @@ public class NotificationService {
         return List.of(
                 new NotificationResponse(
                         UUID.randomUUID(),
-                        NotificationType.EVIDENCE_UPLOADED.name().toLowerCase(),
+                        NotificationType.EVIDENCE_UPLOADED.name().toLowerCase(Locale.ROOT),
                         Instant.now().minusSeconds(3600),
                         "Alex",
                         contractId,
@@ -44,7 +45,7 @@ public class NotificationService {
                         null),
                 new NotificationResponse(
                         UUID.randomUUID(),
-                        NotificationType.CONTRACT_INVITED.name().toLowerCase(),
+                        NotificationType.CONTRACT_INVITED.name().toLowerCase(Locale.ROOT),
                         Instant.now().minusSeconds(7200),
                         null,
                         UUID.randomUUID(),
@@ -59,7 +60,7 @@ public class NotificationService {
                         null),
                 new NotificationResponse(
                         UUID.randomUUID(),
-                        NotificationType.CYCLE_PENDING_RESOLUTION.name().toLowerCase(),
+                        NotificationType.CYCLE_PENDING_RESOLUTION.name().toLowerCase(Locale.ROOT),
                         Instant.now().minusSeconds(86400),
                         null,
                         UUID.randomUUID(),
