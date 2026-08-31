@@ -9,8 +9,6 @@ export type FabProps = {
 };
 
 const SIZE = 64;
-// Hand-darkened variant of colors.red for the pressed state.
-const RED_PRESSED = '#CC3232';
 
 export function FAB({ onPress, loading = false, testID = 'fab' }: FabProps) {
     return (
@@ -43,6 +41,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.red,
     },
     pressed: {
-        backgroundColor: RED_PRESSED,
+        backgroundColor: colors.redPressed,
     },
 });

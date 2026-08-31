@@ -1,12 +1,10 @@
-import { borderWidth, colors, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export type AlertBannerType = 'verify' | 'challenge' | 'settle' | 'owed' | 'pay-up';
 
-// Matches the old shadows.sm offset. Rendered as a static solid box instead
-// of a native shadow (see button.tsx for why) so it stays put on press.
-const SHADOW_SIZE = 4;
+const SHADOW = offsetShadow(4);
 
 export type AlertBannerProps = {
     type: AlertBannerType;
@@ -42,7 +40,7 @@ export function AlertBanner({
 
     return (
         <View style={styles.wrapper}>
-            <View style={styles.shadowBox} />
+            <View style={SHADOW.box} />
             <Pressable
                 testID={testID}
                 onPress={onPress}
@@ -75,14 +73,6 @@ const styles = StyleSheet.create({
     wrapper: {
         width: '100%',
     },
-    shadowBox: {
-        position: 'absolute',
-        top: SHADOW_SIZE,
-        left: SHADOW_SIZE,
-        right: 0,
-        bottom: 0,
-        backgroundColor: colors.ink,
-    },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -91,8 +81,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.md,
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
-        marginRight: SHADOW_SIZE,
-        marginBottom: SHADOW_SIZE,
+        ...SHADOW.faceMargin,
     },
     pressed: {
         transform: [{ translateX: 2 }, { translateY: 2 }],
