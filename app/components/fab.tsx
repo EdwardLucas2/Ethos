@@ -1,4 +1,4 @@
-import { borderWidth, colors, shadows, spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -9,13 +9,12 @@ export type FabProps = {
 };
 
 const SIZE = 64;
+// Hand-darkened variant of colors.red for the pressed state.
+const RED_PRESSED = '#CC3232';
 
 export function FAB({ onPress, loading = false, testID = 'fab' }: FabProps) {
     return (
-        // The shadow lives on this fixed-position wrapper, not on the Pressable
-        // face below — so pressing translates only the face, leaving the shadow
-        // static (per DESIGN.md: press shifts 2px, shadow shrinks to match).
-        <View style={[styles.wrapper, shadows.md]}>
+        <View style={styles.wrapper}>
             <Pressable
                 testID={testID}
                 onPress={onPress}
@@ -42,11 +41,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: colors.red,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
     },
     pressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
+        backgroundColor: RED_PRESSED,
     },
 });

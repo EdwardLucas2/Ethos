@@ -1,8 +1,12 @@
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export type AlertBannerType = 'verify' | 'challenge' | 'settle' | 'owed' | 'pay-up';
+
+// Matches the old shadows.sm offset. Rendered as a static solid box instead
+// of a native shadow (see button.tsx for why) so it stays put on press.
+const SHADOW_SIZE = 4;
 
 export type AlertBannerProps = {
     type: AlertBannerType;
@@ -37,47 +41,60 @@ export function AlertBanner({
     const config = TYPE_CONFIG[type];
 
     return (
-        <Pressable
-            testID={testID}
-            onPress={onPress}
-            style={({ pressed }) => [
-                styles.container,
-                { backgroundColor: config.backgroundColor },
-                shadows.sm,
-                pressed && styles.pressed,
-            ]}
-        >
-            <View style={styles.left}>
-                <AntDesign name={config.icon} size={20} color={config.textColor} />
-                <Text style={[styles.message, { color: config.textColor }]}>
-                    {message.toUpperCase()}
-                </Text>
-            </View>
-            <View style={styles.right}>
-                <View style={[styles.actionBadge, { borderColor: config.textColor }]}>
-                    <Text style={[styles.actionText, { color: config.textColor }]}>
-                        {actionLabel.toUpperCase()}
+        <View style={styles.wrapper}>
+            <View style={styles.shadowBox} />
+            <Pressable
+                testID={testID}
+                onPress={onPress}
+                style={({ pressed }) => [
+                    styles.container,
+                    { backgroundColor: config.backgroundColor },
+                    pressed && styles.pressed,
+                ]}
+            >
+                <View style={styles.left}>
+                    <AntDesign name={config.icon} size={20} color={config.textColor} />
+                    <Text style={[styles.message, { color: config.textColor }]}>
+                        {message.toUpperCase()}
                     </Text>
                 </View>
-                <AntDesign name="right" size={18} color={config.textColor} />
-            </View>
-        </Pressable>
+                <View style={styles.right}>
+                    <View style={[styles.actionBadge, { borderColor: config.textColor }]}>
+                        <Text style={[styles.actionText, { color: config.textColor }]}>
+                            {actionLabel.toUpperCase()}
+                        </Text>
+                    </View>
+                    <AntDesign name="right" size={18} color={config.textColor} />
+                </View>
+            </Pressable>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
+    wrapper: {
+        width: '100%',
+    },
+    shadowBox: {
+        position: 'absolute',
+        top: SHADOW_SIZE,
+        left: SHADOW_SIZE,
+        right: 0,
+        bottom: 0,
+        backgroundColor: colors.ink,
+    },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%',
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.md,
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
+        marginRight: SHADOW_SIZE,
+        marginBottom: SHADOW_SIZE,
     },
     pressed: {
-        opacity: 0.9,
         transform: [{ translateX: 2 }, { translateY: 2 }],
     },
     left: {

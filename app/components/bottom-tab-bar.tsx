@@ -2,7 +2,6 @@ import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Href, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type TabName = 'home' | 'contracts' | 'friends';
 
@@ -25,61 +24,62 @@ const TABS: {
     { name: 'friends', label: 'FRIENDS', icon: 'team', href: '/friends' as Href },
 ];
 
-const BAR_HEIGHT = 80;
-
 export function BottomTabBar({ activeTab, testID = 'bottom-tab-bar' }: BottomTabBarProps) {
-    const insets = useSafeAreaInsets();
     const router = useRouter();
 
     return (
-        <View style={[styles.container, { paddingBottom: insets.bottom }]} testID={testID}>
-            <View style={styles.bar}>
-                {TABS.map((tab, index) => {
-                    const active = tab.name === activeTab;
-                    return (
-                        <Pressable
-                            key={tab.name}
-                            style={({ pressed }) => [
-                                styles.tab,
-                                index > 0 && styles.tabDivider,
-                                active && styles.tabActive,
-                                pressed && styles.pressed,
-                            ]}
-                            onPress={() => !active && router.push(tab.href)}
-                            testID={`${testID}-${tab.name}`}
-                        >
-                            <AntDesign
-                                name={tab.icon}
-                                size={22}
-                                color={active ? colors.ink : colors.inkSecondary}
-                            />
-                            <Text style={[styles.label, active && styles.labelActive]}>
-                                {tab.label}
-                            </Text>
-                        </Pressable>
-                    );
-                })}
-            </View>
+        <View style={styles.bar} testID={testID}>
+            {TABS.map((tab, index) => {
+                const active = tab.name === activeTab;
+                return (
+                    <Pressable
+                        key={tab.name}
+                        style={[
+                            styles.tab,
+                            index > 0 && styles.tabDivider,
+                            active && styles.tabActive,
+                        ]}
+                        onPress={() => !active && router.push(tab.href)}
+                        testID={`${testID}-${tab.name}`}
+                    >
+                        {({ pressed }) => (
+                            <>
+                                <AntDesign
+                                    name={tab.icon}
+                                    size={22}
+                                    color={active ? colors.ink : colors.inkSecondary}
+                                    style={pressed && styles.iconPressed}
+                                />
+                                <Text style={[styles.label, active && styles.labelActive]}>
+                                    {tab.label}
+                                </Text>
+                            </>
+                        )}
+                    </Pressable>
+                );
+            })}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    bar: {
+        flexDirection: 'row',
         width: '100%',
-        backgroundColor: colors.surfaceRaised,
         borderTopWidth: borderWidth.accent,
         borderTopColor: colors.ink,
     },
-    bar: {
-        flexDirection: 'row',
-        height: BAR_HEIGHT,
-    },
     tab: {
+        // Fixed padding, not the safe-area inset — BottomTabBar is always the
+        // last flex child in a full-height column, so it reaches the screen's
+        // bottom edge regardless of its own height. Padding here only needs to
+        // clear the home indicator visually, not pad out to the device inset.
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
+        paddingVertical: spacing.sm,
         gap: spacing.xs,
+        backgroundColor: colors.surfaceRaised,
     },
     tabDivider: {
         borderLeftWidth: borderWidth.accent,
@@ -88,9 +88,13 @@ const styles = StyleSheet.create({
     tabActive: {
         backgroundColor: colors.yellow,
     },
-    pressed: {
-        opacity: 0.9,
-        transform: [{ translateX: 2 }, { translateY: 2 }],
+    // Fakes a heavier icon stroke on press — AntDesign's glyphs don't have a
+    // separate bold variant, so a tight same-colour text shadow thickens the
+    // silhouette without changing layout or size.
+    iconPressed: {
+        textShadowColor: colors.ink,
+        textShadowOffset: { width: 0.6, height: 0.6 },
+        textShadowRadius: 0.3,
     },
     label: {
         fontFamily: typography.fonts.black,

@@ -14,15 +14,20 @@ export function TopBar(props: TopBarProps) {
 
     return (
         <View
-            style={[styles.header, { paddingTop: Math.max(insets.top, spacing.md) }]}
+            style={[styles.header, { paddingTop: insets.top }]}
             testID={props.testID ?? 'top-bar'}
         >
             {props.variant === 'stack' ? (
-                <Pressable onPress={props.onBack} testID="top-bar-back" hitSlop={spacing.sm}>
+                <Pressable
+                    style={styles.iconSlot}
+                    onPress={props.onBack}
+                    testID="top-bar-back"
+                    hitSlop={spacing.sm}
+                >
                     <AntDesign name="arrow-left" size={24} color={colors.ink} />
                 </Pressable>
             ) : (
-                <View />
+                <View style={styles.iconSlot} />
             )}
 
             <Text style={styles.wordmark}>ETHOS</Text>
@@ -31,6 +36,7 @@ export function TopBar(props: TopBarProps) {
                 <Pressable
                     // The dashboard-page branch adds /profile — cast is required for
                     // this branch to typecheck standalone before that route exists.
+                    style={styles.iconSlot}
                     onPress={() => router.push('/profile' as Href)}
                     testID="top-bar-avatar"
                     hitSlop={spacing.sm}
@@ -42,7 +48,7 @@ export function TopBar(props: TopBarProps) {
                     )}
                 </Pressable>
             ) : (
-                <View style={styles.spacer} />
+                <View style={styles.iconSlot} />
             )}
         </View>
     );
@@ -82,11 +88,13 @@ const styles = StyleSheet.create({
         borderColor: colors.ink,
         backgroundColor: colors.surfaceRaised,
     },
-    spacer: {
-        // Matches the avatar's footprint exactly so the stack and tab variants
-        // render at the same height — a width-only spacer collapses to 0
-        // height, leaving the row's height governed only by the back icon.
+    iconSlot: {
+        // Fixed size on both sides (back arrow, avatar, and the empty
+        // placeholder) so the content row's height is constant across
+        // variants, independent of which icon is actually rendered.
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

@@ -1,10 +1,15 @@
 import { Button } from '@/components/button';
 import { ProgressBar } from '@/components/progress-bar';
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export type CtaState = 'snap' | 'snap-urgent' | 'review' | 'caught-up';
+
+// Matches the old shadows.lg offset. Rendered as a static solid box instead
+// of a native shadow (see button.tsx for why) so it stays put while the
+// whole card translates on press.
+const SHADOW_SIZE = 8;
 
 export type ActiveContractCardProps = {
     contractName: string;
@@ -44,52 +49,77 @@ export function ActiveContractCard({
     const caughtUp = ctaState === 'caught-up';
 
     return (
-        <Pressable testID={testID} onPress={onPress} style={[styles.card, shadows.lg]}>
-            <View style={styles.header}>
-                <View style={styles.titleBlock}>
-                    <Text style={styles.title}>{contractName}</Text>
-                    <Text style={styles.subtitle}>{opponentLabel}</Text>
+        <View style={styles.wrapper}>
+            <View style={styles.shadowBox} />
+            <Pressable
+                testID={testID}
+                onPress={onPress}
+                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+            >
+                <View style={styles.header}>
+                    <View style={styles.titleBlock}>
+                        <Text style={styles.title}>{contractName}</Text>
+                        <Text style={styles.subtitle}>{opponentLabel}</Text>
+                    </View>
+                    <View style={[styles.timeBadge, urgent && styles.timeBadgeUrgent]}>
+                        {urgent && <AntDesign name="warning" size={12} color={colors.red} />}
+                        <Text style={[styles.timeText, urgent && styles.timeTextUrgent]}>
+                            {timeRemaining}
+                        </Text>
+                    </View>
                 </View>
-                <View style={[styles.timeBadge, urgent && styles.timeBadgeUrgent]}>
-                    {urgent && <AntDesign name="warning" size={12} color={colors.red} />}
-                    <Text style={[styles.timeText, urgent && styles.timeTextUrgent]}>
-                        {timeRemaining}
-                    </Text>
-                </View>
-            </View>
 
-            <View style={styles.progressBlock}>
-                <View style={styles.progressLabelRow}>
-                    <Text style={styles.progressLabel}>Progress</Text>
-                    <Text style={styles.progressLabel}>
-                        {verified}/{total} Verified
-                    </Text>
+                <View style={styles.progressBlock}>
+                    <View style={styles.progressLabelRow}>
+                        <Text style={styles.progressLabel}>Progress</Text>
+                        <Text style={styles.progressLabel}>
+                            {verified}/{total} Verified
+                        </Text>
+                    </View>
+                    <ProgressBar
+                        verified={verified}
+                        pending={pending}
+                        total={total}
+                        size="compact"
+                    />
                 </View>
-                <ProgressBar verified={verified} pending={pending} total={total} size="compact" />
-            </View>
 
-            <Button
-                testID={`${testID}-cta`}
-                label={ctaLabel}
-                onPress={onCta}
-                disabled={caughtUp}
-                backgroundColor={CTA_BACKGROUND[ctaState]}
-                icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
-                labelStyle={styles.ctaLabel}
-            />
-        </Pressable>
+                <Button
+                    testID={`${testID}-cta`}
+                    label={ctaLabel}
+                    onPress={onCta}
+                    disabled={caughtUp}
+                    backgroundColor={CTA_BACKGROUND[ctaState]}
+                    icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
+                    labelStyle={styles.ctaLabel}
+                />
+            </Pressable>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    card: {
+    wrapper: {
         width: '100%',
+    },
+    shadowBox: {
+        position: 'absolute',
+        top: SHADOW_SIZE,
+        left: SHADOW_SIZE,
+        right: 0,
+        bottom: 0,
+        backgroundColor: colors.ink,
+    },
+    card: {
         backgroundColor: colors.surfaceRaised,
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
         padding: spacing.lg,
-        marginBottom: spacing.sm,
-        marginRight: spacing.xs,
+        marginRight: SHADOW_SIZE,
+        marginBottom: SHADOW_SIZE,
+    },
+    cardPressed: {
+        transform: [{ translateX: 2 }, { translateY: 2 }],
     },
     header: {
         flexDirection: 'row',

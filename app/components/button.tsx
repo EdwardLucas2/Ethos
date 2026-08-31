@@ -1,4 +1,4 @@
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import {
     ActivityIndicator,
@@ -29,6 +29,12 @@ type ButtonProps = {
 // Light-background colours render ink text; everything else gets white.
 const LIGHT_BACKGROUNDS = new Set<string>([colors.yellow, colors.surface, colors.surfaceRaised]);
 
+// Matches the old shadows.sm offset. Rendered as a static solid box instead
+// of a native shadow — a real shadow is derived from its view's rendered
+// content, so it visibly drags along when that content is translated for
+// the press effect. A separate, unmoved sibling behind the face fixes that.
+const SHADOW_SIZE = 4;
+
 export function Button({
     label,
     onPress,
@@ -46,11 +52,13 @@ export function Button({
     const isDisabled = disabled || loading;
 
     return (
-        <View style={[withShadow ? styles.shadow : styles.noShadow, style]}>
+        <View style={style}>
+            {withShadow && <View style={styles.shadowBox} />}
             <Pressable
                 style={({ pressed }) => [
                     styles.button,
                     { backgroundColor },
+                    withShadow && styles.faceMargin,
                     pressed && !isDisabled && styles.pressed,
                 ]}
                 onPress={onPress}
@@ -84,12 +92,14 @@ export function Button({
 }
 
 const styles = StyleSheet.create({
-    shadow: {
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
+    shadowBox: {
+        position: 'absolute',
+        top: SHADOW_SIZE,
+        left: SHADOW_SIZE,
+        right: 0,
+        bottom: 0,
+        backgroundColor: colors.ink,
     },
-    noShadow: {},
     button: {
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
@@ -97,6 +107,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    faceMargin: {
+        marginRight: SHADOW_SIZE,
+        marginBottom: SHADOW_SIZE,
     },
     pressed: {
         opacity: 0.9,
