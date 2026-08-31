@@ -1,4 +1,4 @@
-import { borderWidth, colors, spacing, typography } from '@/constants/theme';
+import { colors, spacing, typography } from '@/constants/theme';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -7,41 +7,21 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.surface,
     },
     content: {
-        padding: spacing.lg,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: spacing.xl,
         gap: spacing.sm,
     },
-    row: {
-        backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.md,
-        marginBottom: spacing.sm,
-    },
-    rowTop: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    name: {
+    placeholderTitle: {
         fontFamily: typography.fonts.black,
-        fontSize: 16,
+        fontSize: 22,
+        fontStyle: 'italic',
         textTransform: 'uppercase',
+        textAlign: 'center',
         color: colors.ink,
     },
-    status: {
-        fontFamily: typography.fonts.bold,
-        fontSize: 10,
-        letterSpacing: 0.5,
-        textTransform: 'uppercase',
-        color: colors.inkSecondary,
-    },
-    opponents: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 12,
-        color: colors.inkSecondary,
-        marginTop: spacing.xs,
-    },
-    emptyText: {
+    placeholderText: {
         fontFamily: typography.fonts.regular,
         fontSize: 14,
         color: colors.inkSecondary,

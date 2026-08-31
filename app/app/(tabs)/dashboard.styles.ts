@@ -6,16 +6,23 @@ export const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.surface,
     },
+    content: {
+        flex: 1,
+    },
     scrollContent: {
         padding: spacing.md,
         paddingBottom: spacing.xxl * 2,
-        gap: spacing.xl,
     },
+    // Sections used to get uniform spacing for free from scrollContent's
+    // gap. Now that alertStack needs a smaller gap below it than between
+    // notifications, each section carries its own trailing spacing instead.
     section: {
         gap: spacing.md,
+        marginBottom: spacing.xl,
     },
     alertStack: {
-        gap: spacing.sm,
+        gap: spacing.lg,
+        marginBottom: spacing.md,
     },
     sectionHeaderRow: {
         flexDirection: 'row',

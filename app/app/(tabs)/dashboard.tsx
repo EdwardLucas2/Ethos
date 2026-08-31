@@ -205,115 +205,121 @@ export default function DashboardScreen() {
     return (
         <View style={styles.flex}>
             <TopBar variant="tab" avatarUri={me?.avatarUrl} />
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                {isLoading ? (
-                    <View style={styles.skeletonStack} testID="dashboard-skeleton">
-                        <View style={styles.skeletonBlock} />
-                        <View style={styles.skeletonBlock} />
-                        <View style={styles.skeletonBlock} />
-                    </View>
-                ) : isError ? (
-                    <View style={styles.centered}>
-                        <Text style={styles.errorText}>
-                            Couldn&apos;t load your dashboard. Try again later.
-                        </Text>
-                    </View>
-                ) : isEmpty ? (
-                    <EmptyState
-                        message="No active contracts. Challenge your friends!"
-                        ctaLabel="Create a Contract"
-                        onCta={handleFabPress}
-                    />
-                ) : (
-                    <>
-                        {alerts.length > 0 && (
-                            <View style={styles.alertStack} testID="alert-stack">
-                                {alerts.map((alert) => (
-                                    <AlertBanner
-                                        key={alert.key}
-                                        type={alert.type}
-                                        message={alert.message}
-                                        actionLabel={alert.actionLabel}
-                                        onPress={() => router.push(alert.href)}
-                                    />
-                                ))}
-                            </View>
-                        )}
+            <View style={styles.content}>
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {isLoading ? (
+                        <View style={styles.skeletonStack} testID="dashboard-skeleton">
+                            <View style={styles.skeletonBlock} />
+                            <View style={styles.skeletonBlock} />
+                            <View style={styles.skeletonBlock} />
+                        </View>
+                    ) : isError ? (
+                        <View style={styles.centered}>
+                            <Text style={styles.errorText}>
+                                Couldn&apos;t load your dashboard. Try again later.
+                            </Text>
+                        </View>
+                    ) : isEmpty ? (
+                        <EmptyState
+                            message="No active contracts. Challenge your friends!"
+                            ctaLabel="Create a Contract"
+                            onCta={handleFabPress}
+                        />
+                    ) : (
+                        <>
+                            {alerts.length > 0 && (
+                                <View style={styles.alertStack} testID="alert-stack">
+                                    {alerts.map((alert) => (
+                                        <AlertBanner
+                                            key={alert.key}
+                                            type={alert.type}
+                                            message={alert.message}
+                                            actionLabel={alert.actionLabel}
+                                            onPress={() => router.push(alert.href)}
+                                        />
+                                    ))}
+                                </View>
+                            )}
 
-                        {(activeContracts?.length ?? 0) > 0 && (
-                            <View style={styles.section} testID="active-arena">
-                                <View style={styles.sectionHeaderRow}>
-                                    <Text style={styles.sectionHeader}>Active Arena</Text>
-                                    <View style={styles.countBadge}>
-                                        <Text style={styles.countBadgeText}>
-                                            {activeContracts?.length} LIVE
-                                        </Text>
+                            {(activeContracts?.length ?? 0) > 0 && (
+                                <View style={styles.section} testID="active-arena">
+                                    <View style={styles.sectionHeaderRow}>
+                                        <Text style={styles.sectionHeader}>Active Arena</Text>
+                                        <View style={styles.countBadge}>
+                                            <Text style={styles.countBadgeText}>
+                                                {activeContracts?.length} LIVE
+                                            </Text>
+                                        </View>
                                     </View>
+                                    {activeContracts?.map((contract) => {
+                                        const cta = ctaFor(contract, me?.displayName);
+                                        return (
+                                            <ActiveContractCard
+                                                key={contract.contractId}
+                                                contractName={contract.name ?? ''}
+                                                opponentLabel={opponentLabel(
+                                                    contract.participants,
+                                                    me?.displayName
+                                                )}
+                                                verified={contract.myProgress?.completed ?? 0}
+                                                pending={contract.myProgress?.pending ?? 0}
+                                                total={contract.myProgress?.total ?? 0}
+                                                timeRemaining={formatTimeRemaining(
+                                                    contract.endDate
+                                                )}
+                                                ctaState={cta.state}
+                                                ctaLabel={cta.label}
+                                                onPress={() =>
+                                                    router.push(
+                                                        `/contract/${contract.contractId}/${contract.cycleNumber}/active` as Href
+                                                    )
+                                                }
+                                                onCta={() =>
+                                                    router.push(
+                                                        (cta.state === 'review'
+                                                            ? `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/review`
+                                                            : `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/upload`) as Href
+                                                    )
+                                                }
+                                            />
+                                        );
+                                    })}
                                 </View>
-                                {activeContracts?.map((contract) => {
-                                    const cta = ctaFor(contract, me?.displayName);
-                                    return (
-                                        <ActiveContractCard
-                                            key={contract.contractId}
-                                            contractName={contract.name ?? ''}
-                                            opponentLabel={opponentLabel(
-                                                contract.participants,
-                                                me?.displayName
-                                            )}
-                                            verified={contract.myProgress?.completed ?? 0}
-                                            pending={contract.myProgress?.pending ?? 0}
-                                            total={contract.myProgress?.total ?? 0}
-                                            timeRemaining={formatTimeRemaining(contract.endDate)}
-                                            ctaState={cta.state}
-                                            ctaLabel={cta.label}
-                                            onPress={() =>
-                                                router.push(
-                                                    `/contract/${contract.contractId}/${contract.cycleNumber}/active` as Href
-                                                )
-                                            }
-                                            onCta={() =>
-                                                router.push(
-                                                    (cta.state === 'review'
-                                                        ? `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/review`
-                                                        : `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/upload`) as Href
-                                                )
-                                            }
-                                        />
-                                    );
-                                })}
-                            </View>
-                        )}
+                            )}
 
-                        {(pendingContracts?.length ?? 0) > 0 && (
-                            <View style={styles.section} testID="pending-resolution">
-                                <View style={styles.sectionHeaderRow}>
-                                    <Text style={styles.sectionHeader}>Last Week</Text>
+                            {(pendingContracts?.length ?? 0) > 0 && (
+                                <View style={styles.section} testID="pending-resolution">
+                                    <View style={styles.sectionHeaderRow}>
+                                        <Text style={styles.sectionHeader}>Last Week</Text>
+                                    </View>
+                                    {pendingContracts?.map((contract) => {
+                                        const mine = contract.participants?.find(
+                                            (p) => p.displayName === me?.displayName
+                                        );
+                                        return (
+                                            <PendingResolutionCard
+                                                key={contract.contractId}
+                                                contractName={contract.contractName ?? ''}
+                                                verified={mine?.completed ?? 0}
+                                                total={mine?.total ?? 0}
+                                                reviewsNeeded={
+                                                    contract.unreviewedEvidenceCount ?? 0
+                                                }
+                                                onPress={() =>
+                                                    router.push(
+                                                        `/contract/${contract.contractId}/${contract.cycleNumber}/unsettled` as Href
+                                                    )
+                                                }
+                                            />
+                                        );
+                                    })}
                                 </View>
-                                {pendingContracts?.map((contract) => {
-                                    const mine = contract.participants?.find(
-                                        (p) => p.displayName === me?.displayName
-                                    );
-                                    return (
-                                        <PendingResolutionCard
-                                            key={contract.contractId}
-                                            contractName={contract.contractName ?? ''}
-                                            verified={mine?.completed ?? 0}
-                                            total={mine?.total ?? 0}
-                                            reviewsNeeded={contract.unreviewedEvidenceCount ?? 0}
-                                            onPress={() =>
-                                                router.push(
-                                                    `/contract/${contract.contractId}/${contract.cycleNumber}/unsettled` as Href
-                                                )
-                                            }
-                                        />
-                                    );
-                                })}
-                            </View>
-                        )}
-                    </>
-                )}
-            </ScrollView>
-            {!isEmpty && <FAB onPress={handleFabPress} loading={createContract.isPending} />}
+                            )}
+                        </>
+                    )}
+                </ScrollView>
+                {!isEmpty && <FAB onPress={handleFabPress} loading={createContract.isPending} />}
+            </View>
             <BottomTabBar activeTab="home" />
         </View>
     );

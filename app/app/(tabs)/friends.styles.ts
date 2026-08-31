@@ -1,4 +1,4 @@
-import { borderWidth, colors, spacing, typography } from '@/constants/theme';
+import { colors, spacing, typography } from '@/constants/theme';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -7,36 +7,21 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.surface,
     },
     content: {
-        padding: spacing.lg,
-        gap: spacing.md,
-    },
-    row: {
-        flexDirection: 'row',
+        flex: 1,
         alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: spacing.xl,
         gap: spacing.sm,
-        paddingVertical: spacing.sm,
-        borderBottomWidth: borderWidth.structural - 1,
-        borderBottomColor: colors.ink,
     },
-    avatar: {
-        width: 32,
-        height: 32,
-        borderWidth: borderWidth.structural - 1,
-        borderColor: colors.ink,
-        backgroundColor: colors.surfaceRaised,
-    },
-    name: {
+    placeholderTitle: {
         fontFamily: typography.fonts.black,
-        fontSize: 14,
+        fontSize: 22,
+        fontStyle: 'italic',
         textTransform: 'uppercase',
+        textAlign: 'center',
         color: colors.ink,
     },
-    tag: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 12,
-        color: colors.inkSecondary,
-    },
-    emptyText: {
+    placeholderText: {
         fontFamily: typography.fonts.regular,
         fontSize: 14,
         color: colors.inkSecondary,
