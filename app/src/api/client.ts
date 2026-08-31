@@ -1,3 +1,5 @@
+import SuperTokens from '@/src/lib/supertokens';
+
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 const REQUEST_TIMEOUT_MS = 10_000;
 
@@ -8,12 +10,18 @@ export async function customFetch<T>(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+  // Every backend endpoint except POST /users requires a bearer token; reading it
+  // here (rather than injecting it at the call site) keeps every Orval-generated
+  // hook authenticated automatically.
+  const token = await SuperTokens.getAccessToken();
+
   let response: Response;
   try {
     response = await fetch(`${BASE_URL}${url}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
       signal: controller.signal,
@@ -36,5 +44,10 @@ export async function customFetch<T>(
   }
 
   const text = await response.text();
-  return text ? JSON.parse(text) : (undefined as T);
+  const data = text ? JSON.parse(text) : undefined;
+
+  // Orval's generated types for a custom fetch mutator assume this shape
+  // (data/status/headers), matching their documented custom-fetch example —
+  // callers read the body via `.data`, not the resolved value directly.
+  return { data, status: response.status, headers: response.headers } as T;
 }

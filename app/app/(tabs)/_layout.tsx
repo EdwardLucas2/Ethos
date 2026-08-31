@@ -1,37 +1,19 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { colors } from '@/constants/theme';
-
+// The visual tab bar is our own BottomTabBar component, rendered by each
+// screen — the native tab bar is kept only for its tab-switching behaviour
+// (single instance per tab, no back-stack growth), not for its UI.
 export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: colors.blue,
                 headerShown: false,
-                tabBarButton: HapticTab,
+                tabBarStyle: { display: 'none' },
             }}
         >
-            <Tabs.Screen
-                name="index"
-                options={{
-                    title: 'Home',
-                    tabBarIcon: ({ color }) => (
-                        <IconSymbol size={28} name="house.fill" color={color} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="explore"
-                options={{
-                    title: 'Explore',
-                    tabBarIcon: ({ color }) => (
-                        <IconSymbol size={28} name="paperplane.fill" color={color} />
-                    ),
-                }}
-            />
+            <Tabs.Screen name="dashboard" />
+            <Tabs.Screen name="contracts" />
+            <Tabs.Screen name="friends" />
         </Tabs>
     );
 }

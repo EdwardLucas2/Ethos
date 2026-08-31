@@ -14,21 +14,45 @@ const config: StorybookConfig = {
     viteFinal(config) {
         return mergeConfig(config, {
             resolve: {
-                alias: {
+                alias: [
                     // App-specific mocks — must appear before vite-tsconfig-paths resolves
                     // @/* from tsconfig, so the real modules are never imported here.
-                    '@/src/services/auth': path.resolve(__dirname, 'mocks/auth-api.ts'),
-                    '@/src/context/AuthContext': path.resolve(__dirname, 'mocks/auth-context.tsx'),
+                    // Exact-match regexes (not plain strings) — a plain string key does
+                    // prefix-boundary matching in Vite/rollup-plugin-alias, so e.g. a
+                    // '@/src/api' string key would also swallow '@/src/api/unwrap' and
+                    // redirect it under the mock file (which isn't a directory), breaking
+                    // that import entirely.
+                    {
+                        find: /^@\/src\/services\/auth$/,
+                        replacement: path.resolve(__dirname, 'mocks/auth-api.ts'),
+                    },
+                    {
+                        find: /^@\/src\/context\/AuthContext$/,
+                        replacement: path.resolve(__dirname, 'mocks/auth-context.tsx'),
+                    },
+                    {
+                        find: /^@\/src\/api$/,
+                        replacement: path.resolve(__dirname, 'mocks/api.tsx'),
+                    },
                     // expo-router has no standalone web context
-                    'expo-router': path.resolve(__dirname, 'mocks/expo-router.tsx'),
+                    {
+                        find: /^expo-router$/,
+                        replacement: path.resolve(__dirname, 'mocks/expo-router.tsx'),
+                    },
                     // expo-haptics has no web implementation
-                    'expo-haptics': path.resolve(__dirname, 'mocks/expo-haptics.ts'),
+                    {
+                        find: /^expo-haptics$/,
+                        replacement: path.resolve(__dirname, 'mocks/expo-haptics.ts'),
+                    },
                     // AntDesign from @expo/vector-icons has no web build — stub with a text-based mock
-                    '@expo/vector-icons/AntDesign': path.resolve(
-                        __dirname,
-                        'mocks/expo-vector-icons-antdesign.tsx'
-                    ),
-                },
+                    {
+                        find: /^@expo\/vector-icons\/AntDesign$/,
+                        replacement: path.resolve(
+                            __dirname,
+                            'mocks/expo-vector-icons-antdesign.tsx'
+                        ),
+                    },
+                ],
             },
             define: {
                 // Ensures components that guard with process.env.EXPO_OS === 'ios'

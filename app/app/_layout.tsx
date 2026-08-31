@@ -40,7 +40,7 @@ function RootRedirect() {
         if (!session && !inPublicGroup) {
             router.replace('/login');
         } else if (session && inPublicGroup) {
-            router.replace('/(tabs)');
+            router.replace('/dashboard');
         }
         // useRouter() returns a stable instance; depending on it would re-run on every render
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,10 +83,7 @@ export default function RootLayout() {
                             <Stack>
                                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                                <Stack.Screen
-                                    name="modal"
-                                    options={{ presentation: 'modal', title: 'Modal' }}
-                                />
+                                <Stack.Screen name="profile" options={{ headerShown: false }} />
                             </Stack>
                             <StatusBar style="dark" />
                         </ThemeProvider>
