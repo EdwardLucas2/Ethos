@@ -8,7 +8,8 @@ const meta: Meta<typeof AlertBanner> = {
     component: AlertBanner,
     args: {
         type: 'verify',
-        message: 'Alex uploaded proof. [VERIFY]',
+        message: 'Alex uploaded proof.',
+        actionLabel: 'Verify',
         onPress: fn(),
     },
     // AlertBanner is width: '100%' — without a concrete width to resolve
@@ -28,17 +29,17 @@ type Story = StoryObj<typeof AlertBanner>;
 export const Default: Story = {};
 
 export const Challenge: Story = {
-    args: { type: 'challenge', message: 'Alex challenged you. [VIEW]' },
+    args: { type: 'challenge', message: 'Alex challenged you.', actionLabel: 'View' },
 };
 
 export const Settle: Story = {
-    args: { type: 'settle', message: "Last week's results are in. [SETTLE]" },
+    args: { type: 'settle', message: "Last week's results are in.", actionLabel: 'Settle' },
 };
 
 export const Owed: Story = {
-    args: { type: 'owed', message: 'Alex owes you. [COLLECT]' },
+    args: { type: 'owed', message: 'Alex owes you.', actionLabel: 'Collect' },
 };
 
 export const PayUp: Story = {
-    args: { type: 'pay-up', message: 'You owe Alex. [PAY UP]' },
+    args: { type: 'pay-up', message: 'You owe Alex.', actionLabel: 'Pay Up' },
 };

@@ -7,6 +7,8 @@ export type AlertBannerType = 'verify' | 'challenge' | 'settle' | 'owed' | 'pay-
 export type AlertBannerProps = {
     type: AlertBannerType;
     message: string;
+    /** e.g. "VERIFY", "SETTLE" — rendered as a bordered tag, not inline brackets. */
+    actionLabel: string;
     onPress: () => void;
     testID?: string;
 };
@@ -25,7 +27,13 @@ const TYPE_CONFIG: Record<AlertBannerType, TypeConfig> = {
     'pay-up': { backgroundColor: colors.red, textColor: colors.surfaceRaised, icon: 'credit-card' },
 };
 
-export function AlertBanner({ type, message, onPress, testID = 'alert-banner' }: AlertBannerProps) {
+export function AlertBanner({
+    type,
+    message,
+    actionLabel,
+    onPress,
+    testID = 'alert-banner',
+}: AlertBannerProps) {
     const config = TYPE_CONFIG[type];
 
     return (
@@ -45,7 +53,14 @@ export function AlertBanner({ type, message, onPress, testID = 'alert-banner' }:
                     {message.toUpperCase()}
                 </Text>
             </View>
-            <AntDesign name="right" size={18} color={config.textColor} />
+            <View style={styles.right}>
+                <View style={[styles.actionBadge, { borderColor: config.textColor }]}>
+                    <Text style={[styles.actionText, { color: config.textColor }]}>
+                        {actionLabel.toUpperCase()}
+                    </Text>
+                </View>
+                <AntDesign name="right" size={18} color={config.textColor} />
+            </View>
         </Pressable>
     );
 }
@@ -75,6 +90,22 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         fontFamily: typography.fonts.black,
         fontSize: 13,
+        letterSpacing: 0.5,
+    },
+    right: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+        marginLeft: spacing.sm,
+    },
+    actionBadge: {
+        borderWidth: borderWidth.structural - 1,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.xs,
+    },
+    actionText: {
+        fontFamily: typography.fonts.black,
+        fontSize: 11,
         letterSpacing: 0.5,
     },
 });

@@ -23,9 +23,11 @@ export function PendingResolutionCard({
         <Pressable testID={testID} onPress={onPress} style={[styles.card, shadows.sm]}>
             <View style={styles.header}>
                 <Text style={styles.title}>{contractName}</Text>
-                <Text style={styles.reviewsNeeded}>
-                    {reviewsNeeded} {reviewsNeeded === 1 ? 'REVIEW' : 'REVIEWS'} NEEDED
-                </Text>
+                <View style={styles.reviewsBadge}>
+                    <Text style={styles.reviewsNeeded}>
+                        {reviewsNeeded} {reviewsNeeded === 1 ? 'REVIEW' : 'REVIEWS'} NEEDED
+                    </Text>
+                </View>
             </View>
             <Text style={styles.summary}>
                 {verified}/{total} VERIFIED
@@ -57,6 +59,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textTransform: 'uppercase',
         color: colors.ink,
+    },
+    reviewsBadge: {
+        borderWidth: borderWidth.structural - 1,
+        borderColor: colors.ink,
+        backgroundColor: colors.surfaceRaised,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.xs,
     },
     reviewsNeeded: {
         fontFamily: typography.fonts.bold,

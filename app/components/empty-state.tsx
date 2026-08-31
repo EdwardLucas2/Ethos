@@ -2,6 +2,9 @@ import { Button } from '@/components/button';
 import { colors, spacing, typography } from '@/constants/theme';
 import { StyleSheet, Text, View } from 'react-native';
 
+// The Home Dashboard's zero-contracts state (PRD §5.3 "Empty (new user)") —
+// replaces the alert stack and contract sections entirely when the caller
+// has no active or pending-resolution contracts yet.
 export type EmptyStateProps = {
     message: string;
     ctaLabel: string;
