@@ -11,15 +11,18 @@ type BottomTabBarProps = {
     testID?: string;
 };
 
+// Casts below are required for this branch to typecheck standalone: /dashboard,
+// /contracts, and /friends are added by the dashboard-page branch, so they aren't
+// part of Expo Router's typed-route union until that branch's screens exist.
 const TABS: {
     name: TabName;
     label: string;
     icon: React.ComponentProps<typeof AntDesign>['name'];
     href: Href;
 }[] = [
-    { name: 'home', label: 'HOME', icon: 'dashboard', href: '/dashboard' },
-    { name: 'contracts', label: 'CONTRACTS', icon: 'file-text', href: '/contracts' },
-    { name: 'friends', label: 'FRIENDS', icon: 'team', href: '/friends' },
+    { name: 'home', label: 'HOME', icon: 'dashboard', href: '/dashboard' as Href },
+    { name: 'contracts', label: 'CONTRACTS', icon: 'file-text', href: '/contracts' as Href },
+    { name: 'friends', label: 'FRIENDS', icon: 'team', href: '/friends' as Href },
 ];
 
 export function BottomTabBar({ activeTab, testID = 'bottom-tab-bar' }: BottomTabBarProps) {

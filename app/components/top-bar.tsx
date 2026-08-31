@@ -1,6 +1,6 @@
 import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useRouter } from 'expo-router';
+import { Href, useRouter } from 'expo-router';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -29,7 +29,9 @@ export function TopBar(props: TopBarProps) {
 
             {props.variant === 'tab' ? (
                 <Pressable
-                    onPress={() => router.push('/profile')}
+                    // The dashboard-page branch adds /profile — cast is required for
+                    // this branch to typecheck standalone before that route exists.
+                    onPress={() => router.push('/profile' as Href)}
                     testID="top-bar-avatar"
                     hitSlop={spacing.sm}
                 >
