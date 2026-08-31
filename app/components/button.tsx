@@ -1,5 +1,14 @@
 import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextStyle,
+    View,
+    ViewStyle,
+} from 'react-native';
 
 type ButtonProps = {
     label: string;
@@ -8,9 +17,13 @@ type ButtonProps = {
     loading?: boolean;
     disabled?: boolean;
     showArrow?: boolean;
+    /** Leading icon, e.g. for ActiveContractCard's "SNAP PROOF" CTA. */
+    icon?: React.ComponentProps<typeof AntDesign>['name'];
     withShadow?: boolean;
     testID?: string;
     style?: ViewStyle;
+    /** Override the label's typography, e.g. ActiveContractCard's italic font-black CTA. */
+    labelStyle?: TextStyle;
 };
 
 // Light-background colours render ink text; everything else gets white.
@@ -23,9 +36,11 @@ export function Button({
     loading = false,
     disabled = false,
     showArrow = false,
+    icon,
     withShadow = true,
     testID,
     style,
+    labelStyle,
 }: ButtonProps) {
     const textColor = LIGHT_BACKGROUNDS.has(backgroundColor) ? colors.ink : colors.surfaceRaised;
     const isDisabled = disabled || loading;
@@ -46,7 +61,17 @@ export function Button({
                     <ActivityIndicator color={textColor} />
                 ) : (
                     <View style={styles.inner}>
-                        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+                        {icon ? (
+                            <AntDesign
+                                name={icon}
+                                size={18}
+                                color={textColor}
+                                style={styles.icon}
+                            />
+                        ) : null}
+                        <Text style={[styles.label, { color: textColor }, labelStyle]}>
+                            {label}
+                        </Text>
                         {showArrow ? (
                             <Text style={[styles.arrow, { color: textColor }]}>→</Text>
                         ) : null}
@@ -83,6 +108,9 @@ const styles = StyleSheet.create({
     inner: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    icon: {
+        marginRight: spacing.sm,
     },
     label: {
         fontFamily: typography.fonts.bold,

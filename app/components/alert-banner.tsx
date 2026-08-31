@@ -1,0 +1,80 @@
+import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+export type AlertBannerType = 'verify' | 'challenge' | 'settle' | 'owed' | 'pay-up';
+
+export type AlertBannerProps = {
+    type: AlertBannerType;
+    message: string;
+    onPress: () => void;
+    testID?: string;
+};
+
+type TypeConfig = {
+    backgroundColor: string;
+    textColor: string;
+    icon: React.ComponentProps<typeof AntDesign>['name'];
+};
+
+const TYPE_CONFIG: Record<AlertBannerType, TypeConfig> = {
+    verify: { backgroundColor: colors.blue, textColor: colors.surfaceRaised, icon: 'check-circle' },
+    challenge: { backgroundColor: colors.yellow, textColor: colors.ink, icon: 'mail' },
+    settle: { backgroundColor: colors.red, textColor: colors.surfaceRaised, icon: 'wallet' },
+    owed: { backgroundColor: colors.yellow, textColor: colors.ink, icon: 'trophy' },
+    'pay-up': { backgroundColor: colors.red, textColor: colors.surfaceRaised, icon: 'credit-card' },
+};
+
+export function AlertBanner({ type, message, onPress, testID = 'alert-banner' }: AlertBannerProps) {
+    const config = TYPE_CONFIG[type];
+
+    return (
+        <Pressable
+            testID={testID}
+            onPress={onPress}
+            style={({ pressed }) => [
+                styles.container,
+                { backgroundColor: config.backgroundColor },
+                shadows.sm,
+                pressed && styles.pressed,
+            ]}
+        >
+            <View style={styles.left}>
+                <AntDesign name={config.icon} size={20} color={config.textColor} />
+                <Text style={[styles.message, { color: config.textColor }]}>
+                    {message.toUpperCase()}
+                </Text>
+            </View>
+            <AntDesign name="right" size={18} color={config.textColor} />
+        </Pressable>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.md,
+        borderWidth: borderWidth.structural,
+        borderColor: colors.ink,
+    },
+    pressed: {
+        opacity: 0.9,
+        transform: [{ translateX: 2 }, { translateY: 2 }],
+    },
+    left: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 1,
+        gap: spacing.sm,
+    },
+    message: {
+        flexShrink: 1,
+        fontFamily: typography.fonts.black,
+        fontSize: 13,
+        letterSpacing: 0.5,
+    },
+});
