@@ -13,6 +13,9 @@ import {
     NotificationResponse,
     PendingResolutionContractResponse,
     UserResponse,
+    getGetContractsMeActiveQueryKey,
+    getGetContractsMePendingResolutionQueryKey,
+    getGetNotificationsQueryKey,
     useGetContractsMeActive,
     useGetContractsMePendingResolution,
     useGetNotifications,
@@ -20,6 +23,7 @@ import {
     usePostContracts,
 } from '@/src/api';
 import { unwrapData } from '@/src/api/unwrap';
+import { useQueryClient } from '@tanstack/react-query';
 import { Href, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
@@ -142,11 +146,12 @@ function ctaFor(
     myName: string | undefined
 ): { state: CtaState; label: string } {
     if ((contract.unreviewedEvidenceCount ?? 0) > 0) {
-        const opponent = opponentsOf(contract.participants, myName)[0];
-        return {
-            state: 'review',
-            label: `REVIEW ${(opponent?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`,
-        };
+        const opponents = opponentsOf(contract.participants, myName);
+        const label =
+            opponents.length === 1
+                ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
+                : 'REVIEW PROOF';
+        return { state: 'review', label };
     }
     const completed = contract.myProgress?.completed ?? 0;
     const total = contract.myProgress?.total ?? 0;
@@ -163,8 +168,9 @@ function ctaFor(
 
 export default function DashboardScreen() {
     const router = useRouter();
+    const queryClient = useQueryClient();
 
-    const { data: meResponse } = useGetUsersMe();
+    const { data: meResponse, isLoading: meLoading } = useGetUsersMe();
     const me = unwrapData<UserResponse>(meResponse);
 
     const { data: notificationsResponse, isLoading: notificationsLoading } = useGetNotifications();
@@ -192,6 +198,13 @@ export default function DashboardScreen() {
         try {
             const result = await createContract.mutateAsync();
             const contract = unwrapData<ContractResponse>(result);
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: getGetContractsMeActiveQueryKey() }),
+                queryClient.invalidateQueries({
+                    queryKey: getGetContractsMePendingResolutionQueryKey(),
+                }),
+                queryClient.invalidateQueries({ queryKey: getGetNotificationsQueryKey() }),
+            ]);
             if (contract?.id) {
                 // Contract Builder isn't built yet — see product/PRD.md §5.4.
                 router.push(`/contract/${contract.id}/build` as Href);
@@ -201,7 +214,7 @@ export default function DashboardScreen() {
         }
     }
 
-    const isLoading = notificationsLoading || activeLoading || pendingLoading;
+    const isLoading = notificationsLoading || activeLoading || pendingLoading || meLoading;
     const isError = activeError || pendingError;
 
     const alerts = (notifications ?? [])
@@ -254,6 +267,7 @@ export default function DashboardScreen() {
                                     {alerts.map((alert) => (
                                         <AlertBanner
                                             key={alert.key}
+                                            testID={`alert-banner-${alert.key}`}
                                             type={alert.type}
                                             message={alert.message}
                                             actionLabel={alert.actionLabel}
@@ -278,6 +292,7 @@ export default function DashboardScreen() {
                                         return (
                                             <ActiveContractCard
                                                 key={contract.contractId}
+                                                testID={`active-contract-card-${contract.contractId}`}
                                                 contractName={contract.name ?? ''}
                                                 opponentLabel={opponentLabel(
                                                     contract.participants,
@@ -321,6 +336,7 @@ export default function DashboardScreen() {
                                         return (
                                             <PendingResolutionCard
                                                 key={contract.contractId}
+                                                testID={`pending-resolution-card-${contract.contractId}`}
                                                 contractName={contract.contractName ?? ''}
                                                 verified={mine?.completed ?? 0}
                                                 total={mine?.total ?? 0}
@@ -340,7 +356,9 @@ export default function DashboardScreen() {
                         </>
                     )}
                 </ScrollView>
-                {!isEmpty && <FAB onPress={handleFabPress} loading={createContract.isPending} />}
+                {!isLoading && !isEmpty && (
+                    <FAB onPress={handleFabPress} loading={createContract.isPending} />
+                )}
             </View>
             <BottomTabBar activeTab="home" />
         </View>

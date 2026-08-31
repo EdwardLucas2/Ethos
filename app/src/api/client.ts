@@ -10,13 +10,12 @@ export async function customFetch<T>(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  // Every backend endpoint except POST /users requires a bearer token; reading it
-  // here (rather than injecting it at the call site) keeps every Orval-generated
-  // hook authenticated automatically.
-  const token = await SuperTokens.getAccessToken();
-
   let response: Response;
   try {
+    // Every backend endpoint except POST /users requires a bearer token; reading it
+    // here (rather than injecting it at the call site) keeps every Orval-generated
+    // hook authenticated automatically.
+    const token = await SuperTokens.getAccessToken();
     response = await fetch(`${BASE_URL}${url}`, {
       ...options,
       headers: {

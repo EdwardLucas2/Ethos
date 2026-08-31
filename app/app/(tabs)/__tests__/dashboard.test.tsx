@@ -17,11 +17,19 @@ jest.mock('@/src/api', () => ({
     useGetContractsMeActive: jest.fn(),
     useGetContractsMePendingResolution: jest.fn(),
     usePostContracts: jest.fn(),
+    getGetContractsMeActiveQueryKey: jest.fn(() => ['contracts-me-active']),
+    getGetContractsMePendingResolutionQueryKey: jest.fn(() => ['contracts-me-pending-resolution']),
+    getGetNotificationsQueryKey: jest.fn(() => ['notifications']),
 }));
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
     useRouter: () => ({ push: mockPush, back: jest.fn() }),
+}));
+
+const mockInvalidateQueries = jest.fn().mockResolvedValue(undefined);
+jest.mock('@tanstack/react-query', () => ({
+    useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
 }));
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
@@ -46,6 +54,21 @@ const ACTIVE_CONTRACT = {
     participants: [
         { displayName: 'Edward', completed: 1, pending: 0, total: 3 },
         { displayName: 'Alex', completed: 2, pending: 0, total: 3 },
+    ],
+};
+
+const SQUAD_CONTRACT = {
+    contractId: 'contract-3',
+    name: 'No Sugar',
+    cycleNumber: 1,
+    startDate: '2026-01-01',
+    endDate: '2099-01-01',
+    myProgress: { completed: 1, pending: 0, total: 3 },
+    unreviewedEvidenceCount: 1,
+    participants: [
+        { displayName: 'Edward', completed: 1, pending: 0, total: 3 },
+        { displayName: 'Sarah', completed: 2, pending: 0, total: 3 },
+        { displayName: 'Mike', completed: 0, pending: 1, total: 3 },
     ],
 };
 
@@ -102,6 +125,22 @@ describe('DashboardScreen', () => {
         render(<DashboardScreen />);
         expect(screen.getByTestId('dashboard-skeleton')).toBeTruthy();
         expect(screen.queryByTestId('active-arena')).toBeNull();
+        expect(screen.queryByTestId('fab')).toBeNull();
+    });
+
+    it('keeps showing the skeleton while only the current user is still loading', () => {
+        jest.mocked(useGetUsersMe).mockReturnValue({
+            data: undefined,
+            isLoading: true,
+            isError: false,
+        } as never);
+        jest.mocked(useGetNotifications).mockReturnValue(successOf([]) as never);
+        jest.mocked(useGetContractsMeActive).mockReturnValue(successOf([]) as never);
+        jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
+
+        render(<DashboardScreen />);
+        expect(screen.getByTestId('dashboard-skeleton')).toBeTruthy();
+        expect(screen.queryByTestId('empty-state')).toBeNull();
     });
 
     it('shows the empty state when there are no contracts', () => {
@@ -140,12 +179,22 @@ describe('DashboardScreen', () => {
         jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
 
         render(<DashboardScreen />);
-        const banner = screen.getByTestId('alert-banner');
+        const banner = screen.getByTestId('alert-banner-notif-1');
         expect(banner).toBeTruthy();
         expect(screen.getByText(/ALEX UPLOADED PROOF/)).toBeTruthy();
 
         fireEvent.press(banner);
         expect(mockPush).toHaveBeenCalledWith('/contract/contract-1/3/evidence/evidence-1');
+    });
+
+    it('shows a generic review CTA for a contract with more than one opponent', () => {
+        jest.mocked(useGetNotifications).mockReturnValue(successOf([]) as never);
+        jest.mocked(useGetContractsMeActive).mockReturnValue(successOf([SQUAD_CONTRACT]) as never);
+        jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
+
+        render(<DashboardScreen />);
+        expect(screen.getByText('REVIEW PROOF')).toBeTruthy();
+        expect(screen.queryByText(/REVIEW SARAH'S PROOF/)).toBeNull();
     });
 
     it('shows the active contract count badge and pending-resolution section', () => {
@@ -173,6 +222,13 @@ describe('DashboardScreen', () => {
         await waitFor(() => {
             expect(mockPush).toHaveBeenCalledWith('/contract/new-contract/build');
         });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['contracts-me-active'],
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['contracts-me-pending-resolution'],
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['notifications'] });
     });
 
     it('shows an error message when contract creation fails', async () => {
