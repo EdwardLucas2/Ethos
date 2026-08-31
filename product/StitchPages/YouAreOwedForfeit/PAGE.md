@@ -21,7 +21,7 @@ A victory screen reminding the winner they are owed a forfeit, with tools to pes
 ## Sections
 
 ### TopBar
-`stack` variant. Back navigates to `/dashboard`.
+`stack` variant. Back uses stack back navigation — returns to Dashboard or to `/contract/[contractId]/[cycleNumber]/settled`, whichever this screen was pushed from (see Data). Does not hard-code `/dashboard`; that destination is reserved for the "Mark as Settled" action below.
 
 ### BottomTabBar
 None — suppressed, per `docs/ROUTING.md` (settlement screens are not tab roots). The mockup's tab bar (CYCLES/VAULT/SOCIAL/PROFILE) is stale and does not apply.

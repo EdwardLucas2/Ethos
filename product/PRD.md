@@ -934,7 +934,7 @@ Each card shows:
 - **Empty:** No contracts yet — same onboarding prompt as Home Dashboard's empty state
 - **Populated:** Full list
 
-**Note:** No mockup exists — design to match the established style. Needs a new backend endpoint (an all-contracts list); `GET /contracts/me/active` and `GET /contracts/me/pending-resolution` alone aren't sufficient since this screen also needs settled contracts.
+**Note:** No mockup exists — design to match the established style. Backed by `GET /contracts/me` (see `docs/API.md`), which covers active, pending-resolution, and settled contracts; `GET /contracts/me/active` and `GET /contracts/me/pending-resolution` alone aren't sufficient since this screen also needs settled contracts.
 
 ---
 

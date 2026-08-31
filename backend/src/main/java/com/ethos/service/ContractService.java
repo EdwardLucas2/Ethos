@@ -15,6 +15,7 @@ import com.ethos.store.ContractStore;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +47,8 @@ public class ContractService {
                         UUID.randomUUID(),
                         "Gym 3x/Week",
                         3,
-                        LocalDate.now().minusDays(2),
-                        LocalDate.now().plusDays(5),
+                        LocalDate.now(ZoneOffset.UTC).minusDays(2),
+                        LocalDate.now(ZoneOffset.UTC).plusDays(5),
                         new ProgressResponse(2, 0, 3),
                         0,
                         List.of(
@@ -57,8 +58,8 @@ public class ContractService {
                         UUID.randomUUID(),
                         "No Sugar",
                         1,
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(6),
+                        LocalDate.now(ZoneOffset.UTC).minusDays(1),
+                        LocalDate.now(ZoneOffset.UTC).plusDays(6),
                         new ProgressResponse(0, 0, 1),
                         2,
                         List.of(
@@ -101,9 +102,9 @@ public class ContractService {
                 detail.contract().id(),
                 detail.contract().name(),
                 detail.contract().forfeit(),
-                detail.contract().period().name().toLowerCase(),
+                detail.contract().period().name().toLowerCase(Locale.ROOT),
                 detail.contract().startDate(),
-                detail.contract().status().name().toLowerCase(),
+                detail.contract().status().name().toLowerCase(Locale.ROOT),
                 detail.currentCycleNumber(),
                 detail.contract().creatorId(),
                 detail.contract().createdAt(),
@@ -116,7 +117,7 @@ public class ContractService {
                 participant.userId(),
                 participant.habit(),
                 participant.frequency(),
-                participant.signStatus().name().toLowerCase(),
+                participant.signStatus().name().toLowerCase(Locale.ROOT),
                 participant.optedOutOfNextCycle());
     }
 }

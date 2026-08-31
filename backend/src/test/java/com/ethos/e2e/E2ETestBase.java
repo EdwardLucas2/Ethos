@@ -100,7 +100,7 @@ public abstract class E2ETestBase {
         AUTH_URL = authServerUrl;
         var jwtVerifier = JwtVerifier.fromJwksUrl(supertokensUrl + "/.well-known/jwks.json");
         var userStore = new UserStore(JDBI);
-        var contractStore = new ContractStore(JDBI);
+        ContractStore contractStore = new ContractStore(JDBI);
         var appRouter = new AppRouter(
                 jwtVerifier,
                 userStore,

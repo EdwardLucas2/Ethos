@@ -195,12 +195,12 @@ All components must follow the design system defined in [product/DESIGN.md](../p
 
 **Tabs** — fixed, three total, per PRD §4: **HOME** (`grid_view`, `/dashboard`), **CONTRACTS** (`description`, `/contracts`), **FRIENDS** (`group`, `/friends`). Not configurable per-screen beyond which is active.
 
-Profile is deliberately not a tab — every tab-root screen's TopBar already has an avatar shortcut to it (see TopBar above), and a dedicated tab would just duplicate that path. Contracts takes the third slot instead: a full list/history of the caller's contracts (active, pending-resolution, and settled), distinct from Dashboard's curated alert-driven view of only what needs attention right now. This needs its own backend endpoint (an all-contracts list) that doesn't exist yet — see the Contracts page spec once written.
+Profile is deliberately not a tab — every tab-root screen's TopBar already has an avatar shortcut to it (see TopBar above), and a dedicated tab would just duplicate that path. Contracts takes the third slot instead: a full list/history of the caller's contracts (active, pending-resolution, and settled), distinct from Dashboard's curated alert-driven view of only what needs attention right now. Backed by `GET /contracts/me` (see `docs/API.md`); the response still returns placeholder data until the real store query is implemented.
 
 **Props**
 
 - `activeTab` — which tab is currently selected (fills with `yellow` or accent colour)
-- `tabs` — array of tab definitions (icon, label, destination) — configured once at the app level
+- `tabs` — internal constant listing the three fixed tab definitions (icon, label, destination); not exposed as a screen-configurable prop
 
 **Design notes** — 4px top border, full width, height 80px. Tabs divided by vertical 4px borders. Active tab fills with `yellow`. All tab labels are ALL CAPS, font-black, `text-xs`. Tapping a tab should trigger the 2px press-shift interaction.
 
