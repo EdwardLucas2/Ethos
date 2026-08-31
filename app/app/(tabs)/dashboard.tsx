@@ -30,6 +30,7 @@ type AlertEntry = {
     key: string;
     type: AlertBannerType;
     message: string;
+    actionLabel: string;
     href: Href;
     priority: number;
 };
@@ -41,7 +42,8 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
             return {
                 key: n.id ?? `${n.type}-${n.evidenceId}`,
                 type: 'verify',
-                message: `${n.submitterName ?? 'Someone'} uploaded proof. [VERIFY]`,
+                message: `${n.submitterName ?? 'Someone'} uploaded proof.`,
+                actionLabel: 'Verify',
                 href: `/contract/${n.contractId}/${n.cycleNumber}/evidence/${n.evidenceId}` as Href,
                 priority: 1,
             };
@@ -50,7 +52,8 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
             return {
                 key: n.id ?? `${n.type}-${n.contractId}`,
                 type: 'challenge',
-                message: `${n.inviterName ?? 'Someone'} challenged you. [VIEW]`,
+                message: `${n.inviterName ?? 'Someone'} challenged you.`,
+                actionLabel: 'View',
                 href: `/contract/${n.contractId}/join` as Href,
                 priority: 2,
             };
@@ -59,7 +62,8 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
             return {
                 key: n.id ?? `${n.type}-${n.contractId}`,
                 type: 'settle',
-                message: "Last week's results are in. [SETTLE]",
+                message: "Last week's results are in.",
+                actionLabel: 'Settle',
                 href: `/contract/${n.contractId}/${n.cycleNumber}/unsettled` as Href,
                 priority: 3,
             };
@@ -68,7 +72,8 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
             return {
                 key: n.id ?? `${n.type}-${n.resolutionId}`,
                 type: 'owed',
-                message: `${n.loserNames?.[0] ?? 'Someone'} owes you. [COLLECT]`,
+                message: `${n.loserNames?.[0] ?? 'Someone'} owes you.`,
+                actionLabel: 'Collect',
                 href: `/owed/${n.resolutionId}` as Href,
                 priority: 4,
             };
@@ -77,7 +82,8 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
             return {
                 key: n.id ?? `${n.type}-${n.resolutionId}`,
                 type: 'pay-up',
-                message: `You owe ${n.winnerNames?.[0] ?? 'someone'}. [PAY UP]`,
+                message: `You owe ${n.winnerNames?.[0] ?? 'someone'}.`,
+                actionLabel: 'Pay Up',
                 href: `/pay-up/${n.resolutionId}` as Href,
                 priority: 5,
             };
@@ -86,7 +92,8 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
             return {
                 key: n.id ?? `${n.type}-${n.resolutionId}`,
                 type: 'pay-up',
-                message: `${n.fromName ?? 'Someone'} is waiting. [PAY UP]`,
+                message: `${n.fromName ?? 'Someone'} is waiting.`,
+                actionLabel: 'Pay Up',
                 href: `/pay-up/${n.resolutionId}` as Href,
                 priority: 5,
             };
@@ -226,6 +233,7 @@ export default function DashboardScreen() {
                                         key={alert.key}
                                         type={alert.type}
                                         message={alert.message}
+                                        actionLabel={alert.actionLabel}
                                         onPress={() => router.push(alert.href)}
                                     />
                                 ))}
