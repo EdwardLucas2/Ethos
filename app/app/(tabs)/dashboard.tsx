@@ -1,5 +1,6 @@
 import { ActiveContractCard, CtaState } from '@/components/active-contract-card';
 import { AlertBanner, AlertBannerType } from '@/components/alert-banner';
+import { AlertMessage } from '@/components/alert-message';
 import { BottomTabBar } from '@/components/bottom-tab-bar';
 import { EmptyState } from '@/components/empty-state';
 import { FAB } from '@/components/fab';
@@ -20,6 +21,7 @@ import {
 } from '@/src/api';
 import { unwrapData } from '@/src/api/unwrap';
 import { Href, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { styles } from './dashboard.styles';
 
@@ -130,6 +132,7 @@ function opponentLabel(
     myName: string | undefined
 ): string {
     const opponents = opponentsOf(participants, myName);
+    if (opponents.length === 0) return 'SOLO';
     if (opponents.length === 1) return `VS ${(opponents[0]?.displayName ?? '').toUpperCase()}`;
     return 'SQUAD BATTLE';
 }
@@ -182,29 +185,48 @@ export default function DashboardScreen() {
     const pendingContracts = unwrapData<PendingResolutionContractResponse[]>(pendingResponse);
 
     const createContract = usePostContracts();
+    const [fabError, setFabError] = useState<string | null>(null);
 
     async function handleFabPress() {
-        const result = await createContract.mutateAsync();
-        const contract = unwrapData<ContractResponse>(result);
-        if (contract?.id) {
-            // Contract Builder isn't built yet — see product/PRD.md §5.4.
-            router.push(`/contract/${contract.id}/build` as Href);
+        setFabError(null);
+        try {
+            const result = await createContract.mutateAsync();
+            const contract = unwrapData<ContractResponse>(result);
+            if (contract?.id) {
+                // Contract Builder isn't built yet — see product/PRD.md §5.4.
+                router.push(`/contract/${contract.id}/build` as Href);
+            }
+        } catch {
+            setFabError("Couldn't create a contract. Try again.");
         }
     }
 
     const isLoading = notificationsLoading || activeLoading || pendingLoading;
     const isError = activeError || pendingError;
-    const isEmpty =
-        !isLoading && (activeContracts?.length ?? 0) === 0 && (pendingContracts?.length ?? 0) === 0;
 
     const alerts = (notifications ?? [])
         .map(toAlertEntry)
         .filter((entry): entry is AlertEntry => entry !== null)
         .sort((a, b) => a.priority - b.priority);
 
+    const isEmpty =
+        !isLoading &&
+        (activeContracts?.length ?? 0) === 0 &&
+        (pendingContracts?.length ?? 0) === 0 &&
+        alerts.length === 0;
+
     return (
         <View style={styles.flex}>
             <TopBar variant="tab" avatarUri={me?.avatarUrl} />
+            {fabError && (
+                <AlertMessage
+                    message={fabError}
+                    severity="error"
+                    dismissible
+                    onDismiss={() => setFabError(null)}
+                    testID="fab-error"
+                />
+            )}
             <View style={styles.content}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     {isLoading ? (

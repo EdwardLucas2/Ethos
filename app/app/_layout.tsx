@@ -86,7 +86,7 @@ export default function RootLayout() {
                 {fontsReady ? (
                     <>
                         <RootRedirect />
-                        {/* Ethos is light-only — see app/hooks/use-theme-color.ts */}
+                        {/* Ethos is light-only — no dark-mode theme is defined */}
                         <ThemeProvider value={DefaultTheme}>
                             <Stack>
                                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />

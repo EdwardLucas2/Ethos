@@ -114,6 +114,16 @@ describe('DashboardScreen', () => {
         expect(screen.queryByTestId('fab')).toBeNull();
     });
 
+    it('shows alerts instead of the empty state when there are notifications but no contracts', () => {
+        jest.mocked(useGetNotifications).mockReturnValue(successOf([NOTIFICATION]) as never);
+        jest.mocked(useGetContractsMeActive).mockReturnValue(successOf([]) as never);
+        jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
+
+        render(<DashboardScreen />);
+        expect(screen.queryByTestId('empty-state')).toBeNull();
+        expect(screen.getByTestId('alert-stack')).toBeTruthy();
+    });
+
     it('hides the alert stack when there are no unread notifications', () => {
         jest.mocked(useGetNotifications).mockReturnValue(successOf([]) as never);
         jest.mocked(useGetContractsMeActive).mockReturnValue(successOf([ACTIVE_CONTRACT]) as never);
@@ -163,6 +173,21 @@ describe('DashboardScreen', () => {
         await waitFor(() => {
             expect(mockPush).toHaveBeenCalledWith('/contract/new-contract/build');
         });
+    });
+
+    it('shows an error message when contract creation fails', async () => {
+        jest.mocked(useGetNotifications).mockReturnValue(successOf([]) as never);
+        jest.mocked(useGetContractsMeActive).mockReturnValue(successOf([ACTIVE_CONTRACT]) as never);
+        jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
+        mockMutateAsync.mockRejectedValue(new Error('network error'));
+
+        render(<DashboardScreen />);
+        fireEvent.press(screen.getByTestId('fab'));
+
+        await waitFor(() => {
+            expect(screen.getByTestId('fab-error')).toBeTruthy();
+        });
+        expect(mockPush).not.toHaveBeenCalled();
     });
 
     it('shows an error message when a query fails', () => {
