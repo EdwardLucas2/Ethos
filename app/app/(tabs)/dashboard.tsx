@@ -9,10 +9,7 @@ import { TopBar } from '@/components/top-bar';
 import {
     ActiveContractResponse,
     ActiveParticipantResponse,
-    ContractResponse,
     NotificationResponse,
-    PendingResolutionContractResponse,
-    UserResponse,
     getGetContractsMeActiveQueryKey,
     getGetContractsMePendingResolutionQueryKey,
     getGetNotificationsQueryKey,
@@ -22,7 +19,7 @@ import {
     useGetUsersMe,
     usePostContracts,
 } from '@/src/api';
-import { unwrapData } from '@/src/api/unwrap';
+import { useAuth } from '@/src/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { Href, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -84,21 +81,15 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
                 priority: 4,
             };
         case 'resolution_loser':
-            if (!n.resolutionId) return null;
-            return {
-                key: n.id ?? `${n.type}-${n.resolutionId}`,
-                type: 'pay-up',
-                message: `You owe ${n.winnerNames?.[0] ?? 'someone'}.`,
-                actionLabel: 'Pay Up',
-                href: `/pay-up/${n.resolutionId}` as Href,
-                priority: 5,
-            };
         case 'pester':
             if (!n.resolutionId) return null;
             return {
                 key: n.id ?? `${n.type}-${n.resolutionId}`,
                 type: 'pay-up',
-                message: `${n.fromName ?? 'Someone'} is waiting.`,
+                message:
+                    n.type === 'pester'
+                        ? `${n.fromName ?? 'Someone'} is waiting.`
+                        : `You owe ${n.winnerNames?.[0] ?? 'someone'}.`,
                 actionLabel: 'Pay Up',
                 href: `/pay-up/${n.resolutionId}` as Href,
                 priority: 5,
@@ -119,23 +110,28 @@ function daysUntil(dateString: string | undefined): number {
 
 function formatTimeRemaining(dateString: string | undefined): string {
     const days = daysUntil(dateString);
-    if (days <= 0) return 'ENDS TODAY';
+    if (days < 0) return 'OVERDUE';
+    if (days === 0) return 'ENDS TODAY';
     if (days === 1) return '1 DAY LEFT';
     return `${days} DAYS LEFT`;
 }
 
 function opponentsOf(
     participants: ActiveParticipantResponse[] | undefined,
-    myName: string | undefined
+    myId: string | undefined
 ): ActiveParticipantResponse[] {
-    return (participants ?? []).filter((p) => p.displayName !== myName);
+    // myId undefined means "me" hasn't resolved yet (still loading/errored) —
+    // returning [] rather than everyone avoids briefly mislabeling a 1v1 as a
+    // squad battle before useGetUsersMe() settles.
+    if (!myId) return [];
+    return (participants ?? []).filter((p) => p.userId !== myId);
 }
 
 function opponentLabel(
     participants: ActiveParticipantResponse[] | undefined,
-    myName: string | undefined
+    myId: string | undefined
 ): string {
-    const opponents = opponentsOf(participants, myName);
+    const opponents = opponentsOf(participants, myId);
     if (opponents.length === 0) return 'SOLO';
     if (opponents.length === 1) return `VS ${(opponents[0]?.displayName ?? '').toUpperCase()}`;
     return 'SQUAD BATTLE';
@@ -143,10 +139,10 @@ function opponentLabel(
 
 function ctaFor(
     contract: ActiveContractResponse,
-    myName: string | undefined
+    myId: string | undefined
 ): { state: CtaState; label: string } {
     if ((contract.unreviewedEvidenceCount ?? 0) > 0) {
-        const opponents = opponentsOf(contract.participants, myName);
+        const opponents = opponentsOf(contract.participants, myId);
         const label =
             opponents.length === 1
                 ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
@@ -169,26 +165,32 @@ function ctaFor(
 export default function DashboardScreen() {
     const router = useRouter();
     const queryClient = useQueryClient();
-
-    const { data: meResponse, isLoading: meLoading } = useGetUsersMe();
-    const me = unwrapData<UserResponse>(meResponse);
-
-    const { data: notificationsResponse, isLoading: notificationsLoading } = useGetNotifications();
-    const notifications = unwrapData<NotificationResponse[]>(notificationsResponse);
+    const { session, isLoading: authLoading } = useAuth();
+    const enabled = !authLoading && !!session;
 
     const {
-        data: activeResponse,
+        data: me,
+        isLoading: meLoading,
+        isError: meError,
+    } = useGetUsersMe({ query: { enabled } });
+
+    const {
+        data: notifications,
+        isLoading: notificationsLoading,
+        isError: notificationsError,
+    } = useGetNotifications({ query: { enabled } });
+
+    const {
+        data: activeContracts,
         isLoading: activeLoading,
         isError: activeError,
-    } = useGetContractsMeActive();
-    const activeContracts = unwrapData<ActiveContractResponse[]>(activeResponse);
+    } = useGetContractsMeActive({ query: { enabled } });
 
     const {
-        data: pendingResponse,
+        data: pendingContracts,
         isLoading: pendingLoading,
         isError: pendingError,
-    } = useGetContractsMePendingResolution();
-    const pendingContracts = unwrapData<PendingResolutionContractResponse[]>(pendingResponse);
+    } = useGetContractsMePendingResolution({ query: { enabled } });
 
     const createContract = usePostContracts();
     const [fabError, setFabError] = useState<string | null>(null);
@@ -196,8 +198,7 @@ export default function DashboardScreen() {
     async function handleFabPress() {
         setFabError(null);
         try {
-            const result = await createContract.mutateAsync();
-            const contract = unwrapData<ContractResponse>(result);
+            const contract = await createContract.mutateAsync();
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: getGetContractsMeActiveQueryKey() }),
                 queryClient.invalidateQueries({
@@ -214,19 +215,18 @@ export default function DashboardScreen() {
         }
     }
 
-    const isLoading = notificationsLoading || activeLoading || pendingLoading || meLoading;
-    const isError = activeError || pendingError;
+    const isLoading =
+        authLoading || notificationsLoading || activeLoading || pendingLoading || meLoading;
+    const isError = activeError || pendingError || meError || notificationsError;
 
     const alerts = (notifications ?? [])
         .map(toAlertEntry)
         .filter((entry): entry is AlertEntry => entry !== null)
         .sort((a, b) => a.priority - b.priority);
 
-    const isEmpty =
-        !isLoading &&
-        (activeContracts?.length ?? 0) === 0 &&
-        (pendingContracts?.length ?? 0) === 0 &&
-        alerts.length === 0;
+    const activeCount = activeContracts?.length ?? 0;
+    const pendingCount = pendingContracts?.length ?? 0;
+    const isEmpty = !isLoading && activeCount === 0 && pendingCount === 0 && alerts.length === 0;
 
     return (
         <View style={styles.flex}>
@@ -277,18 +277,18 @@ export default function DashboardScreen() {
                                 </View>
                             )}
 
-                            {(activeContracts?.length ?? 0) > 0 && (
+                            {activeCount > 0 && (
                                 <View style={styles.section} testID="active-arena">
                                     <View style={styles.sectionHeaderRow}>
                                         <Text style={styles.sectionHeader}>Active Arena</Text>
                                         <View style={styles.countBadge}>
                                             <Text style={styles.countBadgeText}>
-                                                {activeContracts?.length} LIVE
+                                                {activeCount} LIVE
                                             </Text>
                                         </View>
                                     </View>
                                     {activeContracts?.map((contract) => {
-                                        const cta = ctaFor(contract, me?.displayName);
+                                        const cta = ctaFor(contract, me?.id);
                                         return (
                                             <ActiveContractCard
                                                 key={contract.contractId}
@@ -296,7 +296,7 @@ export default function DashboardScreen() {
                                                 contractName={contract.name ?? ''}
                                                 opponentLabel={opponentLabel(
                                                     contract.participants,
-                                                    me?.displayName
+                                                    me?.id
                                                 )}
                                                 verified={contract.myProgress?.completed ?? 0}
                                                 pending={contract.myProgress?.pending ?? 0}
@@ -324,14 +324,14 @@ export default function DashboardScreen() {
                                 </View>
                             )}
 
-                            {(pendingContracts?.length ?? 0) > 0 && (
+                            {pendingCount > 0 && (
                                 <View style={styles.section} testID="pending-resolution">
                                     <View style={styles.sectionHeaderRow}>
                                         <Text style={styles.sectionHeader}>Last Week</Text>
                                     </View>
                                     {pendingContracts?.map((contract) => {
                                         const mine = contract.participants?.find(
-                                            (p) => p.displayName === me?.displayName
+                                            (p) => p.userId === me?.id
                                         );
                                         return (
                                             <PendingResolutionCard

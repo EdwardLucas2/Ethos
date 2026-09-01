@@ -1,5 +1,4 @@
 import { customFetch } from '@/src/api/client';
-import SuperTokens from '@/src/lib/supertokens';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 
@@ -84,19 +83,14 @@ export function __resetProfileConfirmedCache(): void {
 async function ensureUserProfile(email: string): Promise<void> {
     if (profileConfirmed.has(email)) return;
 
-    const token = await SuperTokens.getAccessToken();
-    if (!token) {
-        throw new AuthError('Session not established', 'UNKNOWN');
-    }
-
     try {
         // Routed through the shared Orval mutator (src/api/client.ts) rather
         // than a second hand-rolled fetch client — /users is this backend's
         // own OpenAPI-documented endpoint, not the external SuperTokens
         // service that authFetch above legitimately talks to directly.
+        // customFetch already attaches the bearer token itself.
         await customFetch('/users', {
             method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
             body: JSON.stringify({ displayName: deriveDisplayName(email) }),
         });
     } catch (e) {

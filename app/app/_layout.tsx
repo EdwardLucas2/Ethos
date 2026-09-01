@@ -33,26 +33,22 @@ function RootRedirect() {
     const router = useRouter();
 
     const inPublicGroup = PUBLIC_ROUTE_GROUPS.has(segments[0] ?? '');
-    // The bare root ("/", app/index.tsx) has no group segment at all — it's
-    // neither public nor protected by the check above, it's just a landing
-    // spot Expo Router needs to resolve the initial deep link (see
-    // app/index.tsx). A signed-in user landing there needs the same
-    // redirect-to-dashboard treatment as one who lands in the public group,
-    // otherwise they're stuck: !session-branch doesn't match (there IS a
-    // session) and the original session-branch only fired for inPublicGroup.
-    const atRoot = segments[0] === undefined;
 
     useEffect(() => {
+        // The bare root ("/", app/index.tsx) has no group segment at all and
+        // owns its own redirect — no-op here so it never races index.tsx's
+        // own <Redirect>.
+        if (segments[0] === undefined) return;
         if (isLoading) return;
 
         if (!session && !inPublicGroup) {
             router.replace('/login');
-        } else if (session && (inPublicGroup || atRoot)) {
+        } else if (session && inPublicGroup) {
             router.replace('/dashboard');
         }
         // useRouter() returns a stable instance; depending on it would re-run on every render
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session, isLoading, inPublicGroup, atRoot]);
+    }, [session, isLoading, inPublicGroup, segments[0]]);
 
     return null;
 }
@@ -89,6 +85,7 @@ export default function RootLayout() {
                         {/* Ethos is light-only — no dark-mode theme is defined */}
                         <ThemeProvider value={DefaultTheme}>
                             <Stack>
+                                <Stack.Screen name="index" options={{ headerShown: false }} />
                                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                                 <Stack.Screen name="profile" options={{ headerShown: false }} />

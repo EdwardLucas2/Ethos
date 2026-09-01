@@ -42,7 +42,7 @@ export function ActiveContractCard({
     onCta,
     testID = 'active-contract-card',
 }: ActiveContractCardProps) {
-    const urgent = ctaState === 'snap-urgent';
+    const urgent = ctaState === 'snap-urgent' || timeRemaining === 'OVERDUE';
     const caughtUp = ctaState === 'caught-up';
 
     return (

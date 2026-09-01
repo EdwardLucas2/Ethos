@@ -54,6 +54,19 @@ describe('ActiveContractCard', () => {
         expect(onCta).toHaveBeenCalledTimes(1);
     });
 
+    it('shows the overdue badge in red even when the CTA state is not urgent', () => {
+        render(
+            <ActiveContractCard
+                {...baseProps}
+                timeRemaining="OVERDUE"
+                ctaState="snap"
+                onPress={jest.fn()}
+                onCta={jest.fn()}
+            />
+        );
+        expect(screen.getByText('OVERDUE')).toHaveStyle({ color: colors.red });
+    });
+
     it('disables the CTA when caught up', () => {
         const onCta = jest.fn();
         render(

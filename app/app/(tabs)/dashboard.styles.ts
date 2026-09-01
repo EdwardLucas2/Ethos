@@ -54,7 +54,7 @@ export const styles = StyleSheet.create({
         height: 80,
         backgroundColor: colors.surfaceRaised,
         borderWidth: 1,
-        borderColor: '#E5E5E0',
+        borderColor: colors.borderMuted,
     },
     skeletonStack: {
         gap: spacing.sm,

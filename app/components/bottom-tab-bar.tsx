@@ -1,6 +1,7 @@
 import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Href, useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export type TabName = 'home' | 'contracts' | 'friends';
@@ -39,8 +40,16 @@ export function BottomTabBar({ activeTab, testID = 'bottom-tab-bar' }: BottomTab
                             index > 0 && styles.tabDivider,
                             active && styles.tabActive,
                         ]}
+                        onPressIn={() => {
+                            if (process.env.EXPO_OS === 'ios') {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
+                        }}
                         onPress={() => !active && router.push(tab.href)}
                         testID={`${testID}-${tab.name}`}
+                        accessibilityRole="tab"
+                        accessibilityState={{ selected: active }}
+                        accessibilityLabel={tab.label}
                     >
                         {({ pressed }) => (
                             <>

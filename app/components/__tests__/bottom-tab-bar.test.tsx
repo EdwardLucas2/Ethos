@@ -33,4 +33,13 @@ describe('BottomTabBar', () => {
         fireEvent.press(screen.getByTestId('bottom-tab-bar-friends'));
         expect(mockPush).toHaveBeenCalledWith('/friends');
     });
+
+    it('exposes tab role and selected state for screen readers', () => {
+        render(<BottomTabBar activeTab="contracts" />);
+        const active = screen.getByTestId('bottom-tab-bar-contracts');
+        const inactive = screen.getByTestId('bottom-tab-bar-home');
+        expect(active.props.accessibilityRole).toBe('tab');
+        expect(active.props.accessibilityState).toEqual({ selected: true });
+        expect(inactive.props.accessibilityState).toEqual({ selected: false });
+    });
 });

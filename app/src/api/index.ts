@@ -30,6 +30,7 @@ export interface ProgressResponse {
 }
 
 export interface ActiveParticipantResponse {
+  userId?: string;
   displayName?: string;
   avatarUrl?: string;
   completed: number;
@@ -115,6 +116,7 @@ export interface NotificationResponse {
 }
 
 export interface PendingParticipantResponse {
+  userId?: string;
   displayName?: string;
   completed: number;
   total: number;
@@ -163,25 +165,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * Returns the calling user's contacts ordered alphabetically by display name.
  * @summary List contacts
  */
-export type getContactsResponse200 = {
-  data: ContactResponse[]
-  status: 200
-}
-
-export type getContactsResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getContactsResponseSuccess = (getContactsResponse200) & {
-  headers: Headers;
-};
-export type getContactsResponseError = (getContactsResponse401) & {
-  headers: Headers;
-};
-
-export type getContactsResponse = (getContactsResponseSuccess | getContactsResponseError)
-
 export const getGetContactsUrl = () => {
 
 
@@ -190,9 +173,9 @@ export const getGetContactsUrl = () => {
   return `/contacts`
 }
 
-export const getContacts = async ( options?: RequestInit): Promise<getContactsResponse> => {
+export const getContacts = async ( options?: RequestInit): Promise<ContactResponse[]> => {
 
-  return customFetch<getContactsResponse>(getGetContactsUrl(),
+  return customFetch<ContactResponse[]>(getGetContactsUrl(),
   {
     ...options,
     method: 'GET'
@@ -284,40 +267,6 @@ export function useGetContacts<TData = Awaited<ReturnType<typeof getContacts>>, 
  * Adds a user to the caller's contacts list. userId comes from a prior tag search result. Returns 400 if userId is the caller's own ID, 404 if the user does not exist, 409 if they are already a contact.
  * @summary Add a contact
  */
-export type postContactsResponse201 = {
-  data: ContactResponse
-  status: 201
-}
-
-export type postContactsResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
-
-export type postContactsResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type postContactsResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
-
-export type postContactsResponse409 = {
-  data: ErrorResponse
-  status: 409
-}
-
-export type postContactsResponseSuccess = (postContactsResponse201) & {
-  headers: Headers;
-};
-export type postContactsResponseError = (postContactsResponse400 | postContactsResponse401 | postContactsResponse404 | postContactsResponse409) & {
-  headers: Headers;
-};
-
-export type postContactsResponse = (postContactsResponseSuccess | postContactsResponseError)
-
 export const getPostContactsUrl = () => {
 
 
@@ -326,9 +275,9 @@ export const getPostContactsUrl = () => {
   return `/contacts`
 }
 
-export const postContacts = async (addContactRequest: AddContactRequest, options?: RequestInit): Promise<postContactsResponse> => {
+export const postContacts = async (addContactRequest: AddContactRequest, options?: RequestInit): Promise<ContactResponse> => {
 
-  return customFetch<postContactsResponse>(getPostContactsUrl(),
+  return customFetch<ContactResponse>(getPostContactsUrl(),
   {
     ...options,
     method: 'POST',
@@ -390,30 +339,6 @@ export const usePostContacts = <TError = ErrorResponse,
  * Removes a user from the caller's contacts. Path param is the target user's ID, not the contact row ID. Returns 404 if the user is not in the caller's contacts.
  * @summary Remove a contact
  */
-export type deleteContactsTargetUserIdResponse204 = {
-  data: void
-  status: 204
-}
-
-export type deleteContactsTargetUserIdResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type deleteContactsTargetUserIdResponse404 = {
-  data: ErrorResponse
-  status: 404
-}
-
-export type deleteContactsTargetUserIdResponseSuccess = (deleteContactsTargetUserIdResponse204) & {
-  headers: Headers;
-};
-export type deleteContactsTargetUserIdResponseError = (deleteContactsTargetUserIdResponse401 | deleteContactsTargetUserIdResponse404) & {
-  headers: Headers;
-};
-
-export type deleteContactsTargetUserIdResponse = (deleteContactsTargetUserIdResponseSuccess | deleteContactsTargetUserIdResponseError)
-
 export const getDeleteContactsTargetUserIdUrl = (targetUserId: string,) => {
 
 
@@ -422,9 +347,9 @@ export const getDeleteContactsTargetUserIdUrl = (targetUserId: string,) => {
   return `/contacts/${targetUserId}`
 }
 
-export const deleteContactsTargetUserId = async (targetUserId: string, options?: RequestInit): Promise<deleteContactsTargetUserIdResponse> => {
+export const deleteContactsTargetUserId = async (targetUserId: string, options?: RequestInit): Promise<void> => {
 
-  return customFetch<deleteContactsTargetUserIdResponse>(getDeleteContactsTargetUserIdUrl(targetUserId),
+  return customFetch<void>(getDeleteContactsTargetUserIdUrl(targetUserId),
   {
     ...options,
     method: 'DELETE'
@@ -485,25 +410,6 @@ export const useDeleteContactsTargetUserId = <TError = ErrorResponse,
  * Called on FAB tap. Creates a contract with default values (name and forfeit empty, period weekly, start date tomorrow UTC, status draft) and a participant row for the caller with sign_status drafting. Everything stays mutable until POST /contracts/{contractId}/start.
  * @summary Create contract
  */
-export type postContractsResponse201 = {
-  data: ContractResponse
-  status: 201
-}
-
-export type postContractsResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type postContractsResponseSuccess = (postContractsResponse201) & {
-  headers: Headers;
-};
-export type postContractsResponseError = (postContractsResponse401) & {
-  headers: Headers;
-};
-
-export type postContractsResponse = (postContractsResponseSuccess | postContractsResponseError)
-
 export const getPostContractsUrl = () => {
 
 
@@ -512,9 +418,9 @@ export const getPostContractsUrl = () => {
   return `/contracts`
 }
 
-export const postContracts = async ( options?: RequestInit): Promise<postContractsResponse> => {
+export const postContracts = async ( options?: RequestInit): Promise<ContractResponse> => {
 
-  return customFetch<postContractsResponse>(getPostContractsUrl(),
+  return customFetch<ContractResponse>(getPostContractsUrl(),
   {
     ...options,
     method: 'POST'
@@ -575,25 +481,6 @@ export const usePostContracts = <TError = ErrorResponse,
  * Returns every contract the caller is or was a participant in — active, pending_resolution, and settled — most recent first. Backs the Contracts tab's full list/history, distinct from GET /contracts/me/active and GET /contracts/me/pending-resolution, which the Dashboard uses for its curated, needs-attention view and only cover active/pending_resolution.
  * @summary List the caller's contracts
  */
-export type getContractsMeResponse200 = {
-  data: ContractSummaryResponse[]
-  status: 200
-}
-
-export type getContractsMeResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getContractsMeResponseSuccess = (getContractsMeResponse200) & {
-  headers: Headers;
-};
-export type getContractsMeResponseError = (getContractsMeResponse401) & {
-  headers: Headers;
-};
-
-export type getContractsMeResponse = (getContractsMeResponseSuccess | getContractsMeResponseError)
-
 export const getGetContractsMeUrl = () => {
 
 
@@ -602,9 +489,9 @@ export const getGetContractsMeUrl = () => {
   return `/contracts/me`
 }
 
-export const getContractsMe = async ( options?: RequestInit): Promise<getContractsMeResponse> => {
+export const getContractsMe = async ( options?: RequestInit): Promise<ContractSummaryResponse[]> => {
 
-  return customFetch<getContractsMeResponse>(getGetContractsMeUrl(),
+  return customFetch<ContractSummaryResponse[]>(getGetContractsMeUrl(),
   {
     ...options,
     method: 'GET'
@@ -696,25 +583,6 @@ export function useGetContractsMe<TData = Awaited<ReturnType<typeof getContracts
  * Returns contracts where status is active and the caller is a signed participant, carrying all data needed for the Dashboard contract card: current cycle progress, per-participant progress, and unreviewed evidence count.
  * @summary List the caller's active contracts
  */
-export type getContractsMeActiveResponse200 = {
-  data: ActiveContractResponse[]
-  status: 200
-}
-
-export type getContractsMeActiveResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getContractsMeActiveResponseSuccess = (getContractsMeActiveResponse200) & {
-  headers: Headers;
-};
-export type getContractsMeActiveResponseError = (getContractsMeActiveResponse401) & {
-  headers: Headers;
-};
-
-export type getContractsMeActiveResponse = (getContractsMeActiveResponseSuccess | getContractsMeActiveResponseError)
-
 export const getGetContractsMeActiveUrl = () => {
 
 
@@ -723,9 +591,9 @@ export const getGetContractsMeActiveUrl = () => {
   return `/contracts/me/active`
 }
 
-export const getContractsMeActive = async ( options?: RequestInit): Promise<getContractsMeActiveResponse> => {
+export const getContractsMeActive = async ( options?: RequestInit): Promise<ActiveContractResponse[]> => {
 
-  return customFetch<getContractsMeActiveResponse>(getGetContractsMeActiveUrl(),
+  return customFetch<ActiveContractResponse[]>(getGetContractsMeActiveUrl(),
   {
     ...options,
     method: 'GET'
@@ -817,25 +685,6 @@ export function useGetContractsMeActive<TData = Awaited<ReturnType<typeof getCon
  * Returns contracts where the caller is a signed participant and a cycle has status pending_resolution. A contract can appear here and in GET /contracts/me/active simultaneously during the overlap period — they represent different cycles.
  * @summary List the caller's pending-resolution contracts
  */
-export type getContractsMePendingResolutionResponse200 = {
-  data: PendingResolutionContractResponse[]
-  status: 200
-}
-
-export type getContractsMePendingResolutionResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getContractsMePendingResolutionResponseSuccess = (getContractsMePendingResolutionResponse200) & {
-  headers: Headers;
-};
-export type getContractsMePendingResolutionResponseError = (getContractsMePendingResolutionResponse401) & {
-  headers: Headers;
-};
-
-export type getContractsMePendingResolutionResponse = (getContractsMePendingResolutionResponseSuccess | getContractsMePendingResolutionResponseError)
-
 export const getGetContractsMePendingResolutionUrl = () => {
 
 
@@ -844,9 +693,9 @@ export const getGetContractsMePendingResolutionUrl = () => {
   return `/contracts/me/pending-resolution`
 }
 
-export const getContractsMePendingResolution = async ( options?: RequestInit): Promise<getContractsMePendingResolutionResponse> => {
+export const getContractsMePendingResolution = async ( options?: RequestInit): Promise<PendingResolutionContractResponse[]> => {
 
-  return customFetch<getContractsMePendingResolutionResponse>(getGetContractsMePendingResolutionUrl(),
+  return customFetch<PendingResolutionContractResponse[]>(getGetContractsMePendingResolutionUrl(),
   {
     ...options,
     method: 'GET'
@@ -938,25 +787,6 @@ export function useGetContractsMePendingResolution<TData = Awaited<ReturnType<ty
  * Returns all unread notifications for the caller, enriched server-side with the display context needed to render each Dashboard alert. Only unread (read_at IS NULL) rows are returned. Frontend is responsible for ordering by urgency (verify, challenge, settle, owed, pay-up).
  * @summary List unread notifications
  */
-export type getNotificationsResponse200 = {
-  data: NotificationResponse[]
-  status: 200
-}
-
-export type getNotificationsResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getNotificationsResponseSuccess = (getNotificationsResponse200) & {
-  headers: Headers;
-};
-export type getNotificationsResponseError = (getNotificationsResponse401) & {
-  headers: Headers;
-};
-
-export type getNotificationsResponse = (getNotificationsResponseSuccess | getNotificationsResponseError)
-
 export const getGetNotificationsUrl = () => {
 
 
@@ -965,9 +795,9 @@ export const getGetNotificationsUrl = () => {
   return `/notifications`
 }
 
-export const getNotifications = async ( options?: RequestInit): Promise<getNotificationsResponse> => {
+export const getNotifications = async ( options?: RequestInit): Promise<NotificationResponse[]> => {
 
-  return customFetch<getNotificationsResponse>(getGetNotificationsUrl(),
+  return customFetch<NotificationResponse[]>(getGetNotificationsUrl(),
   {
     ...options,
     method: 'GET'
@@ -1059,35 +889,6 @@ export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotific
  * Creates the users row after SuperTokens has created the auth account. Called once per signup. supertokens_user_id and email are derived from the verified JWT. Returns 409 if a users row already exists for this account.
  * @summary Register a new user
  */
-export type postUsersResponse201 = {
-  data: UserResponse
-  status: 201
-}
-
-export type postUsersResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
-
-export type postUsersResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type postUsersResponse409 = {
-  data: ErrorResponse
-  status: 409
-}
-
-export type postUsersResponseSuccess = (postUsersResponse201) & {
-  headers: Headers;
-};
-export type postUsersResponseError = (postUsersResponse400 | postUsersResponse401 | postUsersResponse409) & {
-  headers: Headers;
-};
-
-export type postUsersResponse = (postUsersResponseSuccess | postUsersResponseError)
-
 export const getPostUsersUrl = () => {
 
 
@@ -1096,9 +897,9 @@ export const getPostUsersUrl = () => {
   return `/users`
 }
 
-export const postUsers = async (createUserRequest: CreateUserRequest, options?: RequestInit): Promise<postUsersResponse> => {
+export const postUsers = async (createUserRequest: CreateUserRequest, options?: RequestInit): Promise<UserResponse> => {
 
-  return customFetch<postUsersResponse>(getPostUsersUrl(),
+  return customFetch<UserResponse>(getPostUsersUrl(),
   {
     ...options,
     method: 'POST',
@@ -1160,25 +961,6 @@ export const usePostUsers = <TError = ErrorResponse,
  * Returns the authenticated user's profile.
  * @summary Get current user
  */
-export type getUsersMeResponse200 = {
-  data: UserResponse
-  status: 200
-}
-
-export type getUsersMeResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getUsersMeResponseSuccess = (getUsersMeResponse200) & {
-  headers: Headers;
-};
-export type getUsersMeResponseError = (getUsersMeResponse401) & {
-  headers: Headers;
-};
-
-export type getUsersMeResponse = (getUsersMeResponseSuccess | getUsersMeResponseError)
-
 export const getGetUsersMeUrl = () => {
 
 
@@ -1187,9 +969,9 @@ export const getGetUsersMeUrl = () => {
   return `/users/me`
 }
 
-export const getUsersMe = async ( options?: RequestInit): Promise<getUsersMeResponse> => {
+export const getUsersMe = async ( options?: RequestInit): Promise<UserResponse> => {
 
-  return customFetch<getUsersMeResponse>(getGetUsersMeUrl(),
+  return customFetch<UserResponse>(getGetUsersMeUrl(),
   {
     ...options,
     method: 'GET'
@@ -1281,30 +1063,6 @@ export function useGetUsersMe<TData = Awaited<ReturnType<typeof getUsersMe>>, TE
  * Updates the authenticated user's display name. At least one field required. MVP: displayName only; avatar upload is out of scope.
  * @summary Update current user's profile
  */
-export type patchUsersMeResponse200 = {
-  data: UserResponse
-  status: 200
-}
-
-export type patchUsersMeResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
-
-export type patchUsersMeResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type patchUsersMeResponseSuccess = (patchUsersMeResponse200) & {
-  headers: Headers;
-};
-export type patchUsersMeResponseError = (patchUsersMeResponse400 | patchUsersMeResponse401) & {
-  headers: Headers;
-};
-
-export type patchUsersMeResponse = (patchUsersMeResponseSuccess | patchUsersMeResponseError)
-
 export const getPatchUsersMeUrl = () => {
 
 
@@ -1313,9 +1071,9 @@ export const getPatchUsersMeUrl = () => {
   return `/users/me`
 }
 
-export const patchUsersMe = async (updateUserRequest: UpdateUserRequest, options?: RequestInit): Promise<patchUsersMeResponse> => {
+export const patchUsersMe = async (updateUserRequest: UpdateUserRequest, options?: RequestInit): Promise<UserResponse> => {
 
-  return customFetch<patchUsersMeResponse>(getPatchUsersMeUrl(),
+  return customFetch<UserResponse>(getPatchUsersMeUrl(),
   {
     ...options,
     method: 'PATCH',
@@ -1377,30 +1135,6 @@ export const usePatchUsersMe = <TError = ErrorResponse,
  * Prefix-matches against users.tag. Excludes the calling user. isContact is true if the result user is already in the caller's contacts. Returns up to 20 results ordered by tag ascending.
  * @summary Search users by tag prefix
  */
-export type getUsersSearchResponse200 = {
-  data: UserSearchResponse[]
-  status: 200
-}
-
-export type getUsersSearchResponse400 = {
-  data: ErrorResponse
-  status: 400
-}
-
-export type getUsersSearchResponse401 = {
-  data: ErrorResponse
-  status: 401
-}
-
-export type getUsersSearchResponseSuccess = (getUsersSearchResponse200) & {
-  headers: Headers;
-};
-export type getUsersSearchResponseError = (getUsersSearchResponse400 | getUsersSearchResponse401) & {
-  headers: Headers;
-};
-
-export type getUsersSearchResponse = (getUsersSearchResponseSuccess | getUsersSearchResponseError)
-
 export const getGetUsersSearchUrl = (params: GetUsersSearchParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -1416,9 +1150,9 @@ export const getGetUsersSearchUrl = (params: GetUsersSearchParams,) => {
   return stringifiedParams.length > 0 ? `/users/search?${stringifiedParams}` : `/users/search`
 }
 
-export const getUsersSearch = async (params: GetUsersSearchParams, options?: RequestInit): Promise<getUsersSearchResponse> => {
+export const getUsersSearch = async (params: GetUsersSearchParams, options?: RequestInit): Promise<UserSearchResponse[]> => {
 
-  return customFetch<getUsersSearchResponse>(getGetUsersSearchUrl(params),
+  return customFetch<UserSearchResponse[]>(getGetUsersSearchUrl(params),
   {
     ...options,
     method: 'GET'

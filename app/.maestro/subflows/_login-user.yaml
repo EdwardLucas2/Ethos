@@ -15,5 +15,5 @@ appId: com.ethos.app
       text: 'Not Now'
       optional: true
 - extendedWaitUntil:
-      visible: 'Welcome!'
+      visible: 'ETHOS'
       timeout: 8000

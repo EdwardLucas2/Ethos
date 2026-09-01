@@ -19,9 +19,9 @@ const config: StorybookConfig = {
                     // @/* from tsconfig, so the real modules are never imported here.
                     // Exact-match regexes (not plain strings) — a plain string key does
                     // prefix-boundary matching in Vite/rollup-plugin-alias, so e.g. a
-                    // '@/src/api' string key would also swallow '@/src/api/unwrap' and
-                    // redirect it under the mock file (which isn't a directory), breaking
-                    // that import entirely.
+                    // '@/src/api' string key would also swallow any future '@/src/api/*'
+                    // sub-path import and redirect it under the mock file (which isn't a
+                    // directory), breaking that import entirely.
                     {
                         find: /^@\/src\/services\/auth$/,
                         replacement: path.resolve(__dirname, 'mocks/auth-api.ts'),

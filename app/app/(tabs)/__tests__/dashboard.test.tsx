@@ -8,6 +8,8 @@ import {
     useGetUsersMe,
     usePostContracts,
 } from '@/src/api';
+import { useAuth } from '@/src/context/AuthContext';
+import { ME } from '@/.storybook/mocks/dashboard-fixtures';
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
@@ -22,6 +24,10 @@ jest.mock('@/src/api', () => ({
     getGetNotificationsQueryKey: jest.fn(() => ['notifications']),
 }));
 
+jest.mock('@/src/context/AuthContext', () => ({
+    useAuth: jest.fn(),
+}));
+
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
     useRouter: () => ({ push: mockPush, back: jest.fn() }),
@@ -34,13 +40,8 @@ jest.mock('@tanstack/react-query', () => ({
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-const ME = {
-    data: { id: 'user-1', displayName: 'Edward', tag: 'edward1', email: 'e@e.com' },
-    status: 200,
-};
-
 function successOf<T>(data: T) {
-    return { data: { data, status: 200 }, isLoading: false, isError: false };
+    return { data, isLoading: false, isError: false };
 }
 
 const ACTIVE_CONTRACT = {
@@ -52,8 +53,8 @@ const ACTIVE_CONTRACT = {
     myProgress: { completed: 1, pending: 0, total: 3 },
     unreviewedEvidenceCount: 0,
     participants: [
-        { displayName: 'Edward', completed: 1, pending: 0, total: 3 },
-        { displayName: 'Alex', completed: 2, pending: 0, total: 3 },
+        { userId: 'user-1', displayName: 'Edward', completed: 1, pending: 0, total: 3 },
+        { userId: 'user-2', displayName: 'Alex', completed: 2, pending: 0, total: 3 },
     ],
 };
 
@@ -66,9 +67,9 @@ const SQUAD_CONTRACT = {
     myProgress: { completed: 1, pending: 0, total: 3 },
     unreviewedEvidenceCount: 1,
     participants: [
-        { displayName: 'Edward', completed: 1, pending: 0, total: 3 },
-        { displayName: 'Sarah', completed: 2, pending: 0, total: 3 },
-        { displayName: 'Mike', completed: 0, pending: 1, total: 3 },
+        { userId: 'user-1', displayName: 'Edward', completed: 1, pending: 0, total: 3 },
+        { userId: 'user-3', displayName: 'Sarah', completed: 2, pending: 0, total: 3 },
+        { userId: 'user-4', displayName: 'Mike', completed: 0, pending: 1, total: 3 },
     ],
 };
 
@@ -77,7 +78,7 @@ const PENDING_CONTRACT = {
     contractName: 'Morning Run',
     cycleNumber: 2,
     unreviewedEvidenceCount: 3,
-    participants: [{ displayName: 'Edward', completed: 3, total: 3 }],
+    participants: [{ userId: 'user-1', displayName: 'Edward', completed: 3, total: 3 }],
 };
 
 const NOTIFICATION = {
@@ -95,7 +96,13 @@ const mockMutateAsync = jest.fn();
 
 beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useGetUsersMe).mockReturnValue(successOf(ME.data) as never);
+    jest.mocked(useAuth).mockReturnValue({
+        session: 'token',
+        isLoading: false,
+        refreshSession: jest.fn(),
+        signOut: jest.fn(),
+    });
+    jest.mocked(useGetUsersMe).mockReturnValue(successOf(ME) as never);
     jest.mocked(usePostContracts).mockReturnValue({
         mutateAsync: mockMutateAsync,
         isPending: false,
@@ -214,7 +221,7 @@ describe('DashboardScreen', () => {
         jest.mocked(useGetNotifications).mockReturnValue(successOf([]) as never);
         jest.mocked(useGetContractsMeActive).mockReturnValue(successOf([ACTIVE_CONTRACT]) as never);
         jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
-        mockMutateAsync.mockResolvedValue({ data: { id: 'new-contract' }, status: 201 });
+        mockMutateAsync.mockResolvedValue({ id: 'new-contract' });
 
         render(<DashboardScreen />);
         fireEvent.press(screen.getByTestId('fab'));

@@ -3,19 +3,41 @@ import SuperTokens from '@/src/lib/supertokens';
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 const REQUEST_TIMEOUT_MS = 10_000;
 
+// Short-TTL cache around SuperTokens.getAccessToken() — well under JWT
+// lifetime, but long enough to collapse a screen's burst of parallel queries
+// (each independently calling customFetch) into a single secure-storage read
+// instead of one per request. Cleared on sign-out/session refresh so a
+// session change never serves a stale token — see clearCachedAccessToken.
+const TOKEN_CACHE_TTL_MS = 5_000;
+let cachedToken: { value: string | null; expiresAt: number } | null = null;
+
+async function getCachedAccessToken(): Promise<string | null> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt) return cachedToken.value;
+  const value = (await SuperTokens.getAccessToken()) ?? null;
+  cachedToken = { value, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS };
+  return value;
+}
+
+export function clearCachedAccessToken(): void {
+  cachedToken = null;
+}
+
 export async function customFetch<T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   let response: Response;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     // Every backend endpoint except POST /users requires a bearer token; reading it
     // here (rather than injecting it at the call site) keeps every Orval-generated
     // hook authenticated automatically.
-    const token = await SuperTokens.getAccessToken();
+    const token = await getCachedAccessToken();
+    // Started right before the network call, not before the token read above —
+    // otherwise a slow secure-storage read eats into the fetch timeout budget.
+    timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     response = await fetch(`${BASE_URL}${url}`, {
       ...options,
       headers: {
@@ -45,8 +67,5 @@ export async function customFetch<T>(
   const text = await response.text();
   const data = text ? JSON.parse(text) : undefined;
 
-  // Orval's generated types for a custom fetch mutator assume this shape
-  // (data/status/headers), matching their documented custom-fetch example —
-  // callers read the body via `.data`, not the resolved value directly.
-  return { data, status: response.status, headers: response.headers } as T;
+  return data as T;
 }
