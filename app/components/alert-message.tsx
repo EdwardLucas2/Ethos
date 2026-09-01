@@ -1,7 +1,9 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
+
+const SHADOW = offsetShadow(6);
 
 type DismissibleProps =
     | { dismissible: true; onDismiss: () => void }
@@ -56,36 +58,41 @@ export function AlertMessage({
     };
 
     return (
-        <TouchableOpacity
-            testID={testID}
-            activeOpacity={dismissible ? 0.8 : 1}
-            onPress={handlePress}
-            style={[styles.container, { backgroundColor: config.backgroundColor }]}
-        >
-            <AntDesign
-                testID={`${testID}-icon`}
-                name={config.iconName}
-                size={20}
-                color={config.iconColor}
-                style={styles.icon}
-            />
-            <Text testID={`${testID}-text`} style={[styles.text, { color: config.textColor }]}>
-                {message.toUpperCase()}
-            </Text>
-        </TouchableOpacity>
+        <View style={styles.wrapper}>
+            <View style={SHADOW.box} />
+            <TouchableOpacity
+                testID={testID}
+                activeOpacity={dismissible ? 0.8 : 1}
+                onPress={handlePress}
+                style={[styles.container, { backgroundColor: config.backgroundColor }]}
+            >
+                <AntDesign
+                    testID={`${testID}-icon`}
+                    name={config.iconName}
+                    size={20}
+                    color={config.iconColor}
+                    style={styles.icon}
+                />
+                <Text testID={`${testID}-text`} style={[styles.text, { color: config.textColor }]}>
+                    {message.toUpperCase()}
+                </Text>
+            </TouchableOpacity>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
+    wrapper: {
+        width: '100%',
+    },
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: '100%',
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
-        ...shadows.md,
+        ...SHADOW.faceMargin,
     },
     icon: {
         marginRight: spacing.sm,

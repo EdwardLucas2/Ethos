@@ -78,13 +78,13 @@ const styles = StyleSheet.create({
     avatar: {
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
-        borderWidth: borderWidth.structural - 1,
+        borderWidth: borderWidth.thin,
         borderColor: colors.ink,
     },
     avatarPlaceholder: {
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
-        borderWidth: borderWidth.structural - 1,
+        borderWidth: borderWidth.thin,
         borderColor: colors.ink,
         backgroundColor: colors.surfaceRaised,
     },

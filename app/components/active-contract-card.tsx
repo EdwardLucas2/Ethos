@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
-        borderWidth: borderWidth.structural - 1,
+        borderWidth: borderWidth.thin,
         borderColor: colors.ink,
         backgroundColor: colors.surface,
         paddingHorizontal: spacing.sm,

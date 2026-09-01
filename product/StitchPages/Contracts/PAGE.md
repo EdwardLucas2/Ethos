@@ -27,4 +27,4 @@ Vertical list of rows, most recent first. Each row: contract name, `StatusBadge`
 
 ## Backend
 
-Needs a new endpoint — `GET /contracts/me/active` and `GET /contracts/me/pending-resolution` (used by Home Dashboard) don't cover settled contracts. Not yet planned in `docs/API.md`.
+Backed by `GET /contracts/me` (see `docs/API.md`), which covers active, pending-resolution, and settled contracts — distinct from `GET /contracts/me/active` and `GET /contracts/me/pending-resolution` (used by Home Dashboard), which don't cover settled contracts. Currently returns placeholder data until the real store query is implemented.
