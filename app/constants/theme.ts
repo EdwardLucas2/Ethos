@@ -10,6 +10,8 @@ export const colors = {
     blue: '#3B82F6',
     yellow: '#FDDC00',
     red: '#FF3E3E',
+    redPressed: '#CC3232',
+    redTint: '#FFE5E5',
 } as const;
 
 // ─── Shadows ─────────────────────────────────────────────────────────────────
@@ -42,6 +44,29 @@ export const shadows = {
     lg: shadow(8),
 } as const;
 
+// ─── Hard offset "shadow" boxes ────────────────────────────────────────────
+// A solid box rendered as a static sibling behind a pressable face, offset by
+// `size` — for anywhere the face also translates on press. A native shadow
+// (the `shadow*`/`shadows` above) is derived from its own layer's rendered
+// content, so translating that layer for a press effect drags the shadow
+// along with it; this renders the same hard-offset look as an independent,
+// unmoving element instead.
+export const offsetShadow = (size: 4 | 6 | 8) =>
+    ({
+        box: {
+            position: 'absolute',
+            top: size,
+            left: size,
+            right: 0,
+            bottom: 0,
+            backgroundColor: colors.ink,
+        },
+        faceMargin: {
+            marginRight: size,
+            marginBottom: size,
+        },
+    }) as const;
+
 // ─── Spacing (8px base grid) ──────────────────────────────────────────────────
 
 export const spacing = {
@@ -55,9 +80,13 @@ export const spacing = {
 
 // ─── Borders ─────────────────────────────────────────────────────────────────
 
+const STRUCTURAL_WIDTH = 3;
+
 export const borderWidth = {
-    structural: 3,
+    structural: STRUCTURAL_WIDTH,
     accent: 4,
+    // One thinner than structural — badge/avatar borders that sit inside a structural border.
+    thin: STRUCTURAL_WIDTH - 1,
 } as const;
 
 export const borderRadius = {

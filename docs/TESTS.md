@@ -59,6 +59,13 @@ mvn verify
 - **Mock Orval hooks** (`jest.mock('@/src/api', ...)`), never `fetch`.
 - **Run:** `npm test` (from `app/`)
 
+### Storybook
+
+- **Tool:** Storybook (`@storybook/react-native-web-vite`). Files co-located with the component (e.g. `ContractCard.stories.tsx`).
+- **Scope:** Visual catalog of a shared component's states — one `Story` per variant. No `play` functions;
+- **CI:** `@storybook/test-runner` visits every story headlessly as a smoke test (fails if a story throws on mount) — it doesn't assert on rendered output or diff screenshots.
+- **Run:** `npm run storybook` (dev, `app/`) · `npm run build-storybook && npm run test-storybook` (CI check)
+
 ### E2E Tests
 
 - **Tool:** Maestro. Flows live in `app/.maestro/`, one `.yaml` file per journey.
@@ -97,6 +104,6 @@ Read-only DB assertions verifying service-level invariants that DB constraints a
 
 - **Backend:** `mvn spotless:check` → `mvn verify` → JaCoCo coverage to Codacy
 - **Auth:** lint → prettier → tsc → `npm test --coverage` → coverage to Codacy
-- **Frontend:** lint → prettier → tsc → jest → coverage to Codacy
+- **Frontend:** lint → prettier → tsc → jest → coverage to Codacy → build-storybook → Storybook smoke test (`test-storybook`)
 
 `codeql.yml` runs CodeQL static analysis (Java + JS/TS)

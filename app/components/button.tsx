@@ -1,5 +1,14 @@
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextStyle,
+    View,
+    ViewStyle,
+} from 'react-native';
 
 type ButtonProps = {
     label: string;
@@ -8,13 +17,19 @@ type ButtonProps = {
     loading?: boolean;
     disabled?: boolean;
     showArrow?: boolean;
+    /** Leading icon, e.g. for ActiveContractCard's "SNAP PROOF" CTA. */
+    icon?: React.ComponentProps<typeof AntDesign>['name'];
     withShadow?: boolean;
     testID?: string;
     style?: ViewStyle;
+    /** Override the label's typography, e.g. ActiveContractCard's italic font-black CTA. */
+    labelStyle?: TextStyle;
 };
 
 // Light-background colours render ink text; everything else gets white.
 const LIGHT_BACKGROUNDS = new Set<string>([colors.yellow, colors.surface, colors.surfaceRaised]);
+
+const SHADOW = offsetShadow(4);
 
 export function Button({
     label,
@@ -23,19 +38,23 @@ export function Button({
     loading = false,
     disabled = false,
     showArrow = false,
+    icon,
     withShadow = true,
     testID,
     style,
+    labelStyle,
 }: ButtonProps) {
     const textColor = LIGHT_BACKGROUNDS.has(backgroundColor) ? colors.ink : colors.surfaceRaised;
     const isDisabled = disabled || loading;
 
     return (
-        <View style={[withShadow ? styles.shadow : styles.noShadow, style]}>
+        <View style={style}>
+            {withShadow && <View style={SHADOW.box} />}
             <Pressable
                 style={({ pressed }) => [
                     styles.button,
                     { backgroundColor },
+                    withShadow && SHADOW.faceMargin,
                     pressed && !isDisabled && styles.pressed,
                 ]}
                 onPress={onPress}
@@ -46,7 +65,17 @@ export function Button({
                     <ActivityIndicator color={textColor} />
                 ) : (
                     <View style={styles.inner}>
-                        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+                        {icon ? (
+                            <AntDesign
+                                name={icon}
+                                size={18}
+                                color={textColor}
+                                style={styles.icon}
+                            />
+                        ) : null}
+                        <Text style={[styles.label, { color: textColor }, labelStyle]}>
+                            {label}
+                        </Text>
                         {showArrow ? (
                             <Text style={[styles.arrow, { color: textColor }]}>→</Text>
                         ) : null}
@@ -59,16 +88,11 @@ export function Button({
 }
 
 const styles = StyleSheet.create({
-    shadow: {
-        marginBottom: spacing.xs,
-        marginRight: spacing.xs,
-        ...shadows.sm,
-    },
-    noShadow: {},
     button: {
         borderWidth: borderWidth.structural,
         borderColor: colors.ink,
         paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -83,6 +107,9 @@ const styles = StyleSheet.create({
     inner: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    icon: {
+        marginRight: spacing.sm,
     },
     label: {
         fontFamily: typography.fonts.bold,
