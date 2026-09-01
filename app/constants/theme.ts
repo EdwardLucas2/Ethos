@@ -51,7 +51,7 @@ export const shadows = {
 // content, so translating that layer for a press effect drags the shadow
 // along with it; this renders the same hard-offset look as an independent,
 // unmoving element instead.
-export const offsetShadow = (size: 4 | 8) =>
+export const offsetShadow = (size: 4 | 6 | 8) =>
     ({
         box: {
             position: 'absolute',
@@ -80,9 +80,13 @@ export const spacing = {
 
 // ─── Borders ─────────────────────────────────────────────────────────────────
 
+const STRUCTURAL_WIDTH = 3;
+
 export const borderWidth = {
-    structural: 3,
+    structural: STRUCTURAL_WIDTH,
     accent: 4,
+    // One thinner than structural — badge/avatar borders that sit inside a structural border.
+    thin: STRUCTURAL_WIDTH - 1,
 } as const;
 
 export const borderRadius = {

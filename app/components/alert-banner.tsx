@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
         marginLeft: spacing.sm,
     },
     actionBadge: {
-        borderWidth: borderWidth.structural - 1,
+        borderWidth: borderWidth.thin,
         paddingHorizontal: spacing.sm,
         paddingVertical: spacing.xs,
     },
