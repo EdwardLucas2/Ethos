@@ -1,9 +1,13 @@
-// Canonical dashboard fixture data, shared by .storybook/mocks/api.tsx,
-// dashboard.stories.tsx, and dashboard.test.tsx. Deliberately has no
-// `@/src/api` import — tsc resolves `@/src/api` against the real Orval
-// module even from files Storybook itself never sees (see mocks/api.tsx),
-// so a plain, unaliased module is what lets all three consumers share one
-// copy instead of three independently-drifting literal copies.
+// Canonical dashboard fixture data, shared by .storybook/mocks/api.tsx and
+// dashboard.stories.tsx. Deliberately has no `@/src/api` import — tsc
+// resolves `@/src/api` against the real Orval module even from files
+// Storybook itself never sees (see mocks/api.tsx), so a plain, unaliased
+// module is what lets both consumers share one copy instead of two
+// independently-drifting literal copies. dashboard.test.tsx only imports
+// `ME` from here — its contract/notification fixtures are intentionally
+// local (far-future dates keep CTA-state assertions stable regardless of
+// when the suite runs; these near-term dates are for Storybook's "today"
+// framing).
 
 export const ME = {
     id: 'user-1',
@@ -30,6 +34,7 @@ export const ACTIVE_CONTRACTS = [
                 completed: 2,
                 pending: 0,
                 total: 3,
+                isSelf: true,
             },
             {
                 userId: 'user-2',
@@ -38,6 +43,7 @@ export const ACTIVE_CONTRACTS = [
                 completed: 1,
                 pending: 1,
                 total: 3,
+                isSelf: false,
             },
         ],
     },
@@ -57,6 +63,7 @@ export const ACTIVE_CONTRACTS = [
                 completed: 0,
                 pending: 0,
                 total: 1,
+                isSelf: true,
             },
             {
                 userId: 'user-3',
@@ -65,6 +72,7 @@ export const ACTIVE_CONTRACTS = [
                 completed: 1,
                 pending: 0,
                 total: 1,
+                isSelf: false,
             },
             {
                 userId: 'user-4',
@@ -73,6 +81,7 @@ export const ACTIVE_CONTRACTS = [
                 completed: 1,
                 pending: 0,
                 total: 1,
+                isSelf: false,
             },
         ],
     },
@@ -85,8 +94,8 @@ export const PENDING_CONTRACTS = [
         cycleNumber: 2,
         unreviewedEvidenceCount: 3,
         participants: [
-            { userId: 'user-1', displayName: 'Edward', completed: 3, total: 3 },
-            { userId: 'user-2', displayName: 'Alex', completed: 1, total: 3 },
+            { userId: 'user-1', displayName: 'Edward', completed: 3, total: 3, isSelf: true },
+            { userId: 'user-2', displayName: 'Alex', completed: 1, total: 3, isSelf: false },
         ],
     },
 ];

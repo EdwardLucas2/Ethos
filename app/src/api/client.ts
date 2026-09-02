@@ -10,16 +10,47 @@ const REQUEST_TIMEOUT_MS = 10_000;
 // session change never serves a stale token — see clearCachedAccessToken.
 const TOKEN_CACHE_TTL_MS = 5_000;
 let cachedToken: { value: string | null; expiresAt: number } | null = null;
+// Memoizes the in-flight read itself, not just its resolved value — without
+// this, a burst of simultaneous callers (the TTL cache's actual target case)
+// would all see no cached value yet and each kick off their own
+// SuperTokens.getAccessToken() call instead of sharing one.
+let pendingToken: Promise<string | null> | null = null;
 
 async function getCachedAccessToken(): Promise<string | null> {
   if (cachedToken && Date.now() < cachedToken.expiresAt) return cachedToken.value;
-  const value = (await SuperTokens.getAccessToken()) ?? null;
-  cachedToken = { value, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS };
-  return value;
+  if (pendingToken) return pendingToken;
+  pendingToken = (async () => {
+    try {
+      const value = (await SuperTokens.getAccessToken()) ?? null;
+      cachedToken = { value, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS };
+      return value;
+    } finally {
+      pendingToken = null;
+    }
+  })();
+  return pendingToken;
 }
 
 export function clearCachedAccessToken(): void {
   cachedToken = null;
+}
+
+function timeoutError(): Error {
+  return Object.assign(new Error('Request timed out'), { status: undefined });
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(timeoutError()), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function customFetch<T>(
@@ -33,10 +64,9 @@ export async function customFetch<T>(
   try {
     // Every backend endpoint except POST /users requires a bearer token; reading it
     // here (rather than injecting it at the call site) keeps every Orval-generated
-    // hook authenticated automatically.
-    const token = await getCachedAccessToken();
-    // Started right before the network call, not before the token read above —
-    // otherwise a slow secure-storage read eats into the fetch timeout budget.
+    // hook authenticated automatically. Bounded by its own timeout — a stalled
+    // secure-storage/refresh read shouldn't hang the request indefinitely.
+    const token = await withTimeout(getCachedAccessToken(), REQUEST_TIMEOUT_MS);
     timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     response = await fetch(`${BASE_URL}${url}`, {
       ...options,
@@ -49,7 +79,7 @@ export async function customFetch<T>(
     });
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
-      throw Object.assign(new Error('Request timed out'), { status: undefined });
+      throw timeoutError();
     }
     throw e;
   } finally {

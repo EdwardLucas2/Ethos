@@ -30,6 +30,18 @@ export const useGetContractsMePendingResolution = fn()
     .mockName('useGetContractsMePendingResolution')
     .mockReturnValue(successOf(PENDING_CONTRACTS));
 
+export const getGetContractsMeActiveQueryKey = fn()
+    .mockName('getGetContractsMeActiveQueryKey')
+    .mockReturnValue(['contracts-me-active']);
+
+export const getGetContractsMePendingResolutionQueryKey = fn()
+    .mockName('getGetContractsMePendingResolutionQueryKey')
+    .mockReturnValue(['contracts-me-pending-resolution']);
+
+export const getGetNotificationsQueryKey = fn()
+    .mockName('getGetNotificationsQueryKey')
+    .mockReturnValue(['notifications']);
+
 const mockCreateContractMutateAsync = fn()
     .mockName('createContract.mutateAsync')
     .mockResolvedValue({ id: 'new-contract' });

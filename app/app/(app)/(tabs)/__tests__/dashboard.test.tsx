@@ -39,6 +39,9 @@ jest.mock('@tanstack/react-query', () => ({
 }));
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
+// Local rather than shared with dashboard-fixtures.ts — these use a
+// far-future endDate so CTA-state assertions stay stable regardless of when
+// the suite runs, unlike the Storybook fixtures' near-term "today" dates.
 
 function successOf<T>(data: T) {
     return { data, isLoading: false, isError: false };
@@ -53,8 +56,22 @@ const ACTIVE_CONTRACT = {
     myProgress: { completed: 1, pending: 0, total: 3 },
     unreviewedEvidenceCount: 0,
     participants: [
-        { userId: 'user-1', displayName: 'Edward', completed: 1, pending: 0, total: 3 },
-        { userId: 'user-2', displayName: 'Alex', completed: 2, pending: 0, total: 3 },
+        {
+            userId: 'user-1',
+            displayName: 'Edward',
+            completed: 1,
+            pending: 0,
+            total: 3,
+            isSelf: true,
+        },
+        {
+            userId: 'user-2',
+            displayName: 'Alex',
+            completed: 2,
+            pending: 0,
+            total: 3,
+            isSelf: false,
+        },
     ],
 };
 
@@ -67,9 +84,30 @@ const SQUAD_CONTRACT = {
     myProgress: { completed: 1, pending: 0, total: 3 },
     unreviewedEvidenceCount: 1,
     participants: [
-        { userId: 'user-1', displayName: 'Edward', completed: 1, pending: 0, total: 3 },
-        { userId: 'user-3', displayName: 'Sarah', completed: 2, pending: 0, total: 3 },
-        { userId: 'user-4', displayName: 'Mike', completed: 0, pending: 1, total: 3 },
+        {
+            userId: 'user-1',
+            displayName: 'Edward',
+            completed: 1,
+            pending: 0,
+            total: 3,
+            isSelf: true,
+        },
+        {
+            userId: 'user-3',
+            displayName: 'Sarah',
+            completed: 2,
+            pending: 0,
+            total: 3,
+            isSelf: false,
+        },
+        {
+            userId: 'user-4',
+            displayName: 'Mike',
+            completed: 0,
+            pending: 1,
+            total: 3,
+            isSelf: false,
+        },
     ],
 };
 
@@ -78,7 +116,9 @@ const PENDING_CONTRACT = {
     contractName: 'Morning Run',
     cycleNumber: 2,
     unreviewedEvidenceCount: 3,
-    participants: [{ userId: 'user-1', displayName: 'Edward', completed: 3, total: 3 }],
+    participants: [
+        { userId: 'user-1', displayName: 'Edward', completed: 3, total: 3, isSelf: true },
+    ],
 };
 
 const NOTIFICATION = {
@@ -212,7 +252,7 @@ describe('DashboardScreen', () => {
         );
 
         render(<DashboardScreen />);
-        expect(screen.getByText('1 LIVE')).toBeTruthy();
+        expect(screen.getByText('1 live')).toBeTruthy();
         expect(screen.getByTestId('pending-resolution')).toBeTruthy();
         expect(screen.getByText('Morning Run')).toBeTruthy();
     });
@@ -263,6 +303,6 @@ describe('DashboardScreen', () => {
         jest.mocked(useGetContractsMePendingResolution).mockReturnValue(successOf([]) as never);
 
         render(<DashboardScreen />);
-        expect(screen.getByText(/Couldn't load your dashboard/)).toBeTruthy();
+        expect(screen.getByText(/Couldn't load your dashboard/i)).toBeTruthy();
     });
 });

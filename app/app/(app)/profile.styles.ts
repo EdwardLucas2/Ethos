@@ -28,14 +28,4 @@ export const styles = StyleSheet.create({
     logout: {
         marginTop: spacing.lg,
     },
-    centered: {
-        paddingVertical: spacing.xxl,
-        alignItems: 'center',
-    },
-    errorText: {
-        fontFamily: typography.fonts.regular,
-        fontSize: 14,
-        color: colors.inkSecondary,
-        textAlign: 'center',
-    },
 });

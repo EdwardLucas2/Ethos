@@ -16,13 +16,13 @@ import {
     useGetContractsMeActive,
     useGetContractsMePendingResolution,
     useGetNotifications,
-    useGetUsersMe,
     usePostContracts,
 } from '@/src/api';
 import { useAuth } from '@/src/context/AuthContext';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
 import { Href, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { styles } from './dashboard.styles';
 
@@ -103,7 +103,7 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
 
 function daysUntil(dateString: string | undefined): number {
     if (!dateString) return 0;
-    const end = new Date(`${dateString}T00:00:00`);
+    const end = new Date(`${dateString}T00:00:00Z`);
     const diffMs = end.getTime() - Date.now();
     return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }
@@ -117,32 +117,21 @@ function formatTimeRemaining(dateString: string | undefined): string {
 }
 
 function opponentsOf(
-    participants: ActiveParticipantResponse[] | undefined,
-    myId: string | undefined
+    participants: ActiveParticipantResponse[] | undefined
 ): ActiveParticipantResponse[] {
-    // myId undefined means "me" hasn't resolved yet (still loading/errored) —
-    // returning [] rather than everyone avoids briefly mislabeling a 1v1 as a
-    // squad battle before useGetUsersMe() settles.
-    if (!myId) return [];
-    return (participants ?? []).filter((p) => p.userId !== myId);
+    return (participants ?? []).filter((p) => !p.isSelf);
 }
 
-function opponentLabel(
-    participants: ActiveParticipantResponse[] | undefined,
-    myId: string | undefined
-): string {
-    const opponents = opponentsOf(participants, myId);
+function opponentLabel(participants: ActiveParticipantResponse[] | undefined): string {
+    const opponents = opponentsOf(participants);
     if (opponents.length === 0) return 'SOLO';
     if (opponents.length === 1) return `VS ${(opponents[0]?.displayName ?? '').toUpperCase()}`;
     return 'SQUAD BATTLE';
 }
 
-function ctaFor(
-    contract: ActiveContractResponse,
-    myId: string | undefined
-): { state: CtaState; label: string } {
+function ctaFor(contract: ActiveContractResponse): { state: CtaState; label: string } {
     if ((contract.unreviewedEvidenceCount ?? 0) > 0) {
-        const opponents = opponentsOf(contract.participants, myId);
+        const opponents = opponentsOf(contract.participants);
         const label =
             opponents.length === 1
                 ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
@@ -168,11 +157,7 @@ export default function DashboardScreen() {
     const { session, isLoading: authLoading } = useAuth();
     const enabled = !authLoading && !!session;
 
-    const {
-        data: me,
-        isLoading: meLoading,
-        isError: meError,
-    } = useGetUsersMe({ query: { enabled } });
+    const { data: me, isLoading: meLoading, isError: meError } = useCurrentUser();
 
     const {
         data: notifications,
@@ -215,14 +200,17 @@ export default function DashboardScreen() {
         }
     }
 
-    const isLoading =
-        authLoading || notificationsLoading || activeLoading || pendingLoading || meLoading;
+    const isLoading = notificationsLoading || activeLoading || pendingLoading || meLoading;
     const isError = activeError || pendingError || meError || notificationsError;
 
-    const alerts = (notifications ?? [])
-        .map(toAlertEntry)
-        .filter((entry): entry is AlertEntry => entry !== null)
-        .sort((a, b) => a.priority - b.priority);
+    const alerts = useMemo(
+        () =>
+            (notifications ?? [])
+                .map(toAlertEntry)
+                .filter((entry): entry is AlertEntry => entry !== null)
+                .sort((a, b) => a.priority - b.priority),
+        [notifications]
+    );
 
     const activeCount = activeContracts?.length ?? 0;
     const pendingCount = pendingContracts?.length ?? 0;
@@ -249,11 +237,7 @@ export default function DashboardScreen() {
                             <View style={styles.skeletonBlock} />
                         </View>
                     ) : isError ? (
-                        <View style={styles.centered}>
-                            <Text style={styles.errorText}>
-                                Couldn&apos;t load your dashboard. Try again later.
-                            </Text>
-                        </View>
+                        <AlertMessage message="Couldn't load your dashboard. Try again later." />
                     ) : isEmpty ? (
                         <EmptyState
                             message="No active contracts. Challenge your friends!"
@@ -283,21 +267,18 @@ export default function DashboardScreen() {
                                         <Text style={styles.sectionHeader}>Active Arena</Text>
                                         <View style={styles.countBadge}>
                                             <Text style={styles.countBadgeText}>
-                                                {activeCount} LIVE
+                                                {activeCount} live
                                             </Text>
                                         </View>
                                     </View>
                                     {activeContracts?.map((contract) => {
-                                        const cta = ctaFor(contract, me?.id);
+                                        const cta = ctaFor(contract);
                                         return (
                                             <ActiveContractCard
                                                 key={contract.contractId}
                                                 testID={`active-contract-card-${contract.contractId}`}
                                                 contractName={contract.name ?? ''}
-                                                opponentLabel={opponentLabel(
-                                                    contract.participants,
-                                                    me?.id
-                                                )}
+                                                opponentLabel={opponentLabel(contract.participants)}
                                                 verified={contract.myProgress?.completed ?? 0}
                                                 pending={contract.myProgress?.pending ?? 0}
                                                 total={contract.myProgress?.total ?? 0}

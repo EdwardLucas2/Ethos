@@ -1,34 +1,23 @@
+import { AlertMessage } from '@/components/alert-message';
 import { Card } from '@/components/card';
 import { SignOutButton } from '@/components/sign-out-button';
 import { TopBar } from '@/components/top-bar';
-import { useGetUsersMe } from '@/src/api';
-import { useAuth } from '@/src/context/AuthContext';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { styles } from './profile.styles';
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const { session, isLoading: authLoading } = useAuth();
-    const {
-        data: me,
-        isLoading,
-        isError,
-    } = useGetUsersMe({
-        query: { enabled: !authLoading && !!session },
-    });
+    const { data: me, isLoading, isError } = useCurrentUser();
 
     return (
         <View style={styles.flex}>
             <TopBar variant="stack" onBack={() => router.back()} />
-            {authLoading || isLoading ? (
+            {isLoading ? (
                 <ActivityIndicator style={styles.content} />
             ) : isError ? (
-                <View style={styles.centered}>
-                    <Text style={styles.errorText}>
-                        Couldn&apos;t load your profile. Try again later.
-                    </Text>
-                </View>
+                <AlertMessage message="Couldn't load your profile. Try again later." />
             ) : (
                 <View style={styles.content}>
                     <Card>

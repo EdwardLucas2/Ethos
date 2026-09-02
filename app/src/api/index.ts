@@ -36,6 +36,7 @@ export interface ActiveParticipantResponse {
   completed: number;
   pending: number;
   total: number;
+  isSelf: boolean;
 }
 
 export interface ActiveContractResponse {
@@ -120,6 +121,7 @@ export interface PendingParticipantResponse {
   displayName?: string;
   completed: number;
   total: number;
+  isSelf: boolean;
 }
 
 export interface PendingResolutionContractResponse {
