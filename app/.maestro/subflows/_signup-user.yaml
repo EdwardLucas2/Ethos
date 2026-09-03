@@ -30,5 +30,9 @@ appId: com.ethos.app
       text: 'Not Now'
       optional: true
 - extendedWaitUntil:
-      visible: 'Welcome!'
+      # Waits on the dashboard's tab bar, not the "ETHOS" wordmark — that text
+      # is also rendered by AuthHeader on the sign-up screen itself, so it
+      # can't prove navigation actually happened.
+      visible:
+          id: 'bottom-tab-bar-home'
       timeout: 8000

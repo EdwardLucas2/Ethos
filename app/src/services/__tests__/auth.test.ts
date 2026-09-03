@@ -4,6 +4,7 @@
  * storage is exercised. The full auth handshake is covered by Maestro E2E.
  */
 import { signIn, signUp, __resetProfileConfirmedCache } from '../auth';
+import { clearCachedAccessToken } from '@/src/api/client';
 import SuperTokens from 'supertokens-react-native';
 
 // Returns a fetch implementation that responds to the auth endpoint and the backend
@@ -40,6 +41,9 @@ beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
     __resetProfileConfirmedCache();
+    // customFetch's token cache (src/api/client.ts) is module-level state that
+    // otherwise leaks across these tests.
+    clearCachedAccessToken();
     // Both signIn and signUp call ensureUserProfile, which needs a valid token.
     (SuperTokens.getAccessToken as jest.Mock).mockResolvedValue('fake-token');
 });
@@ -75,6 +79,14 @@ describe('signIn', () => {
             code: 'UNKNOWN',
             message: expect.stringContaining('Connection failed'),
         });
+    });
+
+    it("reads the access token only once, sharing customFetch's cache instead of a second uncached read", async () => {
+        mockFetchFor({ authStatus: 'OK', usersStatus: 201 });
+
+        await signIn('cached@example.com', 'password123');
+
+        expect(SuperTokens.getAccessToken).toHaveBeenCalledTimes(1);
     });
 
     it('recovers from a missing users row by POSTing /users after signin', async () => {

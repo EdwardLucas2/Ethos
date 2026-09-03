@@ -52,8 +52,8 @@ public class ContractService {
                         new ProgressResponse(2, 0, 3),
                         0,
                         List.of(
-                                new ActiveParticipantResponse("Edward", null, 2, 0, 3),
-                                new ActiveParticipantResponse("Alex", null, 1, 1, 3))),
+                                new ActiveParticipantResponse(userId, "Edward", null, 2, 0, 3, true),
+                                new ActiveParticipantResponse(UUID.randomUUID(), "Alex", null, 1, 1, 3, false))),
                 new ActiveContractResponse(
                         UUID.randomUUID(),
                         "No Sugar",
@@ -63,9 +63,9 @@ public class ContractService {
                         new ProgressResponse(0, 0, 1),
                         2,
                         List.of(
-                                new ActiveParticipantResponse("Edward", null, 0, 0, 1),
-                                new ActiveParticipantResponse("Sarah", null, 1, 0, 1),
-                                new ActiveParticipantResponse("Mike", null, 1, 0, 1))));
+                                new ActiveParticipantResponse(userId, "Edward", null, 0, 0, 1, true),
+                                new ActiveParticipantResponse(UUID.randomUUID(), "Sarah", null, 1, 0, 1, false),
+                                new ActiveParticipantResponse(UUID.randomUUID(), "Mike", null, 1, 0, 1, false))));
     }
 
     /**
@@ -78,7 +78,9 @@ public class ContractService {
                 "Morning Run",
                 2,
                 3,
-                List.of(new PendingParticipantResponse("Edward", 3, 3), new PendingParticipantResponse("Alex", 1, 3))));
+                List.of(
+                        new PendingParticipantResponse(userId, "Edward", 3, 3, true),
+                        new PendingParticipantResponse(UUID.randomUUID(), "Alex", 1, 3, false))));
     }
 
     /**

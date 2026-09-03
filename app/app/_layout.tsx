@@ -35,16 +35,20 @@ function RootRedirect() {
     const inPublicGroup = PUBLIC_ROUTE_GROUPS.has(segments[0] ?? '');
 
     useEffect(() => {
+        // The bare root ("/", app/index.tsx) has no group segment at all and
+        // owns its own redirect — no-op here so it never races index.tsx's
+        // own <Redirect>.
+        if (segments[0] === undefined) return;
         if (isLoading) return;
 
         if (!session && !inPublicGroup) {
             router.replace('/login');
         } else if (session && inPublicGroup) {
-            router.replace('/(tabs)');
+            router.replace('/dashboard');
         }
         // useRouter() returns a stable instance; depending on it would re-run on every render
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session, isLoading, inPublicGroup]);
+    }, [session, isLoading, inPublicGroup, segments[0]]);
 
     return null;
 }
@@ -78,15 +82,12 @@ export default function RootLayout() {
                 {fontsReady ? (
                     <>
                         <RootRedirect />
-                        {/* Ethos is light-only — see app/hooks/use-theme-color.ts */}
+                        {/* Ethos is light-only — no dark-mode theme is defined */}
                         <ThemeProvider value={DefaultTheme}>
                             <Stack>
+                                <Stack.Screen name="index" options={{ headerShown: false }} />
                                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                                <Stack.Screen
-                                    name="modal"
-                                    options={{ presentation: 'modal', title: 'Modal' }}
-                                />
+                                <Stack.Screen name="(app)" options={{ headerShown: false }} />
                             </Stack>
                             <StatusBar style="dark" />
                         </ThemeProvider>

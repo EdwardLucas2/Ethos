@@ -617,6 +617,7 @@ Contracts where `status = 'active'` and the caller is a `signed` participant. Ca
         "unreviewedEvidenceCount": 2,
         "participants": [
             {
+                "userId": "uuid",
                 "displayName": "Edward",
                 "avatarUrl": null,
                 "completed": 2,
@@ -624,6 +625,7 @@ Contracts where `status = 'active'` and the caller is a `signed` participant. Ca
                 "total": 3
             },
             {
+                "userId": "uuid",
                 "displayName": "Alex",
                 "avatarUrl": null,
                 "completed": 1,
@@ -657,8 +659,8 @@ Contracts where the caller is a `signed` participant and a cycle has `status = '
         "cycleNumber": 2,
         "unreviewedEvidenceCount": 3,
         "participants": [
-            { "displayName": "Edward", "completed": 3, "total": 3 },
-            { "displayName": "Alex", "completed": 1, "total": 3 }
+            { "userId": "uuid", "displayName": "Edward", "completed": 3, "total": 3 },
+            { "userId": "uuid", "displayName": "Alex", "completed": 1, "total": 3 }
         ]
     }
 ]

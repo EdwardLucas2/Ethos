@@ -1,3 +1,5 @@
 package com.ethos.dto;
 
-public record PendingParticipantResponse(String displayName, int completed, int total) {}
+import java.util.UUID;
+
+public record PendingParticipantResponse(UUID userId, String displayName, int completed, int total, boolean isSelf) {}

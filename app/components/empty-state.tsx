@@ -9,10 +9,17 @@ export type EmptyStateProps = {
     message: string;
     ctaLabel: string;
     onCta: () => void;
+    loading?: boolean;
     testID?: string;
 };
 
-export function EmptyState({ message, ctaLabel, onCta, testID = 'empty-state' }: EmptyStateProps) {
+export function EmptyState({
+    message,
+    ctaLabel,
+    onCta,
+    loading = false,
+    testID = 'empty-state',
+}: EmptyStateProps) {
     return (
         <View style={styles.container} testID={testID}>
             <Text style={styles.message}>{message}</Text>
@@ -20,6 +27,7 @@ export function EmptyState({ message, ctaLabel, onCta, testID = 'empty-state' }:
                 label={ctaLabel}
                 onPress={onCta}
                 backgroundColor={colors.red}
+                loading={loading}
                 testID={`${testID}-cta`}
             />
         </View>
