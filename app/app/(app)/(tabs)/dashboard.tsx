@@ -101,11 +101,13 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
 
 // ─── Active contract card derivation ───────────────────────────────────────
 
-function daysUntil(dateString: string | undefined): number {
+export function daysUntil(dateString: string | undefined): number {
     if (!dateString) return 0;
-    const end = new Date(`${dateString}T00:00:00Z`);
-    const diffMs = end.getTime() - Date.now();
-    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const [year, month, day] = dateString.split('-').map(Number);
+    const end = new Date(year!, month! - 1, day!);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function formatTimeRemaining(dateString: string | undefined): string {
@@ -243,6 +245,7 @@ export default function DashboardScreen() {
                             message="No active contracts. Challenge your friends!"
                             ctaLabel="Create a Contract"
                             onCta={handleFabPress}
+                            loading={createContract.isPending}
                         />
                     ) : (
                         <>

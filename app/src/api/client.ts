@@ -3,20 +3,13 @@ import SuperTokens from '@/src/lib/supertokens';
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 const REQUEST_TIMEOUT_MS = 10_000;
 
-// Short-TTL cache around SuperTokens.getAccessToken() — well under JWT
-// lifetime, but long enough to collapse a screen's burst of parallel queries
-// (each independently calling customFetch) into a single secure-storage read
-// instead of one per request. Cleared on sign-out/session refresh so a
-// session change never serves a stale token — see clearCachedAccessToken.
+// Short-TTL cache so a screen's burst of parallel queries shares one secure-storage read.
 const TOKEN_CACHE_TTL_MS = 5_000;
 let cachedToken: { value: string | null; expiresAt: number } | null = null;
-// Memoizes the in-flight read itself, not just its resolved value — without
-// this, a burst of simultaneous callers (the TTL cache's actual target case)
-// would all see no cached value yet and each kick off their own
-// SuperTokens.getAccessToken() call instead of sharing one.
+// Memoizes the in-flight read too, so concurrent callers share one SuperTokens call.
 let pendingToken: Promise<string | null> | null = null;
 
-async function getCachedAccessToken(): Promise<string | null> {
+export async function getCachedAccessToken(): Promise<string | null> {
   if (cachedToken && Date.now() < cachedToken.expiresAt) return cachedToken.value;
   if (pendingToken) return pendingToken;
   pendingToken = (async () => {
@@ -62,12 +55,11 @@ export async function customFetch<T>(
   let response: Response;
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    // Every backend endpoint except POST /users requires a bearer token; reading it
-    // here (rather than injecting it at the call site) keeps every Orval-generated
-    // hook authenticated automatically. Bounded by its own timeout — a stalled
-    // secure-storage/refresh read shouldn't hang the request indefinitely.
+    // Token read and network fetch share one deadline so a slow secure-storage
+    // read eats into, rather than adds to, the request's total time budget.
+    const deadline = Date.now() + REQUEST_TIMEOUT_MS;
     const token = await withTimeout(getCachedAccessToken(), REQUEST_TIMEOUT_MS);
-    timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    timer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now()));
     response = await fetch(`${BASE_URL}${url}`, {
       ...options,
       headers: {
@@ -87,9 +79,7 @@ export async function customFetch<T>(
   }
 
   if (!response.ok) {
-    // Status is attached (not just the parsed body) so callers can branch on
-    // specific codes — e.g. treating a 409 as an expected/idempotent outcome
-    // — without re-implementing their own fetch wrapper just to see it.
+    // Status is attached so callers can branch on specific codes (e.g. treating 409 as expected).
     const error = await response.json().catch(() => ({ message: 'Request failed' }));
     throw Object.assign(error, { status: response.status });
   }

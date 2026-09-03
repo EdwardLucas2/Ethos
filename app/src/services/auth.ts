@@ -1,5 +1,4 @@
-import { customFetch } from '@/src/api/client';
-import SuperTokens from '@/src/lib/supertokens';
+import { customFetch, getCachedAccessToken } from '@/src/api/client';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 
@@ -84,7 +83,7 @@ export function __resetProfileConfirmedCache(): void {
 async function ensureUserProfile(email: string): Promise<void> {
     if (profileConfirmed.has(email)) return;
 
-    const token = await SuperTokens.getAccessToken();
+    const token = await getCachedAccessToken();
     if (!token) throw new AuthError('Session not established', 'UNKNOWN');
 
     try {
