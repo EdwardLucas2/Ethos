@@ -61,7 +61,7 @@ describe('ActiveContractCard', () => {
             <ActiveContractCard
                 {...baseProps}
                 timeRemaining="OVERDUE"
-                ctaState="snap-urgent"
+                cta={{ state: 'snap-urgent', label: 'SNAP PROOF' }}
                 onPress={jest.fn()}
                 onCta={jest.fn()}
             />
@@ -70,14 +70,14 @@ describe('ActiveContractCard', () => {
     });
 
     it('does not show urgent styling from the time-remaining text alone', () => {
-        // Urgency is driven solely by ctaState, not by matching against
-        // formatTimeRemaining's output — a non-urgent ctaState shouldn't turn
+        // Urgency is driven solely by cta.state, not by matching against
+        // formatTimeRemaining's output — a non-urgent cta.state shouldn't turn
         // red just because the display text happens to read "OVERDUE".
         render(
             <ActiveContractCard
                 {...baseProps}
                 timeRemaining="OVERDUE"
-                ctaState="snap"
+                cta={{ state: 'snap', label: 'SNAP PROOF' }}
                 onPress={jest.fn()}
                 onCta={jest.fn()}
             />

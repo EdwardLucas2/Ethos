@@ -298,6 +298,27 @@ function useCreateContract(router: ReturnType<typeof useRouter>) {
     };
 }
 
+function useDashboardNavigation(router: ReturnType<typeof useRouter>) {
+    return {
+        openAlert: (href: Href) => router.push(href),
+        openActiveContract: (contract: ActiveContractResponse) =>
+            router.push(`/contract/${contract.contractId}/${contract.cycleNumber}/active` as Href),
+        handleActiveCta: (
+            contract: ActiveContractResponse,
+            cta: { state: CtaState; label: string }
+        ) =>
+            router.push(
+                (cta.state === 'review'
+                    ? `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/review`
+                    : `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/upload`) as Href
+            ),
+        openPendingContract: (contract: PendingResolutionContractResponse) =>
+            router.push(
+                `/contract/${contract.contractId}/${contract.cycleNumber}/unsettled` as Href
+            ),
+    };
+}
+
 // ─── Sections ───────────────────────────────────────────────────────────────
 
 function AlertStackSection({
@@ -324,6 +345,37 @@ function AlertStackSection({
     );
 }
 
+function ActiveContractRow({
+    contract,
+    currentUserId,
+    onOpen,
+    onCta,
+}: {
+    contract: ActiveContractResponse;
+    currentUserId: string | undefined;
+    onOpen: (contract: ActiveContractResponse) => void;
+    onCta: (contract: ActiveContractResponse, cta: { state: CtaState; label: string }) => void;
+}) {
+    const cta = ctaFor(contract, currentUserId);
+    const mine = myParticipant(contract.participants, currentUserId);
+    return (
+        <ActiveContractCard
+            testID={`active-contract-card-${contract.contractId}`}
+            contractName={contract.name ?? ''}
+            opponentLabel={opponentLabel(contract.participants, currentUserId)}
+            progress={{
+                verified: mine?.completed ?? 0,
+                pending: mine?.pending ?? 0,
+                total: mine?.total ?? 0,
+            }}
+            timeRemaining={formatTimeRemaining(contract.endDate)}
+            cta={cta}
+            onPress={() => onOpen(contract)}
+            onCta={() => onCta(contract, cta)}
+        />
+    );
+}
+
 function ActiveArenaSection({
     contracts,
     count,
@@ -346,27 +398,38 @@ function ActiveArenaSection({
                     <Text style={styles.countBadgeText}>{count} live</Text>
                 </View>
             </View>
-            {contracts?.map((contract) => {
-                const cta = ctaFor(contract, currentUserId);
-                const mine = myParticipant(contract.participants, currentUserId);
-                return (
-                    <ActiveContractCard
-                        key={contract.contractId}
-                        testID={`active-contract-card-${contract.contractId}`}
-                        contractName={contract.name ?? ''}
-                        opponentLabel={opponentLabel(contract.participants, currentUserId)}
-                        verified={mine?.completed ?? 0}
-                        pending={mine?.pending ?? 0}
-                        total={mine?.total ?? 0}
-                        timeRemaining={formatTimeRemaining(contract.endDate)}
-                        ctaState={cta.state}
-                        ctaLabel={cta.label}
-                        onPress={() => onOpen(contract)}
-                        onCta={() => onCta(contract, cta)}
-                    />
-                );
-            })}
+            {contracts?.map((contract) => (
+                <ActiveContractRow
+                    key={contract.contractId}
+                    contract={contract}
+                    currentUserId={currentUserId}
+                    onOpen={onOpen}
+                    onCta={onCta}
+                />
+            ))}
         </View>
+    );
+}
+
+function PendingResolutionRow({
+    contract,
+    currentUserId,
+    onOpen,
+}: {
+    contract: PendingResolutionContractResponse;
+    currentUserId: string | undefined;
+    onOpen: (contract: PendingResolutionContractResponse) => void;
+}) {
+    const mine = contract.participants?.find((p) => p.userId === currentUserId);
+    return (
+        <PendingResolutionCard
+            testID={`pending-resolution-card-${contract.contractId}`}
+            contractName={contract.contractName ?? ''}
+            verified={mine?.completed ?? 0}
+            total={mine?.total ?? 0}
+            reviewsNeeded={contract.unreviewedEvidenceCount ?? 0}
+            onPress={() => onOpen(contract)}
+        />
     );
 }
 
@@ -387,21 +450,66 @@ function PendingResolutionSection({
             <View style={styles.sectionHeaderRow}>
                 <Text style={styles.sectionHeader}>Last Week</Text>
             </View>
-            {contracts?.map((contract) => {
-                const mine = contract.participants?.find((p) => p.userId === currentUserId);
-                return (
-                    <PendingResolutionCard
-                        key={contract.contractId}
-                        testID={`pending-resolution-card-${contract.contractId}`}
-                        contractName={contract.contractName ?? ''}
-                        verified={mine?.completed ?? 0}
-                        total={mine?.total ?? 0}
-                        reviewsNeeded={contract.unreviewedEvidenceCount ?? 0}
-                        onPress={() => onOpen(contract)}
-                    />
-                );
-            })}
+            {contracts?.map((contract) => (
+                <PendingResolutionRow
+                    key={contract.contractId}
+                    contract={contract}
+                    currentUserId={currentUserId}
+                    onOpen={onOpen}
+                />
+            ))}
         </View>
+    );
+}
+
+function DashboardSkeleton() {
+    return (
+        <View style={styles.skeletonStack} testID="dashboard-skeleton">
+            <View style={styles.skeletonBlock} />
+            <View style={styles.skeletonBlock} />
+            <View style={styles.skeletonBlock} />
+        </View>
+    );
+}
+
+type DashboardBodyProps = {
+    data: ReturnType<typeof useDashboardData>;
+    nav: ReturnType<typeof useDashboardNavigation>;
+    fab: ReturnType<typeof useCreateContract>;
+};
+
+function DashboardBody({ data, nav, fab }: DashboardBodyProps) {
+    if (data.isLoading) return <DashboardSkeleton />;
+    if (data.isError) {
+        return <AlertMessage message="Couldn't load your dashboard. Try again later." />;
+    }
+    if (data.isEmpty) {
+        return (
+            <EmptyState
+                message="No active contracts. Challenge your friends!"
+                ctaLabel="Create a Contract"
+                onCta={fab.handleFabPress}
+                loading={fab.isPending}
+            />
+        );
+    }
+    return (
+        <>
+            <AlertStackSection alerts={data.alerts} onPress={nav.openAlert} />
+            <ActiveArenaSection
+                contracts={data.activeContracts}
+                count={data.activeCount}
+                currentUserId={data.me?.id}
+                onOpen={nav.openActiveContract}
+                onCta={nav.handleActiveCta}
+            />
+            <PendingResolutionSection
+                contracts={data.pendingContracts}
+                count={data.pendingCount}
+                currentUserId={data.me?.id}
+                onOpen={nav.openPendingContract}
+            />
+        </>
     );
 }
 
@@ -409,85 +517,29 @@ function PendingResolutionSection({
 
 export default function DashboardScreen() {
     const router = useRouter();
-    const {
-        me,
-        activeContracts,
-        pendingContracts,
-        alerts,
-        isLoading,
-        isError,
-        activeCount,
-        pendingCount,
-        isEmpty,
-    } = useDashboardData();
-    const { handleFabPress, fabError, clearFabError, isPending } = useCreateContract(router);
+    const data = useDashboardData();
+    const nav = useDashboardNavigation(router);
+    const fab = useCreateContract(router);
 
     return (
         <View style={styles.flex}>
-            <TopBar variant="tab" avatarUri={me?.avatarUrl} />
-            {fabError && (
+            <TopBar variant="tab" avatarUri={data.me?.avatarUrl} />
+            {fab.fabError && (
                 <AlertMessage
-                    message={fabError}
+                    message={fab.fabError}
                     severity="error"
                     dismissible
-                    onDismiss={clearFabError}
+                    onDismiss={fab.clearFabError}
                     testID="fab-error"
                 />
             )}
             <View style={styles.content}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
-                    {isLoading ? (
-                        <View style={styles.skeletonStack} testID="dashboard-skeleton">
-                            <View style={styles.skeletonBlock} />
-                            <View style={styles.skeletonBlock} />
-                            <View style={styles.skeletonBlock} />
-                        </View>
-                    ) : isError ? (
-                        <AlertMessage message="Couldn't load your dashboard. Try again later." />
-                    ) : isEmpty ? (
-                        <EmptyState
-                            message="No active contracts. Challenge your friends!"
-                            ctaLabel="Create a Contract"
-                            onCta={handleFabPress}
-                            loading={isPending}
-                        />
-                    ) : (
-                        <>
-                            <AlertStackSection
-                                alerts={alerts}
-                                onPress={(href) => router.push(href)}
-                            />
-                            <ActiveArenaSection
-                                contracts={activeContracts}
-                                count={activeCount}
-                                currentUserId={me?.id}
-                                onOpen={(contract) =>
-                                    router.push(
-                                        `/contract/${contract.contractId}/${contract.cycleNumber}/active` as Href
-                                    )
-                                }
-                                onCta={(contract, cta) =>
-                                    router.push(
-                                        (cta.state === 'review'
-                                            ? `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/review`
-                                            : `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/upload`) as Href
-                                    )
-                                }
-                            />
-                            <PendingResolutionSection
-                                contracts={pendingContracts}
-                                count={pendingCount}
-                                currentUserId={me?.id}
-                                onOpen={(contract) =>
-                                    router.push(
-                                        `/contract/${contract.contractId}/${contract.cycleNumber}/unsettled` as Href
-                                    )
-                                }
-                            />
-                        </>
-                    )}
+                    <DashboardBody data={data} nav={nav} fab={fab} />
                 </ScrollView>
-                {!isLoading && !isEmpty && <FAB onPress={handleFabPress} loading={isPending} />}
+                {!data.isLoading && !data.isEmpty && (
+                    <FAB onPress={fab.handleFabPress} loading={fab.isPending} />
+                )}
             </View>
             <BottomTabBar activeTab="home" />
         </View>
