@@ -79,13 +79,17 @@ Use `useRouter()` for programmatic navigation and `useLocalSearchParams()` for r
 
 ## Orval-Generated Code
 
-`src/api/` is auto-generated — never edit it manually. Regenerate after any backend `@OpenApi` change:
+`src/api/index.ts` is auto-generated — never edit it manually. Regenerate after any backend `@OpenApi` change:
 
 ```bash
 cd app && npx orval   # backend must be running on :8080
 ```
 
-Import only from `src/api/` — never from a sub-path within it.
+Import generated hooks and types only from `src/api/` — never reach into `index.ts` by
+a sub-path. `src/api/client.ts` is the hand-written exception: it's Orval's configured
+custom mutator (`customFetch`) plus small colocated utilities (e.g.
+`clearCachedAccessToken`) that have no generated barrel to route through — import those
+directly from `@/src/api/client`.
 
 ---
 

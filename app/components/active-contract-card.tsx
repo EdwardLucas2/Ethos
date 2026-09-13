@@ -37,16 +37,58 @@ const CTA_BACKGROUND: Record<CtaState, string> = {
     'caught-up': colors.inkSecondary,
 };
 
-export function ActiveContractCard({
+function CardHeader({
     contractName,
     opponentLabel,
-    progress,
     timeRemaining,
-    cta,
-    onPress,
-    onCta,
-    testID = 'active-contract-card',
-}: ActiveContractCardProps) {
+    urgent,
+}: {
+    contractName: string;
+    opponentLabel: string;
+    timeRemaining: string;
+    urgent: boolean;
+}) {
+    return (
+        <View style={styles.header}>
+            <View style={styles.titleBlock}>
+                <Text style={styles.title}>{contractName}</Text>
+                <Text style={styles.subtitle}>{opponentLabel}</Text>
+            </View>
+            <View style={[styles.timeBadge, urgent && styles.timeBadgeUrgent]}>
+                {urgent && <AntDesign name="warning" size={12} color={colors.red} />}
+                <Text style={[styles.timeText, urgent && styles.timeTextUrgent]}>
+                    {timeRemaining}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+function CardProgress({ verified, pending, total }: Progress) {
+    return (
+        <View style={styles.progressBlock}>
+            <View style={styles.progressLabelRow}>
+                <Text style={styles.progressLabel}>Progress</Text>
+                <Text style={styles.progressLabel}>
+                    {verified}/{total} Verified
+                </Text>
+            </View>
+            <ProgressBar verified={verified} pending={pending} total={total} size="compact" />
+        </View>
+    );
+}
+
+export function ActiveContractCard(props: ActiveContractCardProps) {
+    const {
+        contractName,
+        opponentLabel,
+        progress,
+        timeRemaining,
+        cta,
+        onPress,
+        onCta,
+        testID = 'active-contract-card',
+    } = props;
     const { verified, pending, total } = progress;
     const { state: ctaState, label: ctaLabel } = cta;
     const urgent = ctaState === 'snap-urgent';
@@ -60,33 +102,14 @@ export function ActiveContractCard({
                 onPress={onPress}
                 style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             >
-                <View style={styles.header}>
-                    <View style={styles.titleBlock}>
-                        <Text style={styles.title}>{contractName}</Text>
-                        <Text style={styles.subtitle}>{opponentLabel}</Text>
-                    </View>
-                    <View style={[styles.timeBadge, urgent && styles.timeBadgeUrgent]}>
-                        {urgent && <AntDesign name="warning" size={12} color={colors.red} />}
-                        <Text style={[styles.timeText, urgent && styles.timeTextUrgent]}>
-                            {timeRemaining}
-                        </Text>
-                    </View>
-                </View>
+                <CardHeader
+                    contractName={contractName}
+                    opponentLabel={opponentLabel}
+                    timeRemaining={timeRemaining}
+                    urgent={urgent}
+                />
 
-                <View style={styles.progressBlock}>
-                    <View style={styles.progressLabelRow}>
-                        <Text style={styles.progressLabel}>Progress</Text>
-                        <Text style={styles.progressLabel}>
-                            {verified}/{total} Verified
-                        </Text>
-                    </View>
-                    <ProgressBar
-                        verified={verified}
-                        pending={pending}
-                        total={total}
-                        size="compact"
-                    />
-                </View>
+                <CardProgress verified={verified} pending={pending} total={total} />
 
                 <Button
                     testID={`${testID}-cta`}

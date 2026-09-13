@@ -1,5 +1,9 @@
-import { customFetch } from '@/src/api/client';
-import SuperTokens from '@/src/lib/supertokens';
+import {
+    clearCachedAccessToken,
+    customFetch,
+    getCachedAccessToken,
+    isApiErrorWithStatus,
+} from '@/src/api/client';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 
@@ -84,19 +88,17 @@ export function __resetProfileConfirmedCache(): void {
 async function ensureUserProfile(email: string): Promise<void> {
     if (profileConfirmed.has(email)) return;
 
-    const token = await SuperTokens.getAccessToken();
-    if (!token) {
-        throw new AuthError('Session not established', 'UNKNOWN');
-    }
+    const token = await getCachedAccessToken();
+    if (!token) throw new AuthError('Session not established', 'UNKNOWN');
 
     try {
         // Routed through the shared Orval mutator (src/api/client.ts) rather
         // than a second hand-rolled fetch client — /users is this backend's
         // own OpenAPI-documented endpoint, not the external SuperTokens
         // service that authFetch above legitimately talks to directly.
+        // customFetch already attaches the bearer token itself.
         await customFetch('/users', {
             method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
             body: JSON.stringify({ displayName: deriveDisplayName(email) }),
         });
     } catch (e) {
@@ -108,10 +110,6 @@ async function ensureUserProfile(email: string): Promise<void> {
     }
 
     profileConfirmed.add(email);
-}
-
-function isApiErrorWithStatus(e: unknown, status: number): boolean {
-    return typeof e === 'object' && e !== null && 'status' in e && e.status === status;
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -130,7 +128,9 @@ export async function signIn(email: string, password: string): Promise<void> {
     if (data.status !== 'OK') {
         throw new AuthError('Sign in failed', 'UNKNOWN');
     }
-    // SuperTokens SDK has stored st-access-token from the response headers
+    // SuperTokens SDK has stored st-access-token from the response headers.
+    // Clear any cached token from a prior session before reading the new one.
+    clearCachedAccessToken();
     await ensureUserProfile(email);
 }
 
@@ -154,5 +154,6 @@ export async function signUp(email: string, password: string): Promise<void> {
         throw new AuthError('Sign up failed. Please try again.', 'UNKNOWN');
     }
 
+    clearCachedAccessToken();
     await ensureUserProfile(email);
 }

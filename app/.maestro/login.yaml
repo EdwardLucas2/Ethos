@@ -12,6 +12,8 @@ appId: com.ethos.app
           TEST_EMAIL: ${output.TEST_EMAIL}
           TEST_PASSWORD: ${output.TEST_PASSWORD}
 - tapOn:
+      id: 'top-bar-avatar'
+- tapOn:
       id: 'sign-out-button'
 - runFlow:
       file: subflows/_login-user.yaml

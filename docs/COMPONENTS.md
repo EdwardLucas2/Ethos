@@ -249,7 +249,7 @@ Profile is deliberately not a tab — every tab-root screen's TopBar already has
 - `opponentLabel` — e.g. "VS ALEX" (2 participants) or "SQUAD BATTLE" (≥ 3 participants)
 - `verified`, `pending`, `total` — passed through to `ProgressBar`
 - `timeRemaining` — string, e.g. "14H 20M" or "2 DAYS LEFT"
-- `ctaState` — `"snap"` | `"snap-urgent"` | `"review"` | `"caught-up"`. Time badge is red iff `ctaState === "snap-urgent"`.
+- `ctaState` — `"snap"` | `"snap-urgent"` | `"review"` | `"caught-up"`. Time badge is red when `ctaState === "snap-urgent"` or `timeRemaining` is overdue.
 - `onPress` — navigates to Contract Overview
 - `onCta` — action for the CTA button (no-op when `caught-up`)
 

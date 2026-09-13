@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+import { clearCachedAccessToken } from '@/src/api/client';
 import SuperTokens from '@/src/lib/supertokens';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -52,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // would leave the user staring at a submitted form with no feedback.
     const refreshSession = useCallback(async () => {
         const thisRead = ++readId.current;
+        clearCachedAccessToken();
         const token = await loadSession();
         if (readId.current === thisRead) setSession(token);
     }, [loadSession]);
@@ -63,14 +73,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signOut = useCallback(async () => {
         await SuperTokens.signOut();
         readId.current++; // invalidate any in-flight session read
+        clearCachedAccessToken();
         setSession(null);
     }, []);
 
-    return (
-        <AuthContext.Provider value={{ session, isLoading, refreshSession, signOut }}>
-            {children}
-        </AuthContext.Provider>
+    const value = useMemo(
+        () => ({ session, isLoading, refreshSession, signOut }),
+        [session, isLoading, refreshSession, signOut]
     );
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────

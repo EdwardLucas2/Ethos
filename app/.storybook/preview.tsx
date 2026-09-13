@@ -1,6 +1,8 @@
 import type { Preview } from '@storybook/react';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { colors } from '@/constants/theme';
 // Imported directly (not via the @/src/context/AuthContext alias) so this file
 // type-checks and lints even when the real AuthContext module isn't present.
@@ -25,24 +27,34 @@ const preview: Preview = {
     },
     decorators: [
         (Story, context) => {
+            // Screens (e.g. dashboard.tsx) call useQueryClient() directly — real
+            // Orval hooks are mocked via the @/src/api alias, but the QueryClient
+            // plumbing itself isn't, so it still needs a real provider in the tree.
+            // Created once per story mount, not per render.
+            const [queryClient] = useState(() => new QueryClient());
+
             // Full-screen stories (screens/pages) manage their own layout and background.
             if (context.parameters['layout'] === 'fullscreen') {
                 return (
-                    <SafeAreaProvider initialMetrics={safeAreaMetrics}>
-                        <MockAuthProvider>
-                            <Story />
-                        </MockAuthProvider>
-                    </SafeAreaProvider>
+                    <QueryClientProvider client={queryClient}>
+                        <SafeAreaProvider initialMetrics={safeAreaMetrics}>
+                            <MockAuthProvider>
+                                <Story />
+                            </MockAuthProvider>
+                        </SafeAreaProvider>
+                    </QueryClientProvider>
                 );
             }
             return (
-                <SafeAreaProvider>
-                    <MockAuthProvider>
-                        <View style={{ padding: 16, backgroundColor: colors.surface }}>
-                            <Story />
-                        </View>
-                    </MockAuthProvider>
-                </SafeAreaProvider>
+                <QueryClientProvider client={queryClient}>
+                    <SafeAreaProvider>
+                        <MockAuthProvider>
+                            <View style={{ padding: 16, backgroundColor: colors.surface }}>
+                                <Story />
+                            </View>
+                        </MockAuthProvider>
+                    </SafeAreaProvider>
+                </QueryClientProvider>
             );
         },
     ],

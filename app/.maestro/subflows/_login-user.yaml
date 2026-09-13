@@ -15,5 +15,6 @@ appId: com.ethos.app
       text: 'Not Now'
       optional: true
 - extendedWaitUntil:
-      visible: 'Welcome!'
+      visible:
+          id: 'bottom-tab-bar-home'
       timeout: 8000
