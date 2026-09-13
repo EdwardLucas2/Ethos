@@ -15,7 +15,10 @@ export async function getCachedAccessToken(): Promise<string | null> {
   pendingToken = (async () => {
     try {
       const value = (await SuperTokens.getAccessToken()) ?? null;
-      cachedToken = { value, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS };
+      // Don't cache a null result — it's indistinguishable from "haven't checked
+      // yet" and could paper over a brief token-refresh window by reusing the
+      // null for the full TTL. Only a real token is worth short-circuiting on.
+      if (value !== null) cachedToken = { value, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS };
       return value;
     } finally {
       pendingToken = null;
@@ -26,6 +29,12 @@ export async function getCachedAccessToken(): Promise<string | null> {
 
 export function clearCachedAccessToken(): void {
   cachedToken = null;
+}
+
+// customFetch attaches `.status` to a thrown error (see below) so callers can
+// branch on specific HTTP status codes without re-parsing the error shape.
+export function isApiErrorWithStatus(e: unknown, status: number): boolean {
+  return typeof e === 'object' && e !== null && 'status' in e && e.status === status;
 }
 
 function timeoutError(): Error {

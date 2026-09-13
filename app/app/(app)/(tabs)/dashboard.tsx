@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/empty-state';
 import { FAB } from '@/components/fab';
 import { PendingResolutionCard } from '@/components/pending-resolution-card';
 import { TopBar } from '@/components/top-bar';
+import { isApiErrorWithStatus } from '@/src/api/client';
 import {
     ActiveContractResponse,
     ActiveParticipantResponse,
@@ -129,7 +130,13 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
 // ─── Active contract card derivation ───────────────────────────────────────
 
 export function daysUntil(dateString: string | undefined): number {
-    if (!dateString) return 0;
+    if (!dateString) {
+        // endDate is a required field on the backend — a contract reaching here
+        // without one is a real bug, not routine optionality. Fail safe (treat
+        // as not urgent) but don't swallow it silently.
+        console.warn('daysUntil: missing endDate on contract — should not happen');
+        return 0;
+    }
     const [year, month, day] = dateString.split('-').map(Number);
     if (year === undefined || month === undefined || day === undefined) return 0;
     const end = new Date(year, month - 1, day);
@@ -269,8 +276,17 @@ function useCreateContract(router: ReturnType<typeof useRouter>) {
                 // Contract Builder isn't built yet — see product/PRD.md §5.4.
                 router.push(`/contract/${contract.id}/build` as Href);
             }
-        } catch {
-            setFabError("Couldn't create a contract. Try again.");
+        } catch (e) {
+            // Always log the real error so it's visible in diagnostics, even
+            // though the user-facing message stays generic (except for the
+            // one case — an expired session — where the message should tell
+            // them what to actually do about it).
+            console.error('Failed to create contract:', e);
+            setFabError(
+                isApiErrorWithStatus(e, 401)
+                    ? 'Your session has expired — please sign in again.'
+                    : "Couldn't create a contract. Try again."
+            );
         }
     }
 

@@ -54,7 +54,23 @@ describe('ActiveContractCard', () => {
         expect(onCta).toHaveBeenCalledTimes(1);
     });
 
-    it('shows the overdue badge in red even when the CTA state is not urgent', () => {
+    it('shows the overdue badge in red when the CTA state is urgent', () => {
+        render(
+            <ActiveContractCard
+                {...baseProps}
+                timeRemaining="OVERDUE"
+                ctaState="snap-urgent"
+                onPress={jest.fn()}
+                onCta={jest.fn()}
+            />
+        );
+        expect(screen.getByText('OVERDUE')).toHaveStyle({ color: colors.red });
+    });
+
+    it('does not show urgent styling from the time-remaining text alone', () => {
+        // Urgency is driven solely by ctaState, not by matching against
+        // formatTimeRemaining's output — a non-urgent ctaState shouldn't turn
+        // red just because the display text happens to read "OVERDUE".
         render(
             <ActiveContractCard
                 {...baseProps}
@@ -64,7 +80,7 @@ describe('ActiveContractCard', () => {
                 onCta={jest.fn()}
             />
         );
-        expect(screen.getByText('OVERDUE')).toHaveStyle({ color: colors.red });
+        expect(screen.getByText('OVERDUE')).not.toHaveStyle({ color: colors.red });
     });
 
     it('disables the CTA when caught up', () => {

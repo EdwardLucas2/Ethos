@@ -41,7 +41,7 @@ export function BottomTabBar({ activeTab, testID = 'bottom-tab-bar' }: BottomTab
                             active && styles.tabActive,
                         ]}
                         onPressIn={() => {
-                            if (process.env.EXPO_OS === 'ios') {
+                            if (!active && process.env.EXPO_OS === 'ios') {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }
                         }}

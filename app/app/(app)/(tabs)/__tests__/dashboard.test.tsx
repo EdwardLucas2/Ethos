@@ -273,17 +273,41 @@ describe('DashboardScreen', () => {
             expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['notifications'] });
         });
 
-        it('shows an error message when contract creation fails', async () => {
+        it('shows a generic error message when contract creation fails', async () => {
+            const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
             mockQueries({ active: [ACTIVE_CONTRACT] });
-            mockMutateAsync.mockRejectedValue(new Error('network error'));
+            const error = new Error('network error');
+            mockMutateAsync.mockRejectedValue(error);
 
             render(<DashboardScreen />);
             fireEvent.press(screen.getByTestId('fab'));
 
             await waitFor(() => {
-                expect(screen.getByTestId('fab-error')).toBeTruthy();
+                expect(screen.getByText(/Couldn't create a contract\. Try again\./i)).toBeTruthy();
             });
             expect(mockPush).not.toHaveBeenCalled();
+            // The real error is still logged, even though the user only sees the generic message.
+            expect(consoleError).toHaveBeenCalledWith('Failed to create contract:', error);
+            consoleError.mockRestore();
+        });
+
+        it('shows a session-expired message when contract creation fails with a 401', async () => {
+            jest.spyOn(console, 'error').mockImplementation(() => {});
+            mockQueries({ active: [ACTIVE_CONTRACT] });
+            mockMutateAsync.mockRejectedValue(
+                Object.assign(new Error('unauthorized'), { status: 401 })
+            );
+
+            render(<DashboardScreen />);
+            fireEvent.press(screen.getByTestId('fab'));
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(/Your session has expired — please sign in again\./i)
+                ).toBeTruthy();
+            });
+            expect(mockPush).not.toHaveBeenCalled();
+            jest.restoreAllMocks();
         });
     });
 
@@ -320,5 +344,14 @@ describe('daysUntil', () => {
 
     it('returns a positive value when endDate is a local calendar day in the future', () => {
         expect(daysUntil('2026-06-16')).toBe(1);
+    });
+
+    it('warns and returns 0 when endDate is missing, instead of failing silently', () => {
+        const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        expect(daysUntil(undefined)).toBe(0);
+        expect(consoleWarn).toHaveBeenCalledWith(
+            'daysUntil: missing endDate on contract — should not happen'
+        );
+        consoleWarn.mockRestore();
     });
 });

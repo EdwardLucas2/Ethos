@@ -1,4 +1,9 @@
-import { customFetch, getCachedAccessToken } from '@/src/api/client';
+import {
+    clearCachedAccessToken,
+    customFetch,
+    getCachedAccessToken,
+    isApiErrorWithStatus,
+} from '@/src/api/client';
 
 const AUTH_URL = process.env['EXPO_PUBLIC_AUTH_URL'] ?? 'http://localhost:3568';
 
@@ -107,10 +112,6 @@ async function ensureUserProfile(email: string): Promise<void> {
     profileConfirmed.add(email);
 }
 
-function isApiErrorWithStatus(e: unknown, status: number): boolean {
-    return typeof e === 'object' && e !== null && 'status' in e && e.status === status;
-}
-
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 export async function signIn(email: string, password: string): Promise<void> {
@@ -127,7 +128,9 @@ export async function signIn(email: string, password: string): Promise<void> {
     if (data.status !== 'OK') {
         throw new AuthError('Sign in failed', 'UNKNOWN');
     }
-    // SuperTokens SDK has stored st-access-token from the response headers
+    // SuperTokens SDK has stored st-access-token from the response headers.
+    // Clear any cached token from a prior session before reading the new one.
+    clearCachedAccessToken();
     await ensureUserProfile(email);
 }
 
@@ -151,5 +154,6 @@ export async function signUp(email: string, password: string): Promise<void> {
         throw new AuthError('Sign up failed. Please try again.', 'UNKNOWN');
     }
 
+    clearCachedAccessToken();
     await ensureUserProfile(email);
 }

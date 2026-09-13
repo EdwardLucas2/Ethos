@@ -3,13 +3,14 @@
  * supertokens-react-native is globally mocked (jest.setup.ts); fetch is
  * mocked per test. Fake timers drive the clock so elapsed time is exact.
  */
-import { customFetch, clearCachedAccessToken } from '../client';
+import { customFetch, clearCachedAccessToken, getCachedAccessToken } from '../client';
 import SuperTokens from 'supertokens-react-native';
 
 const REQUEST_TIMEOUT_MS = 10_000;
 
 beforeEach(() => {
     jest.useFakeTimers();
+    jest.clearAllMocks();
     clearCachedAccessToken();
 });
 
@@ -42,4 +43,17 @@ it('bounds total request latency by REQUEST_TIMEOUT_MS even when the token read 
 
     expect(fetchAborted).toBe(true);
     await assertion;
+});
+
+it('does not cache a null token result, so a subsequent call re-checks instead of reusing it', async () => {
+    (SuperTokens.getAccessToken as jest.Mock)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('fresh-token');
+
+    const first = await getCachedAccessToken();
+    const second = await getCachedAccessToken();
+
+    expect(first).toBeNull();
+    expect(second).toBe('fresh-token');
+    expect(SuperTokens.getAccessToken).toHaveBeenCalledTimes(2);
 });

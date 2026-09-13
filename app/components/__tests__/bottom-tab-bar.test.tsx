@@ -2,10 +2,16 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { BottomTabBar } from '../bottom-tab-bar';
 import { colors } from '@/constants/theme';
+import * as Haptics from 'expo-haptics';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
     useRouter: () => ({ push: mockPush }),
+}));
+
+jest.mock('expo-haptics', () => ({
+    impactAsync: jest.fn(),
+    ImpactFeedbackStyle: { Light: 'light' },
 }));
 
 beforeEach(() => {
@@ -32,6 +38,24 @@ describe('BottomTabBar', () => {
 
         fireEvent.press(screen.getByTestId('bottom-tab-bar-friends'));
         expect(mockPush).toHaveBeenCalledWith('/friends');
+    });
+
+    it('does not fire haptic feedback when pressing the already-active tab', () => {
+        const originalOS = process.env.EXPO_OS;
+        process.env.EXPO_OS = 'ios';
+        render(<BottomTabBar activeTab="home" />);
+        fireEvent(screen.getByTestId('bottom-tab-bar-home'), 'pressIn');
+        expect(Haptics.impactAsync).not.toHaveBeenCalled();
+        process.env.EXPO_OS = originalOS;
+    });
+
+    it('fires haptic feedback when pressing an inactive tab', () => {
+        const originalOS = process.env.EXPO_OS;
+        process.env.EXPO_OS = 'ios';
+        render(<BottomTabBar activeTab="home" />);
+        fireEvent(screen.getByTestId('bottom-tab-bar-contracts'), 'pressIn');
+        expect(Haptics.impactAsync).toHaveBeenCalledWith('light');
+        process.env.EXPO_OS = originalOS;
     });
 
     it('exposes tab role and selected state for screen readers', () => {
