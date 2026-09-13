@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@DiscriminatorMappingName("resolution_winner")
+@DiscriminatorMappingName(ResolutionWinnerNotification.TYPE)
 public record ResolutionWinnerNotification(
         @OpenApiRequired UUID id,
         @OpenApiRequired Instant createdAt,
@@ -17,9 +17,11 @@ public record ResolutionWinnerNotification(
         List<String> loserNames)
         implements NotificationResponse {
 
+    static final String TYPE = "resolution_winner";
+
     public ResolutionWinnerNotification {
-        if (!"resolution_winner".equals(type)) {
-            throw new IllegalArgumentException("type must be \"resolution_winner\", was: " + type);
+        if (!TYPE.equals(type)) {
+            throw new IllegalArgumentException("type must be \"" + TYPE + "\", was: " + type);
         }
     }
 
@@ -30,6 +32,6 @@ public record ResolutionWinnerNotification(
             String contractName,
             String forfeit,
             List<String> loserNames) {
-        this(id, createdAt, "resolution_winner", resolutionId, contractName, forfeit, loserNames);
+        this(id, createdAt, TYPE, resolutionId, contractName, forfeit, loserNames);
     }
 }

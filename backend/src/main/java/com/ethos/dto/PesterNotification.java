@@ -5,7 +5,7 @@ import io.javalin.openapi.OpenApiRequired;
 import java.time.Instant;
 import java.util.UUID;
 
-@DiscriminatorMappingName("pester")
+@DiscriminatorMappingName(PesterNotification.TYPE)
 public record PesterNotification(
         @OpenApiRequired UUID id,
         @OpenApiRequired Instant createdAt,
@@ -15,13 +15,15 @@ public record PesterNotification(
         String forfeit)
         implements NotificationResponse {
 
+    static final String TYPE = "pester";
+
     public PesterNotification {
-        if (!"pester".equals(type)) {
-            throw new IllegalArgumentException("type must be \"pester\", was: " + type);
+        if (!TYPE.equals(type)) {
+            throw new IllegalArgumentException("type must be \"" + TYPE + "\", was: " + type);
         }
     }
 
     public PesterNotification(UUID id, Instant createdAt, UUID resolutionId, String fromName, String forfeit) {
-        this(id, createdAt, "pester", resolutionId, fromName, forfeit);
+        this(id, createdAt, TYPE, resolutionId, fromName, forfeit);
     }
 }

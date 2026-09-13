@@ -5,7 +5,7 @@ import io.javalin.openapi.OpenApiRequired;
 import java.time.Instant;
 import java.util.UUID;
 
-@DiscriminatorMappingName("evidence_uploaded")
+@DiscriminatorMappingName(EvidenceUploadedNotification.TYPE)
 public record EvidenceUploadedNotification(
         @OpenApiRequired UUID id,
         @OpenApiRequired Instant createdAt,
@@ -17,9 +17,11 @@ public record EvidenceUploadedNotification(
         @OpenApiRequired UUID evidenceId)
         implements NotificationResponse {
 
+    static final String TYPE = "evidence_uploaded";
+
     public EvidenceUploadedNotification {
-        if (!"evidence_uploaded".equals(type)) {
-            throw new IllegalArgumentException("type must be \"evidence_uploaded\", was: " + type);
+        if (!TYPE.equals(type)) {
+            throw new IllegalArgumentException("type must be \"" + TYPE + "\", was: " + type);
         }
     }
 
@@ -31,6 +33,6 @@ public record EvidenceUploadedNotification(
             String contractName,
             int cycleNumber,
             UUID evidenceId) {
-        this(id, createdAt, "evidence_uploaded", submitterName, contractId, contractName, cycleNumber, evidenceId);
+        this(id, createdAt, TYPE, submitterName, contractId, contractName, cycleNumber, evidenceId);
     }
 }

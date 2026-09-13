@@ -5,7 +5,7 @@ import io.javalin.openapi.OpenApiRequired;
 import java.time.Instant;
 import java.util.UUID;
 
-@DiscriminatorMappingName("contract_invited")
+@DiscriminatorMappingName(ContractInvitedNotification.TYPE)
 public record ContractInvitedNotification(
         @OpenApiRequired UUID id,
         @OpenApiRequired Instant createdAt,
@@ -15,14 +15,16 @@ public record ContractInvitedNotification(
         String contractName)
         implements NotificationResponse {
 
+    static final String TYPE = "contract_invited";
+
     public ContractInvitedNotification {
-        if (!"contract_invited".equals(type)) {
-            throw new IllegalArgumentException("type must be \"contract_invited\", was: " + type);
+        if (!TYPE.equals(type)) {
+            throw new IllegalArgumentException("type must be \"" + TYPE + "\", was: " + type);
         }
     }
 
     public ContractInvitedNotification(
             UUID id, Instant createdAt, String inviterName, UUID contractId, String contractName) {
-        this(id, createdAt, "contract_invited", inviterName, contractId, contractName);
+        this(id, createdAt, TYPE, inviterName, contractId, contractName);
     }
 }
