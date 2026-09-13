@@ -1,5 +1,7 @@
-import { borderWidth, colors, shadows, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+
+const SHADOW = offsetShadow(4);
 
 type OAuthButtonProps = {
     provider: 'google' | 'apple';
@@ -17,9 +19,14 @@ export function OAuthButton({
     style,
 }: OAuthButtonProps) {
     return (
-        <View style={[styles.shadow, style]}>
+        <View style={style}>
+            <View style={SHADOW.box} />
             <Pressable
-                style={[styles.button, disabled && styles.disabled]}
+                style={({ pressed }) => [
+                    styles.button,
+                    SHADOW.faceMargin,
+                    pressed && !disabled && styles.pressed,
+                ]}
                 onPress={onPress}
                 disabled={disabled}
                 testID={testID}
@@ -28,17 +35,13 @@ export function OAuthButton({
                     <Text style={styles.icon}>{provider === 'google' ? 'G' : 'iOS'}</Text>
                     <Text style={styles.label}>{provider === 'google' ? 'GOOGLE' : 'APPLE'}</Text>
                 </View>
+                {disabled && <View style={styles.disabledOverlay} />}
             </Pressable>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    shadow: {
-        marginRight: spacing.xs,
-        marginBottom: spacing.xs,
-        ...shadows.sm,
-    },
     button: {
         backgroundColor: colors.surfaceRaised,
         borderWidth: borderWidth.structural,
@@ -46,8 +49,12 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm + 2,
         paddingHorizontal: spacing.md,
     },
-    disabled: {
-        opacity: 0.5,
+    pressed: {
+        transform: [{ translateX: 2 }, { translateY: 2 }],
+    },
+    disabledOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(200, 200, 200, 0.5)',
     },
     inner: {
         flexDirection: 'row',
