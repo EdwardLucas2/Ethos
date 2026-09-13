@@ -10,6 +10,5 @@ public record ActiveContractResponse(
         int cycleNumber,
         LocalDate startDate,
         LocalDate endDate,
-        ProgressResponse myProgress,
         int unreviewedEvidenceCount,
         List<ActiveParticipantResponse> participants) {}
