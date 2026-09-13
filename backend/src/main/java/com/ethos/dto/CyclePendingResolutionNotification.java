@@ -5,7 +5,7 @@ import io.javalin.openapi.OpenApiRequired;
 import java.time.Instant;
 import java.util.UUID;
 
-@DiscriminatorMappingName("cycle_pending_resolution")
+@DiscriminatorMappingName(CyclePendingResolutionNotification.TYPE)
 public record CyclePendingResolutionNotification(
         @OpenApiRequired UUID id,
         @OpenApiRequired Instant createdAt,
@@ -15,14 +15,16 @@ public record CyclePendingResolutionNotification(
         int cycleNumber)
         implements NotificationResponse {
 
+    static final String TYPE = "cycle_pending_resolution";
+
     public CyclePendingResolutionNotification {
-        if (!"cycle_pending_resolution".equals(type)) {
-            throw new IllegalArgumentException("type must be \"cycle_pending_resolution\", was: " + type);
+        if (!TYPE.equals(type)) {
+            throw new IllegalArgumentException("type must be \"" + TYPE + "\", was: " + type);
         }
     }
 
     public CyclePendingResolutionNotification(
             UUID id, Instant createdAt, UUID contractId, String contractName, int cycleNumber) {
-        this(id, createdAt, "cycle_pending_resolution", contractId, contractName, cycleNumber);
+        this(id, createdAt, TYPE, contractId, contractName, cycleNumber);
     }
 }

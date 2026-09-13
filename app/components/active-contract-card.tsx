@@ -8,15 +8,23 @@ export type CtaState = 'snap' | 'snap-urgent' | 'review' | 'caught-up';
 
 const SHADOW = offsetShadow(8);
 
-export type ActiveContractCardProps = {
-    contractName: string;
-    opponentLabel: string;
+export type Progress = {
     verified: number;
     pending: number;
     total: number;
+};
+
+export type Cta = {
+    state: CtaState;
+    label: string;
+};
+
+export type ActiveContractCardProps = {
+    contractName: string;
+    opponentLabel: string;
+    progress: Progress;
     timeRemaining: string;
-    ctaState: CtaState;
-    ctaLabel: string;
+    cta: Cta;
     onPress: () => void;
     onCta: () => void;
     testID?: string;
@@ -32,16 +40,15 @@ const CTA_BACKGROUND: Record<CtaState, string> = {
 export function ActiveContractCard({
     contractName,
     opponentLabel,
-    verified,
-    pending,
-    total,
+    progress,
     timeRemaining,
-    ctaState,
-    ctaLabel,
+    cta,
     onPress,
     onCta,
     testID = 'active-contract-card',
 }: ActiveContractCardProps) {
+    const { verified, pending, total } = progress;
+    const { state: ctaState, label: ctaLabel } = cta;
     const urgent = ctaState === 'snap-urgent';
     const caughtUp = ctaState === 'caught-up';
 
