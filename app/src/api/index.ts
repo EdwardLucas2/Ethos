@@ -23,12 +23,6 @@ import type {
 } from '@tanstack/react-query';
 
 import { customFetch } from './client';
-export interface ProgressResponse {
-  completed: number;
-  pending: number;
-  total: number;
-}
-
 export interface ActiveParticipantResponse {
   userId?: string;
   displayName?: string;
@@ -45,7 +39,6 @@ export interface ActiveContractResponse {
   cycleNumber: number;
   startDate?: string;
   endDate?: string;
-  myProgress?: ProgressResponse;
   unreviewedEvidenceCount: number;
   participants?: ActiveParticipantResponse[];
 }
@@ -59,6 +52,22 @@ export interface ContactResponse {
   displayName?: string;
   tag?: string;
   avatarUrl?: string;
+}
+
+export type ContractInvitedNotificationType = typeof ContractInvitedNotificationType[keyof typeof ContractInvitedNotificationType];
+
+
+export const ContractInvitedNotificationType = {
+  contract_invited: 'contract_invited',
+} as const;
+
+export interface ContractInvitedNotification {
+  id: string;
+  createdAt: string;
+  type: ContractInvitedNotificationType;
+  inviterName?: string;
+  contractId: string;
+  contractName?: string;
 }
 
 export interface ContractParticipantResponse {
@@ -95,26 +104,95 @@ export interface CreateUserRequest {
   displayName?: string;
 }
 
+export type CyclePendingResolutionNotificationType = typeof CyclePendingResolutionNotificationType[keyof typeof CyclePendingResolutionNotificationType];
+
+
+export const CyclePendingResolutionNotificationType = {
+  cycle_pending_resolution: 'cycle_pending_resolution',
+} as const;
+
+export interface CyclePendingResolutionNotification {
+  id: string;
+  createdAt: string;
+  type: CyclePendingResolutionNotificationType;
+  contractId: string;
+  contractName?: string;
+  cycleNumber: number;
+}
+
 export interface ErrorResponse {
   message?: string;
 }
 
-export interface NotificationResponse {
-  id?: string;
-  type?: string;
-  createdAt?: string;
+export type EvidenceUploadedNotificationType = typeof EvidenceUploadedNotificationType[keyof typeof EvidenceUploadedNotificationType];
+
+
+export const EvidenceUploadedNotificationType = {
+  evidence_uploaded: 'evidence_uploaded',
+} as const;
+
+export interface EvidenceUploadedNotification {
+  id: string;
+  createdAt: string;
+  type: EvidenceUploadedNotificationType;
   submitterName?: string;
-  contractId?: string;
+  contractId: string;
   contractName?: string;
-  cycleNumber?: number;
-  evidenceId?: string;
-  inviterName?: string;
-  resolutionId?: string;
+  cycleNumber: number;
+  evidenceId: string;
+}
+
+export type PesterNotificationType = typeof PesterNotificationType[keyof typeof PesterNotificationType];
+
+
+export const PesterNotificationType = {
+  pester: 'pester',
+} as const;
+
+export interface PesterNotification {
+  id: string;
+  createdAt: string;
+  type: PesterNotificationType;
+  resolutionId: string;
+  fromName?: string;
+  forfeit?: string;
+}
+
+export type ResolutionLoserNotificationType = typeof ResolutionLoserNotificationType[keyof typeof ResolutionLoserNotificationType];
+
+
+export const ResolutionLoserNotificationType = {
+  resolution_loser: 'resolution_loser',
+} as const;
+
+export interface ResolutionLoserNotification {
+  id: string;
+  createdAt: string;
+  type: ResolutionLoserNotificationType;
+  resolutionId: string;
+  contractName?: string;
+  forfeit?: string;
+  winnerNames?: string[];
+}
+
+export type ResolutionWinnerNotificationType = typeof ResolutionWinnerNotificationType[keyof typeof ResolutionWinnerNotificationType];
+
+
+export const ResolutionWinnerNotificationType = {
+  resolution_winner: 'resolution_winner',
+} as const;
+
+export interface ResolutionWinnerNotification {
+  id: string;
+  createdAt: string;
+  type: ResolutionWinnerNotificationType;
+  resolutionId: string;
+  contractName?: string;
   forfeit?: string;
   loserNames?: string[];
-  winnerNames?: string[];
-  fromName?: string;
 }
+
+export type NotificationResponse = ContractInvitedNotification | CyclePendingResolutionNotification | EvidenceUploadedNotification | PesterNotification | ResolutionLoserNotification | ResolutionWinnerNotification;
 
 export interface PendingParticipantResponse {
   userId?: string;

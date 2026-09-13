@@ -1,21 +1,25 @@
 package com.ethos.dto;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import io.javalin.openapi.Discriminator;
+import io.javalin.openapi.DiscriminatorProperty;
+import io.javalin.openapi.OneOf;
 
-public record NotificationResponse(
-        UUID id,
-        String type,
-        Instant createdAt,
-        String submitterName,
-        UUID contractId,
-        String contractName,
-        Integer cycleNumber,
-        UUID evidenceId,
-        String inviterName,
-        UUID resolutionId,
-        String forfeit,
-        List<String> loserNames,
-        List<String> winnerNames,
-        String fromName) {}
+/**
+ * One variant per notification kind, discriminated by {@code type}. Each variant only carries the
+ * fields that notification actually needs — see docs/API.md's Dashboard section for the JSON shape
+ * per type. {@code type}'s value always matches the variant's {@link DiscriminatorMappingName} below;
+ * every variant sets it via its convenience constructor rather than trusting callers to spell it
+ * correctly.
+ */
+@OneOf(
+        value = {},
+        discriminator =
+                @Discriminator(
+                        property = @DiscriminatorProperty(name = "type", type = String.class, injectInMappings = true)))
+public sealed interface NotificationResponse
+        permits EvidenceUploadedNotification,
+                ContractInvitedNotification,
+                CyclePendingResolutionNotification,
+                ResolutionWinnerNotification,
+                ResolutionLoserNotification,
+                PesterNotification {}
