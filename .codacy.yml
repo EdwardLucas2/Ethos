@@ -23,4 +23,5 @@ exclude_paths:
     - "backend/src/main/resources/META-INF/**" # Java metadata
     - "product/**" # Product docs, not code
     - "app/src/api/**" # Orval-generated API client
+    - "app/.storybook/mocks/**" # Storybook mocks (e.g. plain CSS misidentified as SCSS)
     - "db/migrations/**" # Immutable SQL migrations
