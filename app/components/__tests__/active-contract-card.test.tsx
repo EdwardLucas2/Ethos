@@ -6,11 +6,8 @@ import { colors } from '@/constants/theme';
 const baseProps = {
     contractName: 'GYM 3X/WEEK',
     opponentLabel: 'VS ALEX',
-    verified: 2,
-    pending: 1,
-    total: 4,
+    progress: { verified: 2, pending: 1, total: 4 },
     timeRemaining: '2D LEFT',
-    ctaLabel: 'SNAP PROOF',
 };
 
 describe('ActiveContractCard', () => {
@@ -23,7 +20,7 @@ describe('ActiveContractCard', () => {
         render(
             <ActiveContractCard
                 {...baseProps}
-                ctaState={ctaState}
+                cta={{ state: ctaState, label: 'SNAP PROOF' }}
                 onPress={jest.fn()}
                 onCta={jest.fn()}
             />
@@ -36,7 +33,7 @@ describe('ActiveContractCard', () => {
         render(
             <ActiveContractCard
                 {...baseProps}
-                ctaState="snap"
+                cta={{ state: 'snap', label: 'SNAP PROOF' }}
                 onPress={onPress}
                 onCta={jest.fn()}
             />
@@ -48,7 +45,12 @@ describe('ActiveContractCard', () => {
     it('calls onCta when the CTA is tapped', () => {
         const onCta = jest.fn();
         render(
-            <ActiveContractCard {...baseProps} ctaState="snap" onPress={jest.fn()} onCta={onCta} />
+            <ActiveContractCard
+                {...baseProps}
+                cta={{ state: 'snap', label: 'SNAP PROOF' }}
+                onPress={jest.fn()}
+                onCta={onCta}
+            />
         );
         fireEvent.press(screen.getByTestId('active-contract-card-cta'));
         expect(onCta).toHaveBeenCalledTimes(1);
@@ -59,7 +61,7 @@ describe('ActiveContractCard', () => {
         render(
             <ActiveContractCard
                 {...baseProps}
-                ctaState="caught-up"
+                cta={{ state: 'caught-up', label: 'ALL CAUGHT UP' }}
                 onPress={jest.fn()}
                 onCta={onCta}
             />
