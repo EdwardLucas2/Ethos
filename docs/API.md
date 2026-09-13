@@ -530,6 +530,19 @@ The dashboard loads with two parallel requests: `GET /contracts/me/active` and `
 
 Returns all unread notifications enriched server-side with the display context needed to render each alert. Frontend handles ordering. Only `read_at IS NULL` rows returned.
 
+Each notification is one of 6 variants, discriminated by `type` — a notification only ever carries the fields for its own variant (no extra keys sent as `null` for other types). `id`, `createdAt`, and `type` are always present on every variant; each variant additionally guarantees its own identifier field(s), needed to build the alert's navigation target:
+
+| `type` | additional required fields |
+|---|---|
+| `evidence_uploaded` | `contractId`, `cycleNumber`, `evidenceId` |
+| `contract_invited` | `contractId` |
+| `cycle_pending_resolution` | `contractId`, `cycleNumber` |
+| `resolution_winner` | `resolutionId` |
+| `resolution_loser` | `resolutionId` |
+| `pester` | `resolutionId` |
+
+Everything else (`submitterName`, `inviterName`, `contractName`, `forfeit`, `loserNames`, `winnerNames`, `fromName`) is best-effort display data and may be absent — clients should fall back to a generic label (e.g. "Someone") rather than assume it's always populated.
+
 **Auth:** `requireAuth`
 
 **Response `200`:**
@@ -609,11 +622,6 @@ Contracts where `status = 'active'` and the caller is a `signed` participant. Ca
         "cycleNumber": 3,
         "startDate": "2026-04-14",
         "endDate": "2026-04-20",
-        "myProgress": {
-            "completed": 2,
-            "pending": 0,
-            "total": 3
-        },
         "unreviewedEvidenceCount": 2,
         "participants": [
             {
@@ -635,9 +643,8 @@ Contracts where `status = 'active'` and the caller is a `signed` participant. Ca
 ]
 ```
 
-- `completed` / `pending` / `total` in `myProgress` — caller's verified, pending, and total habit actions for this cycle
 - `unreviewedEvidenceCount` — number of co-participant evidence items the caller hasn't voted on yet; drives the "REVIEW [NAME]'S PROOF" CTA and badge count
-- `participants` — all `signed` participants; includes `completed`/`pending`/`total` for rendering per-participant progress bars on the dashboard card
+- `participants` — all `signed` participants, including the caller — there is no `isSelf` flag; the caller's own row is the one whose `userId` matches `GET /users/me`'s `id`. Includes `completed`/`pending`/`total` for rendering per-participant progress bars, so the caller's own progress numbers (used for the CTA and progress bar) come from this same array rather than a separate top-level field
 
 ---
 
@@ -665,7 +672,7 @@ Contracts where the caller is a `signed` participant and a cycle has `status = '
 ```
 
 - `unreviewedEvidenceCount` — evidence items in this cycle the caller hasn't voted on; drives the "X reviews needed" label
-- `participants` — final verified counts for the progress summary; no `pending` since evidence submission is locked in `pending_resolution`
+- `participants` — final verified counts for the progress summary; no `pending` since evidence submission is locked in `pending_resolution`. As with `GET /contracts/me/active`, there is no `isSelf` flag — match the caller's own row by `userId`
 
 ---
 
