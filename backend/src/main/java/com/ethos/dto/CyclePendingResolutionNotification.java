@@ -15,6 +15,12 @@ public record CyclePendingResolutionNotification(
         int cycleNumber)
         implements NotificationResponse {
 
+    public CyclePendingResolutionNotification {
+        if (!"cycle_pending_resolution".equals(type)) {
+            throw new IllegalArgumentException("type must be \"cycle_pending_resolution\", was: " + type);
+        }
+    }
+
     public CyclePendingResolutionNotification(
             UUID id, Instant createdAt, UUID contractId, String contractName, int cycleNumber) {
         this(id, createdAt, "cycle_pending_resolution", contractId, contractName, cycleNumber);

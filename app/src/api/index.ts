@@ -24,6 +24,7 @@ import type {
 
 import { customFetch } from './client';
 export interface ActiveParticipantResponse {
+  userId: string;
   displayName?: string;
   avatarUrl?: string;
   completed: number;
@@ -32,13 +33,13 @@ export interface ActiveParticipantResponse {
 }
 
 export interface ActiveContractResponse {
-  contractId?: string;
-  name?: string;
+  contractId: string;
+  name: string;
   cycleNumber: number;
-  startDate?: string;
-  endDate?: string;
+  startDate: string;
+  endDate: string;
   unreviewedEvidenceCount: number;
-  participants?: ActiveParticipantResponse[];
+  participants: ActiveParticipantResponse[];
 }
 
 export interface AddContactRequest {
@@ -193,17 +194,18 @@ export interface ResolutionWinnerNotification {
 export type NotificationResponse = ContractInvitedNotification | CyclePendingResolutionNotification | EvidenceUploadedNotification | PesterNotification | ResolutionLoserNotification | ResolutionWinnerNotification;
 
 export interface PendingParticipantResponse {
+  userId: string;
   displayName?: string;
   completed: number;
   total: number;
 }
 
 export interface PendingResolutionContractResponse {
-  contractId?: string;
-  contractName?: string;
+  contractId: string;
+  contractName: string;
   cycleNumber: number;
   unreviewedEvidenceCount: number;
-  participants?: PendingParticipantResponse[];
+  participants: PendingParticipantResponse[];
 }
 
 export interface UpdateUserRequest {

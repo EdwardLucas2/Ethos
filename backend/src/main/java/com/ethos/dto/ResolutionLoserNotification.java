@@ -17,6 +17,12 @@ public record ResolutionLoserNotification(
         List<String> winnerNames)
         implements NotificationResponse {
 
+    public ResolutionLoserNotification {
+        if (!"resolution_loser".equals(type)) {
+            throw new IllegalArgumentException("type must be \"resolution_loser\", was: " + type);
+        }
+    }
+
     public ResolutionLoserNotification(
             UUID id,
             Instant createdAt,
