@@ -30,6 +30,7 @@ public class ContractService {
         this.contractStore = contractStore;
     }
 
+    @SuppressWarnings("PMD.GuardLogStatement")
     public ContractResponse createContract(UUID creatorId) {
         LocalDate startDate = LocalDate.now(ZoneOffset.UTC).plusDays(1);
         ContractDetail detail = contractStore.insert(creatorId, "", "", Period.WEEKLY, startDate);
