@@ -7,7 +7,6 @@ import com.ethos.dto.ContractResponse;
 import com.ethos.dto.ContractSummaryResponse;
 import com.ethos.dto.PendingParticipantResponse;
 import com.ethos.dto.PendingResolutionContractResponse;
-import com.ethos.dto.ProgressResponse;
 import com.ethos.model.ContractDetail;
 import com.ethos.model.Participant;
 import com.ethos.model.Period;
@@ -30,6 +29,7 @@ public class ContractService {
         this.contractStore = contractStore;
     }
 
+    @SuppressWarnings("PMD.GuardLogStatement")
     public ContractResponse createContract(UUID creatorId) {
         LocalDate startDate = LocalDate.now(ZoneOffset.UTC).plusDays(1);
         ContractDetail detail = contractStore.insert(creatorId, "", "", Period.WEEKLY, startDate);
@@ -49,7 +49,6 @@ public class ContractService {
                         3,
                         LocalDate.now(ZoneOffset.UTC).minusDays(2),
                         LocalDate.now(ZoneOffset.UTC).plusDays(5),
-                        new ProgressResponse(2, 0, 3),
                         0,
                         List.of(
                                 new ActiveParticipantResponse("Edward", null, 2, 0, 3),
@@ -60,7 +59,6 @@ public class ContractService {
                         1,
                         LocalDate.now(ZoneOffset.UTC).minusDays(1),
                         LocalDate.now(ZoneOffset.UTC).plusDays(6),
-                        new ProgressResponse(0, 0, 1),
                         2,
                         List.of(
                                 new ActiveParticipantResponse("Edward", null, 0, 0, 1),

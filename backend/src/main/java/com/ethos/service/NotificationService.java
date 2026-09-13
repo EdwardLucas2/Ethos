@@ -1,10 +1,14 @@
 package com.ethos.service;
 
+import com.ethos.dto.ContractInvitedNotification;
+import com.ethos.dto.CyclePendingResolutionNotification;
+import com.ethos.dto.EvidenceUploadedNotification;
 import com.ethos.dto.NotificationResponse;
-import com.ethos.dto.NotificationType;
+import com.ethos.dto.PesterNotification;
+import com.ethos.dto.ResolutionLoserNotification;
+import com.ethos.dto.ResolutionWinnerNotification;
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 public class NotificationService {
@@ -26,52 +30,34 @@ public class NotificationService {
      * Shape matches docs/API.md GET /notifications so the frontend can be built against it now.
      */
     public List<NotificationResponse> listUnread(UUID recipientUserId) {
-        UUID contractId = UUID.randomUUID();
         return List.of(
-                new NotificationResponse(
+                new EvidenceUploadedNotification(
                         UUID.randomUUID(),
-                        NotificationType.EVIDENCE_UPLOADED.name().toLowerCase(Locale.ROOT),
                         Instant.now().minusSeconds(3600),
                         "Alex",
-                        contractId,
+                        UUID.randomUUID(),
                         "Gym 3x/Week",
                         3,
+                        UUID.randomUUID()),
+                new ContractInvitedNotification(
+                        UUID.randomUUID(), Instant.now().minusSeconds(7200), "Sarah", UUID.randomUUID(), "No Sugar"),
+                new CyclePendingResolutionNotification(
+                        UUID.randomUUID(), Instant.now().minusSeconds(86400), UUID.randomUUID(), "Morning Run", 2),
+                new ResolutionWinnerNotification(
                         UUID.randomUUID(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null),
-                new NotificationResponse(
+                        Instant.now().minusSeconds(90000),
                         UUID.randomUUID(),
-                        NotificationType.CONTRACT_INVITED.name().toLowerCase(Locale.ROOT),
-                        Instant.now().minusSeconds(7200),
-                        null,
+                        "Deep Work",
+                        "A pint",
+                        List.of("Bob")),
+                new ResolutionLoserNotification(
                         UUID.randomUUID(),
-                        "No Sugar",
-                        null,
-                        null,
-                        "Sarah",
-                        null,
-                        null,
-                        null,
-                        null,
-                        null),
-                new NotificationResponse(
+                        Instant.now().minusSeconds(90000),
                         UUID.randomUUID(),
-                        NotificationType.CYCLE_PENDING_RESOLUTION.name().toLowerCase(Locale.ROOT),
-                        Instant.now().minusSeconds(86400),
-                        null,
-                        UUID.randomUUID(),
-                        "Morning Run",
-                        2,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null));
+                        "Deep Work",
+                        "A pint",
+                        List.of("Alex", "Sarah")),
+                new PesterNotification(
+                        UUID.randomUUID(), Instant.now().minusSeconds(1800), UUID.randomUUID(), "Alex", "A pint"));
     }
 }

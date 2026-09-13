@@ -16,6 +16,10 @@ import java.util.UUID;
 
 public class ContractHandler {
 
+    private static final String TAG_CONTRACTS = "contracts";
+    private static final String STATUS_UNAUTHORIZED = "401";
+    private static final String DESCRIPTION_UNAUTHORIZED = "JWT missing or invalid";
+
     private final ContractService contractService;
 
     public ContractHandler(ContractService contractService) {
@@ -30,16 +34,16 @@ public class ContractHandler {
                     + " period weekly, start date tomorrow UTC, status draft) and a participant row for the"
                     + " caller with sign_status drafting. Everything stays mutable until"
                     + " POST /contracts/{contractId}/start.",
-            tags = {"contracts"},
+            tags = {TAG_CONTRACTS},
             responses = {
                 @OpenApiResponse(
                         status = "201",
                         content = @OpenApiContent(from = ContractResponse.class),
                         description = "Contract created"),
                 @OpenApiResponse(
-                        status = "401",
+                        status = STATUS_UNAUTHORIZED,
                         content = @OpenApiContent(from = ErrorResponse.class),
-                        description = "JWT missing or invalid")
+                        description = DESCRIPTION_UNAUTHORIZED)
             })
     public void createContract(Context ctx) {
         UUID userId = ctx.attribute(RequestAttributes.USER_ID);
@@ -55,16 +59,16 @@ public class ContractHandler {
                     + " list/history, distinct from GET /contracts/me/active and"
                     + " GET /contracts/me/pending-resolution, which the Dashboard uses for its curated,"
                     + " needs-attention view and only cover active/pending_resolution.",
-            tags = {"contracts"},
+            tags = {TAG_CONTRACTS},
             responses = {
                 @OpenApiResponse(
                         status = "200",
                         content = @OpenApiContent(from = ContractSummaryResponse[].class),
                         description = "All contracts"),
                 @OpenApiResponse(
-                        status = "401",
+                        status = STATUS_UNAUTHORIZED,
                         content = @OpenApiContent(from = ErrorResponse.class),
-                        description = "JWT missing or invalid")
+                        description = DESCRIPTION_UNAUTHORIZED)
             })
     public void getMyContracts(Context ctx) {
         UUID userId = ctx.attribute(RequestAttributes.USER_ID);
@@ -78,16 +82,16 @@ public class ContractHandler {
             description = "Returns contracts where status is active and the caller is a signed participant,"
                     + " carrying all data needed for the Dashboard contract card: current cycle progress,"
                     + " per-participant progress, and unreviewed evidence count.",
-            tags = {"contracts"},
+            tags = {TAG_CONTRACTS},
             responses = {
                 @OpenApiResponse(
                         status = "200",
                         content = @OpenApiContent(from = ActiveContractResponse[].class),
                         description = "Active contracts"),
                 @OpenApiResponse(
-                        status = "401",
+                        status = STATUS_UNAUTHORIZED,
                         content = @OpenApiContent(from = ErrorResponse.class),
-                        description = "JWT missing or invalid")
+                        description = DESCRIPTION_UNAUTHORIZED)
             })
     public void getActiveContracts(Context ctx) {
         UUID userId = ctx.attribute(RequestAttributes.USER_ID);
@@ -101,16 +105,16 @@ public class ContractHandler {
             description = "Returns contracts where the caller is a signed participant and a cycle has status"
                     + " pending_resolution. A contract can appear here and in GET /contracts/me/active"
                     + " simultaneously during the overlap period — they represent different cycles.",
-            tags = {"contracts"},
+            tags = {TAG_CONTRACTS},
             responses = {
                 @OpenApiResponse(
                         status = "200",
                         content = @OpenApiContent(from = PendingResolutionContractResponse[].class),
                         description = "Pending-resolution contracts"),
                 @OpenApiResponse(
-                        status = "401",
+                        status = STATUS_UNAUTHORIZED,
                         content = @OpenApiContent(from = ErrorResponse.class),
-                        description = "JWT missing or invalid")
+                        description = DESCRIPTION_UNAUTHORIZED)
             })
     public void getPendingResolutionContracts(Context ctx) {
         UUID userId = ctx.attribute(RequestAttributes.USER_ID);
