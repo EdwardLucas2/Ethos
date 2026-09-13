@@ -4,7 +4,7 @@ A confrontational, unavoidable screen informing the loser they owe a forfeit. De
 
 **Route:** `/pay-up/[resolutionId]`
 **PRD:** Section 5.12
-**Stitch:** `screen.png` — uses Space Mono font (use Public Sans); TopBar shows "Ethos Resolution" title text (use `back` variant with standard "ETHOS" wordmark only).
+**Stitch:** `screen.png` — uses Space Mono font (use Public Sans); TopBar shows "Ethos Resolution" title text (use `stack` variant with standard "ETHOS" wordmark only); mockup's 3-dot overflow menu is dropped (no destination specified).
 
 ## States
 - Active debt — full layout with "I KNOW" button
@@ -22,7 +22,10 @@ A confrontational, unavoidable screen informing the loser they owe a forfeit. De
 ## Sections
 
 ### TopBar
-`back` variant. Back navigates to `/dashboard`.
+`stack` variant. Back navigates to `/dashboard`.
+
+### BottomTabBar
+None — suppressed, per `docs/ROUTING.md` (settlement screens are not tab roots).
 
 ### Hero Stamp
 `HeroStamp` component, `defeat` variant — "PAY UP", large red stamp, rotated ~−10°, centred. `shadow-lg`. This is the first thing visible; it dominates the screen.

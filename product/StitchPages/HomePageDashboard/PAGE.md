@@ -4,7 +4,7 @@ The app's nerve centre — urgent actions, active contract summaries, and the en
 
 **Route:** `/dashboard`
 **PRD:** Section 5.3
-**Stitch:** `screen.png` — TopBar has avatar left + settings icon right (Stitch layout is wrong; use default variant: hamburger left, ETHOS wordmark, avatar right). Background is `#FDFDFD` (use `surface` `#F4F4F0`).
+**Stitch:** `screen.png` — TopBar has avatar left + settings icon right (Stitch layout is wrong; use `tab` variant per `docs/COMPONENTS.md`: ETHOS wordmark left, avatar right, no hamburger). Background is `#FDFDFD` (use `surface` `#F4F4F0`).
 
 ## States
 - Loading — skeleton placeholders for alert stack and contract cards
@@ -21,7 +21,7 @@ The app's nerve centre — urgent actions, active contract summaries, and the en
 ## Sections
 
 ### TopBar
-`default` variant.
+`tab` variant.
 
 ### Alert Stack
 Zero or more `AlertBanner` components stacked with `gap-3`, no horizontal padding (full bleed to screen edge minus global `px-4`). Ordered by urgency: verification first, invite second, settle third.

@@ -19,7 +19,7 @@ Manage your one-way contacts list. Find users by tag, add them for quick access 
 ## Sections
 
 ### TopBar
-`default` variant.
+`tab` variant.
 
 ### Search Bar
 Full-width input, 3px border, `shadow-sm`, white background. Placeholder: "SEARCH BY TAG (e.g. alex4f2a)". Prefix search fires on each keystroke (debounced). Results appear in a list below, replacing the contacts list while the input is focused. Each result row: avatar + display name + tag. Non-contact result: "ADD" button (small, outlined, `ink` border). Already-a-contact result: "ADDED ✓" label (muted).

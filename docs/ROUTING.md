@@ -21,8 +21,10 @@ app/
     (tabs)/
       _layout.tsx                          ← Tab navigator. Renders the tab bar.
       dashboard.tsx                        → /dashboard
+      contracts.tsx                        → /contracts
       friends.tsx                          → /friends
-      profile.tsx                          → /profile
+
+    profile.tsx                            → /profile  (pushed from the TopBar avatar, not a tab)
 
     contract/
       [contractId]/
@@ -48,7 +50,8 @@ app/
 
 ## Key decisions
 
-- **Tab bar** renders only inside `(tabs)/`. Contract, evidence, and settlement screens are plain stack screens — no tab bar.
+- **Tab bar** renders only inside `(tabs)/`. Contract, evidence, settlement, and `profile` screens are plain stack screens — no tab bar.
+- **Profile is not a tab.** It's reached via the avatar on any tab-root screen's TopBar (`tab` variant) and pushed as a normal `stack`-variant screen. The third tab slot is `contracts` — a full list/history of the caller's contracts, distinct from Dashboard's curated alert-driven view.
 - **`cycleNumber`** is the integer cycle sequence number (1, 2, 3…), not the UUID. Matches `cycles.cycle_number` in the database.
 - **`resolutionId`** maps to `cycle_resolutions.id`. No separate debts table — the resolution is the settlement entity.
 - **Settlement screens at root** — `pay-up/` and `owed/` sit directly under `(app)/` because they are reached from both dashboard alerts and the settled contract screen, not exclusively from within a contract.
@@ -71,6 +74,9 @@ Auth
   /login         → /dashboard  (on success)
   /sign-up       → /dashboard  (on success)
   /reset-password → /login     (on success — password updated, user redirected to log in)
+
+Tab screens (Dashboard, Contracts, Friends)
+  tap TopBar avatar           → /profile
 
 Dashboard
   tap contract card          → /contract/[contractId]/[cycleNumber]/active
