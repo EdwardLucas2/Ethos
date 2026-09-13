@@ -24,7 +24,6 @@ export const ACTIVE_CONTRACTS = [
         cycleNumber: 3,
         startDate: '2026-08-29',
         endDate: '2026-09-05',
-        myProgress: { completed: 2, pending: 0, total: 3 },
         unreviewedEvidenceCount: 0,
         participants: [
             {
@@ -34,7 +33,6 @@ export const ACTIVE_CONTRACTS = [
                 completed: 2,
                 pending: 0,
                 total: 3,
-                isSelf: true,
             },
             {
                 userId: 'user-2',
@@ -43,7 +41,6 @@ export const ACTIVE_CONTRACTS = [
                 completed: 1,
                 pending: 1,
                 total: 3,
-                isSelf: false,
             },
         ],
     },
@@ -53,7 +50,6 @@ export const ACTIVE_CONTRACTS = [
         cycleNumber: 1,
         startDate: '2026-08-30',
         endDate: '2026-09-06',
-        myProgress: { completed: 0, pending: 0, total: 1 },
         unreviewedEvidenceCount: 2,
         participants: [
             {
@@ -63,7 +59,6 @@ export const ACTIVE_CONTRACTS = [
                 completed: 0,
                 pending: 0,
                 total: 1,
-                isSelf: true,
             },
             {
                 userId: 'user-3',
@@ -72,7 +67,6 @@ export const ACTIVE_CONTRACTS = [
                 completed: 1,
                 pending: 0,
                 total: 1,
-                isSelf: false,
             },
             {
                 userId: 'user-4',
@@ -81,7 +75,6 @@ export const ACTIVE_CONTRACTS = [
                 completed: 1,
                 pending: 0,
                 total: 1,
-                isSelf: false,
             },
         ],
     },
@@ -94,8 +87,8 @@ export const PENDING_CONTRACTS = [
         cycleNumber: 2,
         unreviewedEvidenceCount: 3,
         participants: [
-            { userId: 'user-1', displayName: 'Edward', completed: 3, total: 3, isSelf: true },
-            { userId: 'user-2', displayName: 'Alex', completed: 1, total: 3, isSelf: false },
+            { userId: 'user-1', displayName: 'Edward', completed: 3, total: 3 },
+            { userId: 'user-2', displayName: 'Alex', completed: 1, total: 3 },
         ],
     },
 ];

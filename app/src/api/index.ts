@@ -24,21 +24,21 @@ import type {
 
 import { customFetch } from './client';
 export interface ActiveParticipantResponse {
-  userId?: string;
-  displayName?: string;
   avatarUrl?: string;
-  completed: number;
+  displayName?: string;
   pending: number;
+  completed: number;
+  userId?: string;
   total: number;
 }
 
 export interface ActiveContractResponse {
+  endDate?: string;
   contractId?: string;
   name?: string;
-  cycleNumber: number;
-  startDate?: string;
-  endDate?: string;
   unreviewedEvidenceCount: number;
+  startDate?: string;
+  cycleNumber: number;
   participants?: ActiveParticipantResponse[];
 }
 
@@ -47,10 +47,10 @@ export interface AddContactRequest {
 }
 
 export interface ContactResponse {
-  id?: string;
-  displayName?: string;
-  tag?: string;
   avatarUrl?: string;
+  displayName?: string;
+  id?: string;
+  tag?: string;
 }
 
 export type ContractInvitedNotificationType = typeof ContractInvitedNotificationType[keyof typeof ContractInvitedNotificationType];
@@ -61,42 +61,42 @@ export const ContractInvitedNotificationType = {
 } as const;
 
 export interface ContractInvitedNotification {
-  id: string;
-  createdAt: string;
   type: ContractInvitedNotificationType;
   inviterName?: string;
+  createdAt: string;
   contractId: string;
   contractName?: string;
+  id: string;
 }
 
 export interface ContractParticipantResponse {
-  id?: string;
-  userId?: string;
-  habit?: string;
-  frequency?: number;
   signStatus?: string;
   optedOutOfNextCycle: boolean;
+  userId?: string;
+  frequency?: number;
+  habit?: string;
+  id?: string;
 }
 
 export interface ContractResponse {
-  id?: string;
-  name?: string;
-  forfeit?: string;
   period?: string;
-  startDate?: string;
-  status?: string;
-  currentCycleNumber?: number;
   creatorId?: string;
+  forfeit?: string;
+  currentCycleNumber?: number;
   createdAt?: string;
+  name?: string;
+  id?: string;
+  startDate?: string;
   participants?: ContractParticipantResponse[];
+  status?: string;
 }
 
 export interface ContractSummaryResponse {
+  opponentNames?: string[];
   contractId?: string;
   name?: string;
-  status?: string;
   cycleNumber?: number;
-  opponentNames?: string[];
+  status?: string;
 }
 
 export interface CreateUserRequest {
@@ -111,11 +111,11 @@ export const CyclePendingResolutionNotificationType = {
 } as const;
 
 export interface CyclePendingResolutionNotification {
-  id: string;
-  createdAt: string;
   type: CyclePendingResolutionNotificationType;
+  createdAt: string;
   contractId: string;
   contractName?: string;
+  id: string;
   cycleNumber: number;
 }
 
@@ -131,30 +131,14 @@ export const EvidenceUploadedNotificationType = {
 } as const;
 
 export interface EvidenceUploadedNotification {
-  id: string;
-  createdAt: string;
   type: EvidenceUploadedNotificationType;
-  submitterName?: string;
+  createdAt: string;
+  evidenceId: string;
   contractId: string;
   contractName?: string;
-  cycleNumber: number;
-  evidenceId: string;
-}
-
-export type PesterNotificationType = typeof PesterNotificationType[keyof typeof PesterNotificationType];
-
-
-export const PesterNotificationType = {
-  pester: 'pester',
-} as const;
-
-export interface PesterNotification {
   id: string;
-  createdAt: string;
-  type: PesterNotificationType;
-  resolutionId: string;
-  fromName?: string;
-  forfeit?: string;
+  submitterName?: string;
+  cycleNumber: number;
 }
 
 export type ResolutionLoserNotificationType = typeof ResolutionLoserNotificationType[keyof typeof ResolutionLoserNotificationType];
@@ -165,13 +149,13 @@ export const ResolutionLoserNotificationType = {
 } as const;
 
 export interface ResolutionLoserNotification {
-  id: string;
-  createdAt: string;
-  type: ResolutionLoserNotificationType;
   resolutionId: string;
-  contractName?: string;
-  forfeit?: string;
   winnerNames?: string[];
+  forfeit?: string;
+  type: ResolutionLoserNotificationType;
+  createdAt: string;
+  contractName?: string;
+  id: string;
 }
 
 export type ResolutionWinnerNotificationType = typeof ResolutionWinnerNotificationType[keyof typeof ResolutionWinnerNotificationType];
@@ -182,29 +166,45 @@ export const ResolutionWinnerNotificationType = {
 } as const;
 
 export interface ResolutionWinnerNotification {
-  id: string;
-  createdAt: string;
-  type: ResolutionWinnerNotificationType;
   resolutionId: string;
-  contractName?: string;
   forfeit?: string;
+  type: ResolutionWinnerNotificationType;
   loserNames?: string[];
+  createdAt: string;
+  contractName?: string;
+  id: string;
 }
 
-export type NotificationResponse = ContractInvitedNotification | CyclePendingResolutionNotification | EvidenceUploadedNotification | PesterNotification | ResolutionLoserNotification | ResolutionWinnerNotification;
+export type PesterNotificationType = typeof PesterNotificationType[keyof typeof PesterNotificationType];
+
+
+export const PesterNotificationType = {
+  pester: 'pester',
+} as const;
+
+export interface PesterNotification {
+  resolutionId: string;
+  forfeit?: string;
+  type: PesterNotificationType;
+  createdAt: string;
+  fromName?: string;
+  id: string;
+}
+
+export type NotificationResponse = CyclePendingResolutionNotification | ResolutionLoserNotification | ResolutionWinnerNotification | PesterNotification | ContractInvitedNotification | EvidenceUploadedNotification;
 
 export interface PendingParticipantResponse {
-  userId?: string;
   displayName?: string;
   completed: number;
+  userId?: string;
   total: number;
 }
 
 export interface PendingResolutionContractResponse {
   contractId?: string;
   contractName?: string;
-  cycleNumber: number;
   unreviewedEvidenceCount: number;
+  cycleNumber: number;
   participants?: PendingParticipantResponse[];
 }
 
@@ -213,18 +213,18 @@ export interface UpdateUserRequest {
 }
 
 export interface UserResponse {
-  id?: string;
+  avatarUrl?: string;
   displayName?: string;
+  id?: string;
   tag?: string;
   email?: string;
-  avatarUrl?: string;
 }
 
 export interface UserSearchResponse {
-  id?: string;
-  displayName?: string;
-  tag?: string;
   avatarUrl?: string;
+  displayName?: string;
+  id?: string;
+  tag?: string;
   isContact: boolean;
 }
 

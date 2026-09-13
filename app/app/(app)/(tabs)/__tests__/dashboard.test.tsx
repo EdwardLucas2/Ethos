@@ -56,7 +56,6 @@ const ACTIVE_CONTRACT = {
     cycleNumber: 3,
     startDate: '2026-01-01',
     endDate: '2099-01-01',
-    myProgress: { completed: 1, pending: 0, total: 3 },
     unreviewedEvidenceCount: 0,
     participants: [
         {
@@ -65,7 +64,6 @@ const ACTIVE_CONTRACT = {
             completed: 1,
             pending: 0,
             total: 3,
-            isSelf: true,
         },
         {
             userId: 'user-2',
@@ -73,7 +71,6 @@ const ACTIVE_CONTRACT = {
             completed: 2,
             pending: 0,
             total: 3,
-            isSelf: false,
         },
     ],
 };
@@ -84,7 +81,6 @@ const SQUAD_CONTRACT = {
     cycleNumber: 1,
     startDate: '2026-01-01',
     endDate: '2099-01-01',
-    myProgress: { completed: 1, pending: 0, total: 3 },
     unreviewedEvidenceCount: 1,
     participants: [
         {
@@ -93,7 +89,6 @@ const SQUAD_CONTRACT = {
             completed: 1,
             pending: 0,
             total: 3,
-            isSelf: true,
         },
         {
             userId: 'user-3',
@@ -101,7 +96,6 @@ const SQUAD_CONTRACT = {
             completed: 2,
             pending: 0,
             total: 3,
-            isSelf: false,
         },
         {
             userId: 'user-4',
@@ -109,7 +103,6 @@ const SQUAD_CONTRACT = {
             completed: 0,
             pending: 1,
             total: 3,
-            isSelf: false,
         },
     ],
 };
@@ -119,9 +112,7 @@ const PENDING_CONTRACT = {
     contractName: 'Morning Run',
     cycleNumber: 2,
     unreviewedEvidenceCount: 3,
-    participants: [
-        { userId: 'user-1', displayName: 'Edward', completed: 3, total: 3, isSelf: true },
-    ],
+    participants: [{ userId: 'user-1', displayName: 'Edward', completed: 3, total: 3 }],
 };
 
 const NOTIFICATION = {

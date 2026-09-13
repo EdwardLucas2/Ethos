@@ -9,8 +9,14 @@ import { TopBar } from '@/components/top-bar';
 import {
     ActiveContractResponse,
     ActiveParticipantResponse,
+    ContractInvitedNotification,
+    CyclePendingResolutionNotification,
+    EvidenceUploadedNotification,
     NotificationResponse,
     PendingResolutionContractResponse,
+    PesterNotification,
+    ResolutionLoserNotification,
+    ResolutionWinnerNotification,
     getGetContractsMeActiveQueryKey,
     getGetContractsMePendingResolutionQueryKey,
     getGetNotificationsQueryKey,
@@ -39,8 +45,8 @@ type AlertEntry = {
     priority: number;
 };
 
-function evidenceUploadedAlert(n: NotificationResponse): AlertEntry | null {
-    if (!n.contractId || n.cycleNumber === undefined || !n.evidenceId) return null;
+function evidenceUploadedAlert(n: EvidenceUploadedNotification): AlertEntry | null {
+    if (!n.contractId || !n.evidenceId) return null;
     return {
         key: n.id ?? `${n.type}-${n.evidenceId}`,
         type: 'verify',
@@ -51,7 +57,7 @@ function evidenceUploadedAlert(n: NotificationResponse): AlertEntry | null {
     };
 }
 
-function contractInvitedAlert(n: NotificationResponse): AlertEntry | null {
+function contractInvitedAlert(n: ContractInvitedNotification): AlertEntry | null {
     if (!n.contractId) return null;
     return {
         key: n.id ?? `${n.type}-${n.contractId}`,
@@ -63,8 +69,8 @@ function contractInvitedAlert(n: NotificationResponse): AlertEntry | null {
     };
 }
 
-function cyclePendingResolutionAlert(n: NotificationResponse): AlertEntry | null {
-    if (!n.contractId || n.cycleNumber === undefined) return null;
+function cyclePendingResolutionAlert(n: CyclePendingResolutionNotification): AlertEntry | null {
+    if (!n.contractId) return null;
     return {
         key: n.id ?? `${n.type}-${n.contractId}`,
         type: 'settle',
@@ -75,7 +81,7 @@ function cyclePendingResolutionAlert(n: NotificationResponse): AlertEntry | null
     };
 }
 
-function resolutionWinnerAlert(n: NotificationResponse): AlertEntry | null {
+function resolutionWinnerAlert(n: ResolutionWinnerNotification): AlertEntry | null {
     if (!n.resolutionId) return null;
     return {
         key: n.id ?? `${n.type}-${n.resolutionId}`,
@@ -87,7 +93,9 @@ function resolutionWinnerAlert(n: NotificationResponse): AlertEntry | null {
     };
 }
 
-function resolutionLoserOrPesterAlert(n: NotificationResponse): AlertEntry | null {
+function resolutionLoserOrPesterAlert(
+    n: ResolutionLoserNotification | PesterNotification
+): AlertEntry | null {
     if (!n.resolutionId) return null;
     return {
         key: n.id ?? `${n.type}-${n.resolutionId}`,
@@ -115,8 +123,6 @@ function toAlertEntry(n: NotificationResponse): AlertEntry | null {
         case 'resolution_loser':
         case 'pester':
             return resolutionLoserOrPesterAlert(n);
-        default:
-            return null;
     }
 }
 
@@ -141,29 +147,44 @@ function formatTimeRemaining(dateString: string | undefined): string {
 }
 
 function opponentsOf(
-    participants: ActiveParticipantResponse[] | undefined
+    participants: ActiveParticipantResponse[] | undefined,
+    currentUserId: string | undefined
 ): ActiveParticipantResponse[] {
-    return (participants ?? []).filter((p) => !p.isSelf);
+    return (participants ?? []).filter((p) => p.userId !== currentUserId);
 }
 
-function opponentLabel(participants: ActiveParticipantResponse[] | undefined): string {
-    const opponents = opponentsOf(participants);
+function myParticipant(
+    participants: ActiveParticipantResponse[] | undefined,
+    currentUserId: string | undefined
+): ActiveParticipantResponse | undefined {
+    return participants?.find((p) => p.userId === currentUserId);
+}
+
+function opponentLabel(
+    participants: ActiveParticipantResponse[] | undefined,
+    currentUserId: string | undefined
+): string {
+    const opponents = opponentsOf(participants, currentUserId);
     if (opponents.length === 0) return 'SOLO';
     if (opponents.length === 1) return `VS ${(opponents[0]?.displayName ?? '').toUpperCase()}`;
     return 'SQUAD BATTLE';
 }
 
-function ctaFor(contract: ActiveContractResponse): { state: CtaState; label: string } {
+function ctaFor(
+    contract: ActiveContractResponse,
+    currentUserId: string | undefined
+): { state: CtaState; label: string } {
     if ((contract.unreviewedEvidenceCount ?? 0) > 0) {
-        const opponents = opponentsOf(contract.participants);
+        const opponents = opponentsOf(contract.participants, currentUserId);
         const label =
             opponents.length === 1
                 ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
                 : 'REVIEW PROOF';
         return { state: 'review', label };
     }
-    const completed = contract.myProgress?.completed ?? 0;
-    const total = contract.myProgress?.total ?? 0;
+    const mine = myParticipant(contract.participants, currentUserId);
+    const completed = mine?.completed ?? 0;
+    const total = mine?.total ?? 0;
     if (completed < total) {
         return {
             state: daysUntil(contract.endDate) <= 1 ? 'snap-urgent' : 'snap',
@@ -290,11 +311,13 @@ function AlertStackSection({
 function ActiveArenaSection({
     contracts,
     count,
+    currentUserId,
     onOpen,
     onCta,
 }: {
     contracts: ActiveContractResponse[] | undefined;
     count: number;
+    currentUserId: string | undefined;
     onOpen: (contract: ActiveContractResponse) => void;
     onCta: (contract: ActiveContractResponse, cta: { state: CtaState; label: string }) => void;
 }) {
@@ -308,16 +331,17 @@ function ActiveArenaSection({
                 </View>
             </View>
             {contracts?.map((contract) => {
-                const cta = ctaFor(contract);
+                const cta = ctaFor(contract, currentUserId);
+                const mine = myParticipant(contract.participants, currentUserId);
                 return (
                     <ActiveContractCard
                         key={contract.contractId}
                         testID={`active-contract-card-${contract.contractId}`}
                         contractName={contract.name ?? ''}
-                        opponentLabel={opponentLabel(contract.participants)}
-                        verified={contract.myProgress?.completed ?? 0}
-                        pending={contract.myProgress?.pending ?? 0}
-                        total={contract.myProgress?.total ?? 0}
+                        opponentLabel={opponentLabel(contract.participants, currentUserId)}
+                        verified={mine?.completed ?? 0}
+                        pending={mine?.pending ?? 0}
+                        total={mine?.total ?? 0}
                         timeRemaining={formatTimeRemaining(contract.endDate)}
                         ctaState={cta.state}
                         ctaLabel={cta.label}
@@ -420,6 +444,7 @@ export default function DashboardScreen() {
                             <ActiveArenaSection
                                 contracts={activeContracts}
                                 count={activeCount}
+                                currentUserId={me?.id}
                                 onOpen={(contract) =>
                                     router.push(
                                         `/contract/${contract.contractId}/${contract.cycleNumber}/active` as Href
