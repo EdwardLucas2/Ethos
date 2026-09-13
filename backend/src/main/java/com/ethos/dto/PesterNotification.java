@@ -15,6 +15,12 @@ public record PesterNotification(
         String forfeit)
         implements NotificationResponse {
 
+    public PesterNotification {
+        if (!"pester".equals(type)) {
+            throw new IllegalArgumentException("type must be \"pester\", was: " + type);
+        }
+    }
+
     public PesterNotification(UUID id, Instant createdAt, UUID resolutionId, String fromName, String forfeit) {
         this(id, createdAt, "pester", resolutionId, fromName, forfeit);
     }

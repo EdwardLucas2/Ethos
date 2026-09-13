@@ -13,6 +13,8 @@ import java.util.UUID;
 
 public class NotificationHandler {
 
+    private static final String TAG_NOTIFICATIONS = "notifications";
+
     private final NotificationService notificationService;
 
     public NotificationHandler(NotificationService notificationService) {
@@ -27,7 +29,7 @@ public class NotificationHandler {
                     + " context needed to render each Dashboard alert. Only unread (read_at IS NULL) rows are"
                     + " returned. Frontend is responsible for ordering by urgency (verify, challenge, settle, owed,"
                     + " pay-up).",
-            tags = {"notifications"},
+            tags = {TAG_NOTIFICATIONS},
             responses = {
                 @OpenApiResponse(
                         status = "200",

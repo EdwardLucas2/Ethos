@@ -7,9 +7,9 @@ import io.javalin.openapi.OneOf;
 /**
  * One variant per notification kind, discriminated by {@code type}. Each variant only carries the
  * fields that notification actually needs — see docs/API.md's Dashboard section for the JSON shape
- * per type. {@code type}'s value always matches the variant's {@link DiscriminatorMappingName} below;
- * every variant sets it via its convenience constructor rather than trusting callers to spell it
- * correctly.
+ * per type. {@code type}'s value always matches the variant's {@code @DiscriminatorMappingName}
+ * annotation; every variant's compact constructor rejects any other value, and the convenience
+ * constructor supplies it automatically rather than trusting callers to spell it correctly.
  */
 @OneOf(
         value = {},

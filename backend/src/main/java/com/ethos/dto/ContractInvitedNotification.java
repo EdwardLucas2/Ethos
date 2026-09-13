@@ -15,6 +15,12 @@ public record ContractInvitedNotification(
         String contractName)
         implements NotificationResponse {
 
+    public ContractInvitedNotification {
+        if (!"contract_invited".equals(type)) {
+            throw new IllegalArgumentException("type must be \"contract_invited\", was: " + type);
+        }
+    }
+
     public ContractInvitedNotification(
             UUID id, Instant createdAt, String inviterName, UUID contractId, String contractName) {
         this(id, createdAt, "contract_invited", inviterName, contractId, contractName);

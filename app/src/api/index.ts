@@ -24,22 +24,22 @@ import type {
 
 import { customFetch } from './client';
 export interface ActiveParticipantResponse {
-  avatarUrl?: string;
+  userId: string;
   displayName?: string;
-  pending: number;
+  avatarUrl?: string;
   completed: number;
-  userId?: string;
+  pending: number;
   total: number;
 }
 
 export interface ActiveContractResponse {
-  endDate?: string;
-  contractId?: string;
-  name?: string;
-  unreviewedEvidenceCount: number;
-  startDate?: string;
+  contractId: string;
+  name: string;
   cycleNumber: number;
-  participants?: ActiveParticipantResponse[];
+  startDate: string;
+  endDate: string;
+  unreviewedEvidenceCount: number;
+  participants: ActiveParticipantResponse[];
 }
 
 export interface AddContactRequest {
@@ -47,10 +47,10 @@ export interface AddContactRequest {
 }
 
 export interface ContactResponse {
-  avatarUrl?: string;
-  displayName?: string;
   id?: string;
+  displayName?: string;
   tag?: string;
+  avatarUrl?: string;
 }
 
 export type ContractInvitedNotificationType = typeof ContractInvitedNotificationType[keyof typeof ContractInvitedNotificationType];
@@ -61,42 +61,42 @@ export const ContractInvitedNotificationType = {
 } as const;
 
 export interface ContractInvitedNotification {
+  id: string;
+  createdAt: string;
   type: ContractInvitedNotificationType;
   inviterName?: string;
-  createdAt: string;
   contractId: string;
   contractName?: string;
-  id: string;
 }
 
 export interface ContractParticipantResponse {
+  id?: string;
+  userId?: string;
+  habit?: string;
+  frequency?: number;
   signStatus?: string;
   optedOutOfNextCycle: boolean;
-  userId?: string;
-  frequency?: number;
-  habit?: string;
-  id?: string;
 }
 
 export interface ContractResponse {
-  period?: string;
-  creatorId?: string;
-  forfeit?: string;
-  currentCycleNumber?: number;
-  createdAt?: string;
-  name?: string;
   id?: string;
+  name?: string;
+  forfeit?: string;
+  period?: string;
   startDate?: string;
-  participants?: ContractParticipantResponse[];
   status?: string;
+  currentCycleNumber?: number;
+  creatorId?: string;
+  createdAt?: string;
+  participants?: ContractParticipantResponse[];
 }
 
 export interface ContractSummaryResponse {
-  opponentNames?: string[];
   contractId?: string;
   name?: string;
-  cycleNumber?: number;
   status?: string;
+  cycleNumber?: number;
+  opponentNames?: string[];
 }
 
 export interface CreateUserRequest {
@@ -111,11 +111,11 @@ export const CyclePendingResolutionNotificationType = {
 } as const;
 
 export interface CyclePendingResolutionNotification {
-  type: CyclePendingResolutionNotificationType;
+  id: string;
   createdAt: string;
+  type: CyclePendingResolutionNotificationType;
   contractId: string;
   contractName?: string;
-  id: string;
   cycleNumber: number;
 }
 
@@ -131,48 +131,14 @@ export const EvidenceUploadedNotificationType = {
 } as const;
 
 export interface EvidenceUploadedNotification {
-  type: EvidenceUploadedNotificationType;
+  id: string;
   createdAt: string;
-  evidenceId: string;
+  type: EvidenceUploadedNotificationType;
+  submitterName?: string;
   contractId: string;
   contractName?: string;
-  id: string;
-  submitterName?: string;
   cycleNumber: number;
-}
-
-export type ResolutionLoserNotificationType = typeof ResolutionLoserNotificationType[keyof typeof ResolutionLoserNotificationType];
-
-
-export const ResolutionLoserNotificationType = {
-  resolution_loser: 'resolution_loser',
-} as const;
-
-export interface ResolutionLoserNotification {
-  resolutionId: string;
-  winnerNames?: string[];
-  forfeit?: string;
-  type: ResolutionLoserNotificationType;
-  createdAt: string;
-  contractName?: string;
-  id: string;
-}
-
-export type ResolutionWinnerNotificationType = typeof ResolutionWinnerNotificationType[keyof typeof ResolutionWinnerNotificationType];
-
-
-export const ResolutionWinnerNotificationType = {
-  resolution_winner: 'resolution_winner',
-} as const;
-
-export interface ResolutionWinnerNotification {
-  resolutionId: string;
-  forfeit?: string;
-  type: ResolutionWinnerNotificationType;
-  loserNames?: string[];
-  createdAt: string;
-  contractName?: string;
-  id: string;
+  evidenceId: string;
 }
 
 export type PesterNotificationType = typeof PesterNotificationType[keyof typeof PesterNotificationType];
@@ -183,29 +149,63 @@ export const PesterNotificationType = {
 } as const;
 
 export interface PesterNotification {
-  resolutionId: string;
-  forfeit?: string;
-  type: PesterNotificationType;
-  createdAt: string;
-  fromName?: string;
   id: string;
+  createdAt: string;
+  type: PesterNotificationType;
+  resolutionId: string;
+  fromName?: string;
+  forfeit?: string;
 }
 
-export type NotificationResponse = CyclePendingResolutionNotification | ResolutionLoserNotification | ResolutionWinnerNotification | PesterNotification | ContractInvitedNotification | EvidenceUploadedNotification;
+export type ResolutionLoserNotificationType = typeof ResolutionLoserNotificationType[keyof typeof ResolutionLoserNotificationType];
+
+
+export const ResolutionLoserNotificationType = {
+  resolution_loser: 'resolution_loser',
+} as const;
+
+export interface ResolutionLoserNotification {
+  id: string;
+  createdAt: string;
+  type: ResolutionLoserNotificationType;
+  resolutionId: string;
+  contractName?: string;
+  forfeit?: string;
+  winnerNames?: string[];
+}
+
+export type ResolutionWinnerNotificationType = typeof ResolutionWinnerNotificationType[keyof typeof ResolutionWinnerNotificationType];
+
+
+export const ResolutionWinnerNotificationType = {
+  resolution_winner: 'resolution_winner',
+} as const;
+
+export interface ResolutionWinnerNotification {
+  id: string;
+  createdAt: string;
+  type: ResolutionWinnerNotificationType;
+  resolutionId: string;
+  contractName?: string;
+  forfeit?: string;
+  loserNames?: string[];
+}
+
+export type NotificationResponse = ContractInvitedNotification | CyclePendingResolutionNotification | EvidenceUploadedNotification | PesterNotification | ResolutionLoserNotification | ResolutionWinnerNotification;
 
 export interface PendingParticipantResponse {
+  userId: string;
   displayName?: string;
   completed: number;
-  userId?: string;
   total: number;
 }
 
 export interface PendingResolutionContractResponse {
-  contractId?: string;
-  contractName?: string;
-  unreviewedEvidenceCount: number;
+  contractId: string;
+  contractName: string;
   cycleNumber: number;
-  participants?: PendingParticipantResponse[];
+  unreviewedEvidenceCount: number;
+  participants: PendingParticipantResponse[];
 }
 
 export interface UpdateUserRequest {
@@ -213,18 +213,18 @@ export interface UpdateUserRequest {
 }
 
 export interface UserResponse {
-  avatarUrl?: string;
-  displayName?: string;
   id?: string;
+  displayName?: string;
   tag?: string;
   email?: string;
+  avatarUrl?: string;
 }
 
 export interface UserSearchResponse {
-  avatarUrl?: string;
-  displayName?: string;
   id?: string;
+  displayName?: string;
   tag?: string;
+  avatarUrl?: string;
   isContact: boolean;
 }
 

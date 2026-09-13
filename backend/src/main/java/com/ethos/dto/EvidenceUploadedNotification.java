@@ -17,6 +17,12 @@ public record EvidenceUploadedNotification(
         @OpenApiRequired UUID evidenceId)
         implements NotificationResponse {
 
+    public EvidenceUploadedNotification {
+        if (!"evidence_uploaded".equals(type)) {
+            throw new IllegalArgumentException("type must be \"evidence_uploaded\", was: " + type);
+        }
+    }
+
     public EvidenceUploadedNotification(
             UUID id,
             Instant createdAt,
