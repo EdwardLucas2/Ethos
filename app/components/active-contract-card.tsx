@@ -1,12 +1,11 @@
 import { Button } from '@/components/button';
+import { PressableCard } from '@/components/pressable-card';
 import { ProgressBar } from '@/components/progress-bar';
-import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 export type CtaState = 'snap' | 'snap-urgent' | 'review' | 'caught-up';
-
-const SHADOW = offsetShadow(8);
 
 export type Progress = {
     verified: number;
@@ -37,84 +36,90 @@ const CTA_BACKGROUND: Record<CtaState, string> = {
     'caught-up': colors.inkSecondary,
 };
 
-export function ActiveContractCard({
+function CardHeader({
     contractName,
     opponentLabel,
-    progress,
     timeRemaining,
-    cta,
-    onPress,
-    onCta,
-    testID = 'active-contract-card',
-}: ActiveContractCardProps) {
+    urgent,
+}: {
+    contractName: string;
+    opponentLabel: string;
+    timeRemaining: string;
+    urgent: boolean;
+}) {
+    return (
+        <View style={styles.header}>
+            <View style={styles.titleBlock}>
+                <Text style={styles.title}>{contractName}</Text>
+                <Text style={styles.subtitle}>{opponentLabel}</Text>
+            </View>
+            <View style={[styles.timeBadge, urgent && styles.timeBadgeUrgent]}>
+                {urgent && <AntDesign name="warning" size={12} color={colors.red} />}
+                <Text style={[styles.timeText, urgent && styles.timeTextUrgent]}>
+                    {timeRemaining}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+function CardProgress({ verified, pending, total }: Progress) {
+    return (
+        <View style={styles.progressBlock}>
+            <View style={styles.progressLabelRow}>
+                <Text style={styles.progressLabel}>Progress</Text>
+                <Text style={styles.progressLabel}>
+                    {verified}/{total} Verified
+                </Text>
+            </View>
+            <ProgressBar verified={verified} pending={pending} total={total} size="compact" />
+        </View>
+    );
+}
+
+export function ActiveContractCard(props: ActiveContractCardProps) {
+    const {
+        contractName,
+        opponentLabel,
+        progress,
+        timeRemaining,
+        cta,
+        onPress,
+        onCta,
+        testID = 'active-contract-card',
+    } = props;
     const { verified, pending, total } = progress;
     const { state: ctaState, label: ctaLabel } = cta;
     const urgent = ctaState === 'snap-urgent';
     const caughtUp = ctaState === 'caught-up';
 
     return (
-        <View style={styles.wrapper}>
-            <View style={SHADOW.box} />
-            <Pressable
-                testID={testID}
-                onPress={onPress}
-                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-            >
-                <View style={styles.header}>
-                    <View style={styles.titleBlock}>
-                        <Text style={styles.title}>{contractName}</Text>
-                        <Text style={styles.subtitle}>{opponentLabel}</Text>
-                    </View>
-                    <View style={[styles.timeBadge, urgent && styles.timeBadgeUrgent]}>
-                        {urgent && <AntDesign name="warning" size={12} color={colors.red} />}
-                        <Text style={[styles.timeText, urgent && styles.timeTextUrgent]}>
-                            {timeRemaining}
-                        </Text>
-                    </View>
-                </View>
+        <PressableCard testID={testID} onPress={onPress} shadowSize={8} cardStyle={styles.card}>
+            <CardHeader
+                contractName={contractName}
+                opponentLabel={opponentLabel}
+                timeRemaining={timeRemaining}
+                urgent={urgent}
+            />
 
-                <View style={styles.progressBlock}>
-                    <View style={styles.progressLabelRow}>
-                        <Text style={styles.progressLabel}>Progress</Text>
-                        <Text style={styles.progressLabel}>
-                            {verified}/{total} Verified
-                        </Text>
-                    </View>
-                    <ProgressBar
-                        verified={verified}
-                        pending={pending}
-                        total={total}
-                        size="compact"
-                    />
-                </View>
+            <CardProgress verified={verified} pending={pending} total={total} />
 
-                <Button
-                    testID={`${testID}-cta`}
-                    label={ctaLabel}
-                    onPress={onCta}
-                    disabled={caughtUp}
-                    backgroundColor={CTA_BACKGROUND[ctaState]}
-                    icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
-                    labelStyle={styles.ctaLabel}
-                />
-            </Pressable>
-        </View>
+            <Button
+                testID={`${testID}-cta`}
+                label={ctaLabel}
+                onPress={onCta}
+                disabled={caughtUp}
+                backgroundColor={CTA_BACKGROUND[ctaState]}
+                icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
+                labelStyle={styles.ctaLabel}
+            />
+        </PressableCard>
     );
 }
 
 const styles = StyleSheet.create({
-    wrapper: {
-        width: '100%',
-    },
     card: {
         backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.lg,
-        ...SHADOW.faceMargin,
-    },
-    cardPressed: {
-        transform: [{ translateX: 2 }, { translateY: 2 }],
     },
     header: {
         flexDirection: 'row',
