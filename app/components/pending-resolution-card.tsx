@@ -1,8 +1,7 @@
+import { PressableCard } from '@/components/pressable-card';
 import { ProgressBar } from '@/components/progress-bar';
-import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-const SHADOW = offsetShadow(4);
+import { borderWidth, colors, spacing, typography } from '@/constants/theme';
+import { StyleSheet, Text, View } from 'react-native';
 
 export type PendingResolutionCardProps = {
     contractName: string;
@@ -22,45 +21,36 @@ export function PendingResolutionCard({
     testID = 'pending-resolution-card',
 }: PendingResolutionCardProps) {
     return (
-        <View style={styles.wrapper}>
-            <View style={SHADOW.box} />
-            <Pressable
-                testID={testID}
-                onPress={onPress}
-                style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-            >
-                <View style={styles.header}>
-                    <Text style={styles.title}>{contractName}</Text>
-                    <View style={styles.reviewsBadge}>
-                        <Text style={styles.reviewsNeeded}>
-                            {reviewsNeeded} {reviewsNeeded === 1 ? 'REVIEW' : 'REVIEWS'} NEEDED
-                        </Text>
-                    </View>
+        <PressableCard
+            testID={testID}
+            onPress={onPress}
+            shadowSize={4}
+            wrapperStyle={styles.wrapper}
+            cardStyle={styles.card}
+        >
+            <View style={styles.header}>
+                <Text style={styles.title}>{contractName}</Text>
+                <View style={styles.reviewsBadge}>
+                    <Text style={styles.reviewsNeeded}>
+                        {reviewsNeeded} {reviewsNeeded === 1 ? 'REVIEW' : 'REVIEWS'} NEEDED
+                    </Text>
                 </View>
-                <Text style={styles.summary}>
-                    {verified}/{total} VERIFIED
-                </Text>
-                <ProgressBar verified={verified} pending={0} total={total} size="compact" />
-            </Pressable>
-        </View>
+            </View>
+            <Text style={styles.summary}>
+                {verified}/{total} VERIFIED
+            </Text>
+            <ProgressBar verified={verified} pending={0} total={total} size="compact" />
+        </PressableCard>
     );
 }
 
 const styles = StyleSheet.create({
     wrapper: {
-        width: '100%',
         marginBottom: spacing.sm,
     },
     card: {
         backgroundColor: colors.surface,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.lg,
         opacity: 0.85,
-        ...SHADOW.faceMargin,
-    },
-    pressed: {
-        transform: [{ translateX: 2 }, { translateY: 2 }],
     },
     header: {
         flexDirection: 'row',

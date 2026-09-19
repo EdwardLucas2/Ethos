@@ -1,12 +1,11 @@
 import { Button } from '@/components/button';
+import { PressableCard } from '@/components/pressable-card';
 import { ProgressBar } from '@/components/progress-bar';
-import { borderWidth, colors, offsetShadow, spacing, typography } from '@/constants/theme';
+import { borderWidth, colors, spacing, typography } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 export type CtaState = 'snap' | 'snap-urgent' | 'review' | 'caught-up';
-
-const SHADOW = offsetShadow(8);
 
 export type Progress = {
     verified: number;
@@ -95,49 +94,32 @@ export function ActiveContractCard(props: ActiveContractCardProps) {
     const caughtUp = ctaState === 'caught-up';
 
     return (
-        <View style={styles.wrapper}>
-            <View style={SHADOW.box} />
-            <Pressable
-                testID={testID}
-                onPress={onPress}
-                style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-            >
-                <CardHeader
-                    contractName={contractName}
-                    opponentLabel={opponentLabel}
-                    timeRemaining={timeRemaining}
-                    urgent={urgent}
-                />
+        <PressableCard testID={testID} onPress={onPress} shadowSize={8} cardStyle={styles.card}>
+            <CardHeader
+                contractName={contractName}
+                opponentLabel={opponentLabel}
+                timeRemaining={timeRemaining}
+                urgent={urgent}
+            />
 
-                <CardProgress verified={verified} pending={pending} total={total} />
+            <CardProgress verified={verified} pending={pending} total={total} />
 
-                <Button
-                    testID={`${testID}-cta`}
-                    label={ctaLabel}
-                    onPress={onCta}
-                    disabled={caughtUp}
-                    backgroundColor={CTA_BACKGROUND[ctaState]}
-                    icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
-                    labelStyle={styles.ctaLabel}
-                />
-            </Pressable>
-        </View>
+            <Button
+                testID={`${testID}-cta`}
+                label={ctaLabel}
+                onPress={onCta}
+                disabled={caughtUp}
+                backgroundColor={CTA_BACKGROUND[ctaState]}
+                icon={ctaState === 'snap' || ctaState === 'snap-urgent' ? 'camera' : undefined}
+                labelStyle={styles.ctaLabel}
+            />
+        </PressableCard>
     );
 }
 
 const styles = StyleSheet.create({
-    wrapper: {
-        width: '100%',
-    },
     card: {
         backgroundColor: colors.surfaceRaised,
-        borderWidth: borderWidth.structural,
-        borderColor: colors.ink,
-        padding: spacing.lg,
-        ...SHADOW.faceMargin,
-    },
-    cardPressed: {
-        transform: [{ translateX: 2 }, { translateY: 2 }],
     },
     header: {
         flexDirection: 'row',
