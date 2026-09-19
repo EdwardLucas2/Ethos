@@ -133,15 +133,14 @@ const mockMutateAsync = jest.fn();
 function mockQueries(
     overrides: { notifications?: unknown[]; active?: unknown[]; pending?: unknown[] } = {}
 ) {
-    jest.mocked(useGetNotifications).mockReturnValue(
-        successOf(overrides.notifications ?? []) as never
-    );
-    jest.mocked(useGetContractsMeActive).mockReturnValue(
-        successOf(overrides.active ?? []) as never
-    );
-    jest.mocked(useGetContractsMePendingResolution).mockReturnValue(
-        successOf(overrides.pending ?? []) as never
-    );
+    const hooks = [
+        [useGetNotifications, overrides.notifications] as const,
+        [useGetContractsMeActive, overrides.active] as const,
+        [useGetContractsMePendingResolution, overrides.pending] as const,
+    ];
+    hooks.forEach(([hook, data]) => {
+        jest.mocked(hook).mockReturnValue(successOf(data ?? []) as never);
+    });
 }
 
 beforeEach(() => {

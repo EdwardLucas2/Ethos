@@ -30,7 +30,7 @@ import { useAuth } from '@/src/context/AuthContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
 import { Href, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { cloneElement, ReactElement, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { styles } from './dashboard.styles';
 
@@ -177,28 +177,53 @@ function opponentLabel(
     return 'SQUAD BATTLE';
 }
 
+function evidenceReviewCta(
+    contract: ActiveContractResponse,
+    currentUserId: string | undefined
+): { state: CtaState; label: string } | null {
+    if ((contract.unreviewedEvidenceCount ?? 0) === 0) return null;
+    const opponents = opponentsOf(contract.participants, currentUserId);
+    const label =
+        opponents.length === 1
+            ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
+            : 'REVIEW PROOF';
+    return { state: 'review', label };
+}
+
+function myCompletion(
+    participants: ActiveParticipantResponse[] | undefined,
+    currentUserId: string | undefined
+): { completed: number; total: number } {
+    const mine = myParticipant(participants, currentUserId);
+    return { completed: mine?.completed ?? 0, total: mine?.total ?? 0 };
+}
+
+function progressCta(
+    contract: ActiveContractResponse,
+    currentUserId: string | undefined
+): { state: CtaState; label: string } {
+    const { completed, total } = myCompletion(contract.participants, currentUserId);
+    if (completed >= total) return { state: 'caught-up', label: 'ALL CAUGHT UP' };
+    return {
+        state: daysUntil(contract.endDate) <= 1 ? 'snap-urgent' : 'snap',
+        label: 'SNAP PROOF',
+    };
+}
+
 function ctaFor(
     contract: ActiveContractResponse,
     currentUserId: string | undefined
 ): { state: CtaState; label: string } {
-    if ((contract.unreviewedEvidenceCount ?? 0) > 0) {
-        const opponents = opponentsOf(contract.participants, currentUserId);
-        const label =
-            opponents.length === 1
-                ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
-                : 'REVIEW PROOF';
-        return { state: 'review', label };
-    }
-    const mine = myParticipant(contract.participants, currentUserId);
-    const completed = mine?.completed ?? 0;
-    const total = mine?.total ?? 0;
-    if (completed < total) {
-        return {
-            state: daysUntil(contract.endDate) <= 1 ? 'snap-urgent' : 'snap',
-            label: 'SNAP PROOF',
-        };
-    }
-    return { state: 'caught-up', label: 'ALL CAUGHT UP' };
+    return evidenceReviewCta(contract, currentUserId) ?? progressCta(contract, currentUserId);
+}
+
+// A contract's detail routes all share this shape — collects the repeated
+// `/contract/${id}/${cycle}/...` template into one place.
+function contractPath(
+    contract: { contractId: string; cycleNumber: number },
+    segment: string
+): Href {
+    return `/contract/${contract.contractId}/${contract.cycleNumber}/${segment}` as Href;
 }
 
 // ─── Data + mutation hooks ──────────────────────────────────────────────────
@@ -234,6 +259,15 @@ function useAlerts(notifications: NotificationResponse[] | undefined) {
     );
 }
 
+function isDashboardEmpty(
+    isLoading: boolean,
+    activeCount: number,
+    pendingCount: number,
+    alertCount: number
+): boolean {
+    return !isLoading && activeCount === 0 && pendingCount === 0 && alertCount === 0;
+}
+
 function useDashboardData() {
     const { me, notifications, activeContracts, pendingContracts, isLoading, isError } =
         useDashboardQueries();
@@ -241,7 +275,7 @@ function useDashboardData() {
 
     const activeCount = activeContracts?.length ?? 0;
     const pendingCount = pendingContracts?.length ?? 0;
-    const isEmpty = !isLoading && activeCount === 0 && pendingCount === 0 && alerts.length === 0;
+    const isEmpty = isDashboardEmpty(isLoading, activeCount, pendingCount, alerts.length);
 
     return {
         me,
@@ -302,20 +336,19 @@ function useDashboardNavigation(router: ReturnType<typeof useRouter>) {
     return {
         openAlert: (href: Href) => router.push(href),
         openActiveContract: (contract: ActiveContractResponse) =>
-            router.push(`/contract/${contract.contractId}/${contract.cycleNumber}/active` as Href),
+            router.push(contractPath(contract, 'active')),
         handleActiveCta: (
             contract: ActiveContractResponse,
             cta: { state: CtaState; label: string }
         ) =>
             router.push(
-                (cta.state === 'review'
-                    ? `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/review`
-                    : `/contract/${contract.contractId}/${contract.cycleNumber}/evidence/upload`) as Href
+                contractPath(
+                    contract,
+                    cta.state === 'review' ? 'evidence/review' : 'evidence/upload'
+                )
             ),
         openPendingContract: (contract: PendingResolutionContractResponse) =>
-            router.push(
-                `/contract/${contract.contractId}/${contract.cycleNumber}/unsettled` as Href
-            ),
+            router.push(contractPath(contract, 'unsettled')),
     };
 }
 
@@ -343,6 +376,17 @@ function AlertStackSection({
             ))}
         </View>
     );
+}
+
+// Shared key-wiring for a section's list of contract rows — both sections
+// below rendered an identical map+key shape here, which Codacy's clone
+// detector flagged as duplication once each row was its own component.
+// Deliberately not generic: a TS generic type param on this function
+// (`<T extends ...>`) makes Lizard's TSX parser lose track of every
+// function after it in the file, so callers build the {contractId,
+// element} pairs themselves (still fully typed) and this just wires keys.
+function ContractRows({ rows }: { rows: { contractId: string; element: ReactElement }[] }) {
+    return <>{rows.map(({ contractId, element }) => cloneElement(element, { key: contractId }))}</>;
 }
 
 function ActiveContractRow({
@@ -398,15 +442,19 @@ function ActiveArenaSection({
                     <Text style={styles.countBadgeText}>{count} live</Text>
                 </View>
             </View>
-            {contracts?.map((contract) => (
-                <ActiveContractRow
-                    key={contract.contractId}
-                    contract={contract}
-                    currentUserId={currentUserId}
-                    onOpen={onOpen}
-                    onCta={onCta}
-                />
-            ))}
+            <ContractRows
+                rows={(contracts ?? []).map((contract) => ({
+                    contractId: contract.contractId,
+                    element: (
+                        <ActiveContractRow
+                            contract={contract}
+                            currentUserId={currentUserId}
+                            onOpen={onOpen}
+                            onCta={onCta}
+                        />
+                    ),
+                }))}
+            />
         </View>
     );
 }
@@ -450,14 +498,18 @@ function PendingResolutionSection({
             <View style={styles.sectionHeaderRow}>
                 <Text style={styles.sectionHeader}>Last Week</Text>
             </View>
-            {contracts?.map((contract) => (
-                <PendingResolutionRow
-                    key={contract.contractId}
-                    contract={contract}
-                    currentUserId={currentUserId}
-                    onOpen={onOpen}
-                />
-            ))}
+            <ContractRows
+                rows={(contracts ?? []).map((contract) => ({
+                    contractId: contract.contractId,
+                    element: (
+                        <PendingResolutionRow
+                            contract={contract}
+                            currentUserId={currentUserId}
+                            onOpen={onOpen}
+                        />
+                    ),
+                }))}
+            />
         </View>
     );
 }
