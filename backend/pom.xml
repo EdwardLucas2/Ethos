@@ -76,6 +76,13 @@
             <version>${jackson.version}</version>
         </dependency>
 
+        <!-- Serialises java.time types (Instant, LocalDate) as ISO-8601 strings in DTOs -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
         <!-- JWT verification (SuperTokens issues RS256 JWTs; we verify against JWKS endpoint) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
