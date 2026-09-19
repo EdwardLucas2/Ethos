@@ -23,6 +23,15 @@ public class ContractService {
 
     private static final Logger log = LoggerFactory.getLogger(ContractService.class);
 
+    // Dummy participant names shared across the placeholder responses below — see the
+    // per-method javadoc for why these exist. Named here instead of repeated inline so
+    // PMD's duplicate-literal check doesn't need a bespoke suppression.
+    private static final String DUMMY_EDWARD = "Edward";
+    private static final String DUMMY_ALEX = "Alex";
+    private static final String DUMMY_SARAH = "Sarah";
+    private static final String DUMMY_MIKE = "Mike";
+    private static final String DUMMY_JAMES = "James";
+
     private final ContractStore contractStore;
 
     public ContractService(ContractStore contractStore) {
@@ -51,8 +60,8 @@ public class ContractService {
                         LocalDate.now(ZoneOffset.UTC).plusDays(5),
                         0,
                         List.of(
-                                new ActiveParticipantResponse("Edward", null, 2, 0, 3),
-                                new ActiveParticipantResponse("Alex", null, 1, 1, 3))),
+                                new ActiveParticipantResponse(DUMMY_EDWARD, null, 2, 0, 3),
+                                new ActiveParticipantResponse(DUMMY_ALEX, null, 1, 1, 3))),
                 new ActiveContractResponse(
                         UUID.randomUUID(),
                         "No Sugar",
@@ -61,9 +70,9 @@ public class ContractService {
                         LocalDate.now(ZoneOffset.UTC).plusDays(6),
                         2,
                         List.of(
-                                new ActiveParticipantResponse("Edward", null, 0, 0, 1),
-                                new ActiveParticipantResponse("Sarah", null, 1, 0, 1),
-                                new ActiveParticipantResponse("Mike", null, 1, 0, 1))));
+                                new ActiveParticipantResponse(DUMMY_EDWARD, null, 0, 0, 1),
+                                new ActiveParticipantResponse(DUMMY_SARAH, null, 1, 0, 1),
+                                new ActiveParticipantResponse(DUMMY_MIKE, null, 1, 0, 1))));
     }
 
     /**
@@ -76,7 +85,9 @@ public class ContractService {
                 "Morning Run",
                 2,
                 3,
-                List.of(new PendingParticipantResponse("Edward", 3, 3), new PendingParticipantResponse("Alex", 1, 3))));
+                List.of(
+                        new PendingParticipantResponse(DUMMY_EDWARD, 3, 3),
+                        new PendingParticipantResponse(DUMMY_ALEX, 1, 3))));
     }
 
     /**
@@ -86,10 +97,13 @@ public class ContractService {
      */
     public List<ContractSummaryResponse> listContracts(UUID userId) {
         return List.of(
-                new ContractSummaryResponse(UUID.randomUUID(), "Gym 3x/Week", "active", 3, List.of("Alex")),
-                new ContractSummaryResponse(UUID.randomUUID(), "No Sugar", "active", 1, List.of("Sarah", "Mike")),
-                new ContractSummaryResponse(UUID.randomUUID(), "Morning Run", "pending_resolution", 2, List.of("Alex")),
-                new ContractSummaryResponse(UUID.randomUUID(), "Deep Work", "settled", 41, List.of("Sarah", "James")));
+                new ContractSummaryResponse(UUID.randomUUID(), "Gym 3x/Week", "active", 3, List.of(DUMMY_ALEX)),
+                new ContractSummaryResponse(
+                        UUID.randomUUID(), "No Sugar", "active", 1, List.of(DUMMY_SARAH, DUMMY_MIKE)),
+                new ContractSummaryResponse(
+                        UUID.randomUUID(), "Morning Run", "pending_resolution", 2, List.of(DUMMY_ALEX)),
+                new ContractSummaryResponse(
+                        UUID.randomUUID(), "Deep Work", "settled", 41, List.of(DUMMY_SARAH, DUMMY_JAMES)));
     }
 
     private static ContractResponse toResponse(ContractDetail detail) {
