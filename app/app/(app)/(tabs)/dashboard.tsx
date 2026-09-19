@@ -1,5 +1,5 @@
 import { ActiveContractCard, CtaState } from '@/components/active-contract-card';
-import { AlertBanner, AlertBannerType } from '@/components/alert-banner';
+import { AlertBanner } from '@/components/alert-banner';
 import { AlertMessage } from '@/components/alert-message';
 import { BottomTabBar } from '@/components/bottom-tab-bar';
 import { EmptyState } from '@/components/empty-state';
@@ -9,15 +9,8 @@ import { TopBar } from '@/components/top-bar';
 import { isApiErrorWithStatus } from '@/src/api/client';
 import {
     ActiveContractResponse,
-    ActiveParticipantResponse,
-    ContractInvitedNotification,
-    CyclePendingResolutionNotification,
-    EvidenceUploadedNotification,
     NotificationResponse,
     PendingResolutionContractResponse,
-    PesterNotification,
-    ResolutionLoserNotification,
-    ResolutionWinnerNotification,
     getGetContractsMeActiveQueryKey,
     getGetContractsMePendingResolutionQueryKey,
     getGetNotificationsQueryKey,
@@ -32,199 +25,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Href, useRouter } from 'expo-router';
 import { cloneElement, ReactElement, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { AlertEntry, toAlertEntry } from './dashboard.alerts';
+import {
+    contractPath,
+    ctaFor,
+    formatTimeRemaining,
+    myParticipant,
+    opponentLabel,
+} from './dashboard.helpers';
 import { styles } from './dashboard.styles';
 
-// ─── Notification → alert mapping ──────────────────────────────────────────
-// Ordered by urgency per docs/API.md: verify, challenge, settle, owed, pay-up.
-
-type AlertEntry = {
-    key: string;
-    type: AlertBannerType;
-    message: string;
-    actionLabel: string;
-    href: Href;
-    priority: number;
-};
-
-function evidenceUploadedAlert(n: EvidenceUploadedNotification): AlertEntry | null {
-    if (!n.contractId || !n.evidenceId) return null;
-    return {
-        key: n.id ?? `${n.type}-${n.evidenceId}`,
-        type: 'verify',
-        message: `${n.submitterName ?? 'Someone'} uploaded proof.`,
-        actionLabel: 'Verify',
-        href: `/contract/${n.contractId}/${n.cycleNumber}/evidence/${n.evidenceId}` as Href,
-        priority: 1,
-    };
-}
-
-function contractInvitedAlert(n: ContractInvitedNotification): AlertEntry | null {
-    if (!n.contractId) return null;
-    return {
-        key: n.id ?? `${n.type}-${n.contractId}`,
-        type: 'challenge',
-        message: `${n.inviterName ?? 'Someone'} challenged you.`,
-        actionLabel: 'View',
-        href: `/contract/${n.contractId}/join` as Href,
-        priority: 2,
-    };
-}
-
-function cyclePendingResolutionAlert(n: CyclePendingResolutionNotification): AlertEntry | null {
-    if (!n.contractId) return null;
-    return {
-        key: n.id ?? `${n.type}-${n.contractId}`,
-        type: 'settle',
-        message: "Last week's results are in.",
-        actionLabel: 'Settle',
-        href: `/contract/${n.contractId}/${n.cycleNumber}/unsettled` as Href,
-        priority: 3,
-    };
-}
-
-function resolutionWinnerAlert(n: ResolutionWinnerNotification): AlertEntry | null {
-    if (!n.resolutionId) return null;
-    return {
-        key: n.id ?? `${n.type}-${n.resolutionId}`,
-        type: 'owed',
-        message: `${n.loserNames?.[0] ?? 'Someone'} owes you.`,
-        actionLabel: 'Collect',
-        href: `/owed/${n.resolutionId}` as Href,
-        priority: 4,
-    };
-}
-
-function resolutionLoserOrPesterAlert(
-    n: ResolutionLoserNotification | PesterNotification
-): AlertEntry | null {
-    if (!n.resolutionId) return null;
-    return {
-        key: n.id ?? `${n.type}-${n.resolutionId}`,
-        type: 'pay-up',
-        message:
-            n.type === 'pester'
-                ? `${n.fromName ?? 'Someone'} is waiting.`
-                : `You owe ${n.winnerNames?.[0] ?? 'someone'}.`,
-        actionLabel: 'Pay Up',
-        href: `/pay-up/${n.resolutionId}` as Href,
-        priority: 5,
-    };
-}
-
-function toAlertEntry(n: NotificationResponse): AlertEntry | null {
-    switch (n.type) {
-        case 'evidence_uploaded':
-            return evidenceUploadedAlert(n);
-        case 'contract_invited':
-            return contractInvitedAlert(n);
-        case 'cycle_pending_resolution':
-            return cyclePendingResolutionAlert(n);
-        case 'resolution_winner':
-            return resolutionWinnerAlert(n);
-        case 'resolution_loser':
-        case 'pester':
-            return resolutionLoserOrPesterAlert(n);
-    }
-}
-
-// ─── Active contract card derivation ───────────────────────────────────────
-
-export function daysUntil(dateString: string | undefined): number {
-    if (!dateString) {
-        // endDate is a required field on the backend — a contract reaching here
-        // without one is a real bug, not routine optionality. Fail safe (treat
-        // as not urgent) but don't swallow it silently.
-        console.warn('daysUntil: missing endDate on contract — should not happen');
-        return 0;
-    }
-    const [year, month, day] = dateString.split('-').map(Number);
-    if (year === undefined || month === undefined || day === undefined) return 0;
-    const end = new Date(year, month - 1, day);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    return Math.round((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function formatTimeRemaining(dateString: string | undefined): string {
-    const days = daysUntil(dateString);
-    if (days < 0) return 'OVERDUE';
-    if (days === 0) return 'ENDS TODAY';
-    if (days === 1) return '1 DAY LEFT';
-    return `${days} DAYS LEFT`;
-}
-
-function opponentsOf(
-    participants: ActiveParticipantResponse[] | undefined,
-    currentUserId: string | undefined
-): ActiveParticipantResponse[] {
-    return (participants ?? []).filter((p) => p.userId !== currentUserId);
-}
-
-function myParticipant(
-    participants: ActiveParticipantResponse[] | undefined,
-    currentUserId: string | undefined
-): ActiveParticipantResponse | undefined {
-    return participants?.find((p) => p.userId === currentUserId);
-}
-
-function opponentLabel(
-    participants: ActiveParticipantResponse[] | undefined,
-    currentUserId: string | undefined
-): string {
-    const opponents = opponentsOf(participants, currentUserId);
-    if (opponents.length === 0) return 'SOLO';
-    if (opponents.length === 1) return `VS ${(opponents[0]?.displayName ?? '').toUpperCase()}`;
-    return 'SQUAD BATTLE';
-}
-
-function evidenceReviewCta(
-    contract: ActiveContractResponse,
-    currentUserId: string | undefined
-): { state: CtaState; label: string } | null {
-    if ((contract.unreviewedEvidenceCount ?? 0) === 0) return null;
-    const opponents = opponentsOf(contract.participants, currentUserId);
-    const label =
-        opponents.length === 1
-            ? `REVIEW ${(opponents[0]?.displayName ?? 'PROOF').toUpperCase()}'S PROOF`
-            : 'REVIEW PROOF';
-    return { state: 'review', label };
-}
-
-function myCompletion(
-    participants: ActiveParticipantResponse[] | undefined,
-    currentUserId: string | undefined
-): { completed: number; total: number } {
-    const mine = myParticipant(participants, currentUserId);
-    return { completed: mine?.completed ?? 0, total: mine?.total ?? 0 };
-}
-
-function progressCta(
-    contract: ActiveContractResponse,
-    currentUserId: string | undefined
-): { state: CtaState; label: string } {
-    const { completed, total } = myCompletion(contract.participants, currentUserId);
-    if (completed >= total) return { state: 'caught-up', label: 'ALL CAUGHT UP' };
-    return {
-        state: daysUntil(contract.endDate) <= 1 ? 'snap-urgent' : 'snap',
-        label: 'SNAP PROOF',
-    };
-}
-
-function ctaFor(
-    contract: ActiveContractResponse,
-    currentUserId: string | undefined
-): { state: CtaState; label: string } {
-    return evidenceReviewCta(contract, currentUserId) ?? progressCta(contract, currentUserId);
-}
-
-// A contract's detail routes all share this shape — collects the repeated
-// `/contract/${id}/${cycle}/...` template into one place.
-function contractPath(
-    contract: { contractId: string; cycleNumber: number },
-    segment: string
-): Href {
-    return `/contract/${contract.contractId}/${contract.cycleNumber}/${segment}` as Href;
-}
+export { daysUntil } from './dashboard.helpers';
 
 // ─── Data + mutation hooks ──────────────────────────────────────────────────
 
