@@ -60,8 +60,8 @@ public class ContractService {
                         LocalDate.now(ZoneOffset.UTC).plusDays(5),
                         0,
                         List.of(
-                                new ActiveParticipantResponse(DUMMY_EDWARD, null, 2, 0, 3),
-                                new ActiveParticipantResponse(DUMMY_ALEX, null, 1, 1, 3))),
+                                new ActiveParticipantResponse(userId, DUMMY_EDWARD, null, 2, 0, 3),
+                                new ActiveParticipantResponse(UUID.randomUUID(), DUMMY_ALEX, null, 1, 1, 3))),
                 new ActiveContractResponse(
                         UUID.randomUUID(),
                         "No Sugar",
@@ -70,9 +70,9 @@ public class ContractService {
                         LocalDate.now(ZoneOffset.UTC).plusDays(6),
                         2,
                         List.of(
-                                new ActiveParticipantResponse(DUMMY_EDWARD, null, 0, 0, 1),
-                                new ActiveParticipantResponse(DUMMY_SARAH, null, 1, 0, 1),
-                                new ActiveParticipantResponse(DUMMY_MIKE, null, 1, 0, 1))));
+                                new ActiveParticipantResponse(userId, DUMMY_EDWARD, null, 0, 0, 1),
+                                new ActiveParticipantResponse(UUID.randomUUID(), DUMMY_SARAH, null, 1, 0, 1),
+                                new ActiveParticipantResponse(UUID.randomUUID(), DUMMY_MIKE, null, 1, 0, 1))));
     }
 
     /**
@@ -86,8 +86,8 @@ public class ContractService {
                 2,
                 3,
                 List.of(
-                        new PendingParticipantResponse(DUMMY_EDWARD, 3, 3),
-                        new PendingParticipantResponse(DUMMY_ALEX, 1, 3))));
+                        new PendingParticipantResponse(userId, DUMMY_EDWARD, 3, 3),
+                        new PendingParticipantResponse(UUID.randomUUID(), DUMMY_ALEX, 1, 3))));
     }
 
     /**

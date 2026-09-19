@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 export const colors = {
     surface: '#F4F4F0',
     surfaceRaised: '#FFFFFF',
+    borderMuted: '#E5E5E0',
     ink: '#000000',
     inkSecondary: '#3F3F3F',
     blue: '#3B82F6',

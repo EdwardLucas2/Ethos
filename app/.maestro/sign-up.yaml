@@ -12,6 +12,8 @@ appId: com.ethos.app
 
 # Error path: same email again → email already exists error
 - tapOn:
+      id: 'top-bar-avatar'
+- tapOn:
       id: 'sign-out-button'
 - extendedWaitUntil:
       visible: 'WELCOME BACK.'
